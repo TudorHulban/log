@@ -15,25 +15,25 @@ type Info struct {
 var logLevels = []string{"NADA", "INFO", "DEBUG"}
 var delim = ": "
 
-func (i *Info) Infof(format string, args ...interface{}) {
+func (i Info) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
 		i.l.Output(2, logLevels[1]+delim+fmt.Sprintf(format, args...))
 	}
 }
 
-func (i *Info) Info(args ...interface{}) {
+func (i Info) Info(args ...interface{}) {
 	if i.logLevel > 0 {
 		i.l.Output(2, logLevels[1]+delim+fmt.Sprint(args...))
 	}
 }
 
-func (i *Info) Debugf(format string, args ...interface{}) {
+func (i Info) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
 		i.l.Output(2, logLevels[2]+delim+fmt.Sprintf(format, args...))
 	}
 }
 
-func (i *Info) Debug(args ...interface{}) {
+func (i Info) Debug(args ...interface{}) {
 	if i.logLevel > 1 {
 		i.l.Output(2, logLevels[2]+delim+fmt.Sprint(args...))
 	}

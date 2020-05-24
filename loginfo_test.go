@@ -1,17 +1,45 @@
 package loginfo
 
 import (
+	"bytes"
+	"os"
 	"testing"
+
+	"log"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func createLogger(level int, t *testing.T) LogInfo {
+	l, err := New(level, os.Stderr)
+	if assert.Nil(t, err) {
+		return l
+	}
+	return LogInfo{}
+}
+
 func Test1Logger(t *testing.T) {
-	a := assert.New(t)
+	logger := createLogger(2, t)
+	logger.Info("1")
+	logger.Debug("2")
+}
 
-	l, err := New(-99)
-	a.Nil(err)
+// Benchmark_Logger-4   	  248170	      4614 ns/op	     339 B/op	       2 allocs/op
+func Benchmark_Logger(b *testing.B) {
+	logger, _ := New(1, &bytes.Buffer{})
 
-	l.Debug(1)
-	l.Info(2)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Info("1")
+	}
+}
+
+// Benchmark_SLogger-4   	  262298	      4189 ns/op	     329 B/op	       2 allocs/op
+func Benchmark_SLogger(b *testing.B) {
+	logger := log.New(&bytes.Buffer{}, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Print("1")
+	}
 }

@@ -1,39 +1,46 @@
 package loginfo
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
-	"os"
 )
 
-// Custom logger with nada, info and debug.
-type Info struct {
-	l        *log.Logger
-	logLevel int // 0 - nada, 1 - info, 2 - debug
-}
+const delim = ": "
 
 var logLevels = []string{"NADA", "INFO", "DEBUG"}
-var delim = ": "
 
-func (i Info) Infof(format string, args ...interface{}) {
+// LogInfo Custom logger with nada, info and debug.
+type LogInfo struct {
+	logLevel int
+	writeTo  *bytes.Buffer
+	l        *log.Logger
+}
+
+// Infof Method logging info level with formatting.
+func (i LogInfo) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
-		i.l.Output(2, logLevels[1]+delim+fmt.Sprintf(format, args...))
+		i.l.Output(3, logLevels[1]+delim+fmt.Sprintf(format, args...))
 	}
 }
 
-func (i Info) Info(args ...interface{}) {
+// Info Method logging info level without formatting.
+func (i LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
-		i.l.Output(2, logLevels[1]+delim+fmt.Sprint(args...))
+		i.l.Output(3, logLevels[1]+delim+fmt.Sprint(args...))
 	}
 }
 
-func (i Info) Debugf(format string, args ...interface{}) {
+// Debugf Method logging info debug level with formatting.
+func (i LogInfo) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
 		i.l.Output(2, logLevels[2]+delim+fmt.Sprintf(format, args...))
 	}
 }
 
-func (i Info) Debug(args ...interface{}) {
+// Debug Method logging info debug level without formatting.
+func (i LogInfo) Debug(args ...interface{}) {
 	if i.logLevel > 1 {
 		i.l.Output(2, logLevels[2]+delim+fmt.Sprint(args...))
 	}
@@ -41,14 +48,16 @@ func (i Info) Debug(args ...interface{}) {
 
 var thelogger LogInfo // should be type of interface.
 
-func New(level int) (LogInfo, error) {
-	if thelogger != nil {
+// New flyweight constructor for logger.
+// 0 - nada, 1 - info, 2 - debug
+func New(level int, writeTo io.Writer) (LogInfo, error) {
+	if thelogger.l != nil {
 		return thelogger, nil
 	}
 	lev := convertLevel(level)
-	thelogger = &Info{
-		l:        log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile),
+	thelogger = LogInfo{
 		logLevel: lev,
+		l:        log.New(writeTo, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile),
 	}
 	log.Printf("Created logger, level %v.", logLevels[lev])
 	return thelogger, nil

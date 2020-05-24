@@ -1,7 +1,7 @@
 package loginfo
 
-// LogInfo is the type supported when injecting the logger.
-type LogInfo interface {
+// ILogInfo is the type supported when injecting the logger.
+type ILogInfo interface {
 	Infof(string, ...interface{})
 	Info(...interface{})
 	Debugf(string, ...interface{})

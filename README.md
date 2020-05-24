@@ -1,5 +1,6 @@
 # LogInfo
-Simple logger.
+Simple logger. <br/>
+Levels: 0 - nada, 1 - info, 2 - warn, 3 - debug
 
 ## To assess:
 #### a. New log file at day start.

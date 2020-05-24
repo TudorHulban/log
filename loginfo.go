@@ -11,7 +11,7 @@ import (
 
 const delim = ": "
 
-var logLevels = []string{"NADA", "INFO", "DEBUG"}
+var logLevels = []string{"NADA", "INFO", "WARN", "DEBUG"}
 
 // LogInfo Custom logger with nada, info and debug.
 type LogInfo struct {
@@ -50,29 +50,51 @@ func (i LogInfo) Infof(format string, args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
+		i.writeTo.Write(buf.Bytes())
+	}
+}
+
+// Warn Method logging warn level without formatting.
+func (i LogInfo) Warn(args ...interface{}) {
+	if i.logLevel > 1 {
+		_, file, line, _ := runtime.Caller(1)
+
+		var buf bytes.Buffer
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprint(args...) + "\n")
+		i.writeTo.Write(buf.Bytes())
+	}
+}
+
+// Warnf Method logging warn level with formatting.
+func (i LogInfo) Warnf(format string, args ...interface{}) {
+	if i.logLevel > 1 {
+		_, file, line, _ := runtime.Caller(1)
+
+		var buf bytes.Buffer
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprintf(format, args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
 
 // Debug Method logging info debug level without formatting.
 func (i LogInfo) Debug(args ...interface{}) {
-	if i.logLevel > 1 {
+	if i.logLevel > 2 {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprint(args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[3] + delim + fmt.Sprint(args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
 
 // Debugf Method logging info debug level with formatting.
 func (i LogInfo) Debugf(format string, args ...interface{}) {
-	if i.logLevel > 1 {
+	if i.logLevel > 2 {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprintf(format, args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[3] + delim + fmt.Sprintf(format, args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -87,7 +109,7 @@ func (i LogInfo) SetLogLevel(level int) {
 	i.logLevel = level
 }
 
-// 0 - nada, 1 - info, 2 - debug
+// 0 - nada, 1 - info, 2 - warn, 3 - debug
 func New(level int, writeTo io.Writer) (LogInfo, error) {
 	lev := convertLevel(level)
 	result := LogInfo{
@@ -104,8 +126,10 @@ func convertLevel(level int) int {
 		return 0
 	case level == 1:
 		return 1
+	case level == 2:
+		return 2
 	}
-	return 2
+	return 3
 }
 
 // timestamp Helper provides time in format YYYYMonth HH24:Minutes:Seconds.Miliseconds

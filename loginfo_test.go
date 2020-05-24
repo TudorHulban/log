@@ -19,9 +19,10 @@ func createLogger(level int, t *testing.T) LogInfo {
 }
 
 func Test1Logger(t *testing.T) {
-	logger := createLogger(2, t)
+	logger := createLogger(3, t)
 	logger.Info("1")
-	logger.Debug("2")
+	logger.Warn("2")
+	logger.Debug("3")
 }
 
 // Benchmark_Logger-4   	  248170	      4614 ns/op	     339 B/op	       2 allocs/op - Flags: log.LstdFlags|log.Lmicroseconds|log.Lshortfile

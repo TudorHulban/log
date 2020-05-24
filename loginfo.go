@@ -19,6 +19,20 @@ type LogInfo struct {
 	writeTo  io.Writer
 }
 
+// Print Method prints without formatting.
+func (i LogInfo) Print(args ...interface{}) {
+	var buf bytes.Buffer
+	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
+	i.writeTo.Write(buf.Bytes())
+}
+
+// Printf Method prints without formatting.
+func (i LogInfo) Printf(format string, args ...interface{}) {
+	var buf bytes.Buffer
+	buf.WriteString(timestamp() + " " + fmt.Sprintf(format, args...) + "\n")
+	i.writeTo.Write(buf.Bytes())
+}
+
 // Info Method logging info level without formatting.
 func (i LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
@@ -80,7 +94,7 @@ func New(level int, writeTo io.Writer) (LogInfo, error) {
 		logLevel: lev,
 		writeTo:  writeTo,
 	}
-	result.Infof("Created logger, level %v.", logLevels[lev])
+	result.Printf("Created logger, level %v.", logLevels[lev])
 	return result, nil
 }
 

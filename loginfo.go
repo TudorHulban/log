@@ -16,7 +16,7 @@ var logLevels = []string{"NADA", "INFO", "DEBUG"}
 // LogInfo Custom logger with nada, info and debug.
 type LogInfo struct {
 	logLevel int
-	writeTo  *bytes.Buffer
+	writeTo  io.Writer
 	l        *log.Logger
 }
 
@@ -24,29 +24,43 @@ type LogInfo struct {
 func (i LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
 		_, file, line, _ := runtime.Caller(1)
-		i.l.Output(3, file+" Line"+delim+strconv.FormatInt(int64(line), 10)+" "+logLevels[1]+delim+fmt.Sprint(args...))
+
+		var buf bytes.Buffer
+		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
+		i.writeTo.Write(buf.Bytes())
 	}
 }
 
 // Infof Method logging info level with formatting.
 func (i LogInfo) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
-		_, file, _, _ := runtime.Caller(2)
-		i.l.Output(3, file+logLevels[1]+delim+fmt.Sprintf(format, args...))
+		_, file, line, _ := runtime.Caller(1)
+
+		var buf bytes.Buffer
+		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
+		i.writeTo.Write(buf.Bytes())
 	}
 }
 
 // Debug Method logging info debug level without formatting.
 func (i LogInfo) Debug(args ...interface{}) {
 	if i.logLevel > 1 {
-		i.l.Output(3, logLevels[2]+delim+fmt.Sprint(args...))
+		_, file, line, _ := runtime.Caller(1)
+
+		var buf bytes.Buffer
+		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprint(args...) + "\n")
+		i.writeTo.Write(buf.Bytes())
 	}
 }
 
 // Debugf Method logging info debug level with formatting.
 func (i LogInfo) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
-		i.l.Output(3, logLevels[2]+delim+fmt.Sprintf(format, args...))
+		_, file, line, _ := runtime.Caller(1)
+
+		var buf bytes.Buffer
+		buf.WriteString(file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprintf(format, args...) + "\n")
+		i.writeTo.Write(buf.Bytes())
 	}
 }
 
@@ -73,6 +87,7 @@ func New(level int, writeTo io.Writer) (LogInfo, error) {
 	thelogger = LogInfo{
 		logLevel: lev,
 		l:        log.New(writeTo, "", log.LstdFlags),
+		writeTo:  writeTo,
 	}
 	log.Printf("Created logger, level %v.", logLevels[lev])
 	return thelogger, nil

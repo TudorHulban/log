@@ -24,7 +24,8 @@ func Test1Logger(t *testing.T) {
 	logger.Debug("2")
 }
 
-// Benchmark_Logger-4   	  248170	      4614 ns/op	     339 B/op	       2 allocs/op
+// Benchmark_Logger-4   	  248170	      4614 ns/op	     339 B/op	       2 allocs/op - Flags: log.LstdFlags|log.Lmicroseconds|log.Lshortfile
+// Benchmark_Logger-4   	 1208836	       952 ns/op	      79 B/op	       0 allocs/op - Flags: log.LstdFlags
 func Benchmark_Logger(b *testing.B) {
 	logger, _ := New(1, &bytes.Buffer{})
 
@@ -34,9 +35,9 @@ func Benchmark_Logger(b *testing.B) {
 	}
 }
 
-// Benchmark_SLogger-4   	  262298	      4189 ns/op	     329 B/op	       2 allocs/op
+// Benchmark_SLogger-4   	 1502193	       838 ns/op	      60 B/op	       0 allocs/op - Flags: log.LstdFlags
 func Benchmark_SLogger(b *testing.B) {
-	logger := log.New(&bytes.Buffer{}, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	logger := log.New(&bytes.Buffer{}, "", log.LstdFlags)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

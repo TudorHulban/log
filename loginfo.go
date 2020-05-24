@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"runtime"
+	"strconv"
 )
 
 const delim = ": "
@@ -18,32 +20,44 @@ type LogInfo struct {
 	l        *log.Logger
 }
 
-// Infof Method logging info level with formatting.
-func (i LogInfo) Infof(format string, args ...interface{}) {
-	if i.logLevel > 0 {
-		i.l.Output(3, logLevels[1]+delim+fmt.Sprintf(format, args...))
-	}
-}
-
 // Info Method logging info level without formatting.
 func (i LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
-		i.l.Output(3, logLevels[1]+delim+fmt.Sprint(args...))
+		_, file, line, _ := runtime.Caller(1)
+		i.l.Output(3, file+" Line"+delim+strconv.FormatInt(int64(line), 10)+" "+logLevels[1]+delim+fmt.Sprint(args...))
 	}
 }
 
-// Debugf Method logging info debug level with formatting.
-func (i LogInfo) Debugf(format string, args ...interface{}) {
-	if i.logLevel > 1 {
-		i.l.Output(2, logLevels[2]+delim+fmt.Sprintf(format, args...))
+// Infof Method logging info level with formatting.
+func (i LogInfo) Infof(format string, args ...interface{}) {
+	if i.logLevel > 0 {
+		_, file, _, _ := runtime.Caller(2)
+		i.l.Output(3, file+logLevels[1]+delim+fmt.Sprintf(format, args...))
 	}
 }
 
 // Debug Method logging info debug level without formatting.
 func (i LogInfo) Debug(args ...interface{}) {
 	if i.logLevel > 1 {
-		i.l.Output(2, logLevels[2]+delim+fmt.Sprint(args...))
+		i.l.Output(3, logLevels[2]+delim+fmt.Sprint(args...))
 	}
+}
+
+// Debugf Method logging info debug level with formatting.
+func (i LogInfo) Debugf(format string, args ...interface{}) {
+	if i.logLevel > 1 {
+		i.l.Output(3, logLevels[2]+delim+fmt.Sprintf(format, args...))
+	}
+}
+
+// GetLogLevel Method returns current log level.
+func (i LogInfo) GetLogLevel() int {
+	return i.logLevel
+}
+
+// SetLogLevel Method sets log level.
+func (i LogInfo) SetLogLevel(level int) {
+	i.logLevel = level
 }
 
 var thelogger LogInfo // should be type of interface.
@@ -54,10 +68,11 @@ func New(level int, writeTo io.Writer) (LogInfo, error) {
 	if thelogger.l != nil {
 		return thelogger, nil
 	}
+
 	lev := convertLevel(level)
 	thelogger = LogInfo{
 		logLevel: lev,
-		l:        log.New(writeTo, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile),
+		l:        log.New(writeTo, "", log.LstdFlags),
 	}
 	log.Printf("Created logger, level %v.", logLevels[lev])
 	return thelogger, nil

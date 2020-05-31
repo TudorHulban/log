@@ -61,7 +61,7 @@ func (i LogInfo) Warn(args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprint(args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + ColourizeWarn(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -72,7 +72,7 @@ func (i LogInfo) Warnf(format string, args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[2] + delim + fmt.Sprintf(format, args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + ColourizeWarn(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }

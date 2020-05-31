@@ -45,8 +45,8 @@ func BenchmarkLogger_Debug(b *testing.B) {
 	}
 }
 
-// Benchmark_SLogger-4   	 1502193	       838 ns/op	      60 B/op	       0 allocs/op - Flags: log.LstdFlags
-func Benchmark_SLogger(b *testing.B) {
+// Benchmark_StandardLogger-4   	 1502193	       838 ns/op	      60 B/op	       0 allocs/op - Flags: log.LstdFlags
+func Benchmark_StandardLogger(b *testing.B) {
 	logger := log.New(&bytes.Buffer{}, "", log.LstdFlags)
 
 	b.ResetTimer()

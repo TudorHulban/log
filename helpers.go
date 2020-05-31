@@ -37,9 +37,26 @@ type lito struct {
 	style int64
 }
 
-// ColourizeLog To use Linux only.
-func ColourizeLog(s lito, word string) string {
-	b := new(bytes.Buffer)
-	b.WriteString("\x1b[" + strconv.FormatInt(s.style, 10) + ";" + strconv.FormatInt(s.color, 10) + "m")
-	return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
+func cWarn() func(word string) string {
+	lito := lito{
+		color: 33,
+		style: 1,
+	}
+	return func(word string) string {
+		b := new(bytes.Buffer)
+		b.WriteString("\x1b[" + strconv.FormatInt(lito.style, 10) + ";" + strconv.FormatInt(lito.color, 10) + "m")
+		return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
+	}
+}
+
+func cDebug() func(word string) string {
+	lito := lito{
+		color: 34,
+		style: 1,
+	}
+	return func(word string) string {
+		b := new(bytes.Buffer)
+		b.WriteString("\x1b[" + strconv.FormatInt(lito.style, 10) + ";" + strconv.FormatInt(lito.color, 10) + "m")
+		return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
+	}
 }

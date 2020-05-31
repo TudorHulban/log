@@ -61,7 +61,7 @@ func (i LogInfo) Warn(args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + ColourizeWarn(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -72,7 +72,7 @@ func (i LogInfo) Warnf(format string, args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + ColourizeWarn(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -83,7 +83,7 @@ func (i LogInfo) Debug(args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[3] + delim + fmt.Sprint(args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -94,7 +94,7 @@ func (i LogInfo) Debugf(format string, args ...interface{}) {
 		_, file, line, _ := runtime.Caller(1)
 
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[3] + delim + fmt.Sprintf(format, args...) + "\n")
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -109,7 +109,7 @@ func (i LogInfo) SetLogLevel(level int) {
 	i.logLevel = level
 }
 
-// 0 - nada, 1 - info, 2 - warn, 3 - debug
+// New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
 func New(level int, writeTo io.Writer) (LogInfo, error) {
 	lev := convertLevel(level)
 	result := LogInfo{
@@ -136,19 +136,19 @@ func convertLevel(level int) int {
 func timestamp() string {
 	now := time.Now()
 	theMonth := "0" + strconv.FormatInt(int64(now.Month()), 10)
-	theMonth = theMonth[len(theMonth)-2 : len(theMonth)]
+	theMonth = theMonth[len(theMonth)-2:]
 
 	theHour := "0" + strconv.FormatInt(int64(now.Hour()), 10)
-	theHour = theHour[len(theHour)-2 : len(theHour)]
+	theHour = theHour[len(theHour)-2:]
 
 	theMin := "0" + strconv.FormatInt(int64(now.Minute()), 10)
-	theMin = theMin[len(theMin)-2 : len(theMin)]
+	theMin = theMin[len(theMin)-2:]
 
 	theSec := "0" + strconv.FormatInt(int64(now.Second()), 10)
-	theSec = theSec[len(theSec)-2 : len(theSec)]
+	theSec = theSec[len(theSec)-2:]
 
 	theMilisec := "00" + strconv.FormatInt(int64(now.Nanosecond()/1000000), 10)
-	theMilisec = theMilisec[len(theMilisec)-3 : len(theMilisec)]
+	theMilisec = theMilisec[len(theMilisec)-3:]
 
 	return strconv.FormatInt(int64(now.Year()), 10) + theMonth + " " + theHour + ":" + theMin + ":" + theSec + "." + theMilisec
 }

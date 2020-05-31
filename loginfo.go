@@ -20,21 +20,21 @@ type LogInfo struct {
 }
 
 // Print Method prints without formatting.
-func (i LogInfo) Print(args ...interface{}) {
+func (i *LogInfo) Print(args ...interface{}) {
 	var buf bytes.Buffer
 	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
 	i.writeTo.Write(buf.Bytes())
 }
 
 // Printf Method prints without formatting.
-func (i LogInfo) Printf(format string, args ...interface{}) {
+func (i *LogInfo) Printf(format string, args ...interface{}) {
 	var buf bytes.Buffer
 	buf.WriteString(timestamp() + " " + fmt.Sprintf(format, args...) + "\n")
 	i.writeTo.Write(buf.Bytes())
 }
 
 // Info Method logging info level without formatting.
-func (i LogInfo) Info(args ...interface{}) {
+func (i *LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -45,7 +45,7 @@ func (i LogInfo) Info(args ...interface{}) {
 }
 
 // Infof Method logging info level with formatting.
-func (i LogInfo) Infof(format string, args ...interface{}) {
+func (i *LogInfo) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -56,7 +56,7 @@ func (i LogInfo) Infof(format string, args ...interface{}) {
 }
 
 // Warn Method logging warn level without formatting.
-func (i LogInfo) Warn(args ...interface{}) {
+func (i *LogInfo) Warn(args ...interface{}) {
 	if i.logLevel > 1 {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -67,7 +67,7 @@ func (i LogInfo) Warn(args ...interface{}) {
 }
 
 // Warnf Method logging warn level with formatting.
-func (i LogInfo) Warnf(format string, args ...interface{}) {
+func (i *LogInfo) Warnf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -78,7 +78,7 @@ func (i LogInfo) Warnf(format string, args ...interface{}) {
 }
 
 // Debug Method logging info debug level without formatting.
-func (i LogInfo) Debug(args ...interface{}) {
+func (i *LogInfo) Debug(args ...interface{}) {
 	if i.logLevel > 2 {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -89,7 +89,7 @@ func (i LogInfo) Debug(args ...interface{}) {
 }
 
 // Debugf Method logging info debug level with formatting.
-func (i LogInfo) Debugf(format string, args ...interface{}) {
+func (i *LogInfo) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 2 {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -100,24 +100,24 @@ func (i LogInfo) Debugf(format string, args ...interface{}) {
 }
 
 // GetLogLevel Method returns current log level.
-func (i LogInfo) GetLogLevel() int {
+func (i *LogInfo) GetLogLevel() int {
 	return i.logLevel
 }
 
 // SetLogLevel Method sets log level.
-func (i LogInfo) SetLogLevel(level int) {
+func (i *LogInfo) SetLogLevel(level int) {
 	i.logLevel = level
 }
 
 // New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
-func New(level int, writeTo io.Writer) (LogInfo, error) {
+func New(level int, writeTo io.Writer) (*LogInfo, error) {
 	lev := convertLevel(level)
 	result := LogInfo{
 		logLevel: lev,
 		writeTo:  writeTo,
 	}
 	result.Printf("Created logger, level %v.", logLevels[lev])
-	return result, nil
+	return &result, nil
 }
 
 func convertLevel(level int) int {

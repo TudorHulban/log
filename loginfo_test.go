@@ -20,13 +20,23 @@ func createLogger(level int, t *testing.T) LogInfo {
 
 func Test1Logger(t *testing.T) {
 	logger := createLogger(3, t)
+	logger.Print("0")
 	logger.Info("1")
 	logger.Warn("2")
 	logger.Debug("3")
 }
 
-// Benchmark_Logger-4   	  248170	      4614 ns/op	     339 B/op	       2 allocs/op - Flags: log.LstdFlags|log.Lmicroseconds|log.Lshortfile
-// Benchmark_Logger-4   	 1208836	       952 ns/op	      79 B/op	       0 allocs/op - Flags: log.LstdFlags
+// BenchmarkLogger_Print-4   	  595407	      1978 ns/op	     179 B/op	       3 allocs/op
+func BenchmarkLogger_Print(b *testing.B) {
+	logger, _ := New(1, &bytes.Buffer{})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Print("1")
+	}
+}
+
+// BenchmarkLogger_Info-4   	  232419	      5516 ns/op	     578 B/op	       6 allocs/op
 func BenchmarkLogger_Info(b *testing.B) {
 	logger, _ := New(1, &bytes.Buffer{})
 
@@ -36,8 +46,19 @@ func BenchmarkLogger_Info(b *testing.B) {
 	}
 }
 
+// BenchmarkLogger_Warn-4   	  167058	      7035 ns/op	     811 B/op	      11 allocs/op
+func BenchmarkLogger_Warn(b *testing.B) {
+	logger, _ := New(3, &bytes.Buffer{})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Warn("1")
+	}
+}
+
+// BenchmarkLogger_Debug-4   	  142561	      7325 ns/op	     854 B/op	      11 allocs/op
 func BenchmarkLogger_Debug(b *testing.B) {
-	logger, _ := New(2, &bytes.Buffer{})
+	logger, _ := New(3, &bytes.Buffer{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

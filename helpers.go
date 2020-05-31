@@ -3,7 +3,6 @@ package loginfo
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 )
 
 /*
@@ -32,31 +31,18 @@ const (
 	Strikeout = 9
 ) */
 
-type lito struct {
-	color int64
-	style int64
-}
-
 func cWarn() func(word string) string {
-	lito := lito{
-		color: 33,
-		style: 1,
-	}
 	return func(word string) string {
 		b := new(bytes.Buffer)
-		b.WriteString("\x1b[" + strconv.FormatInt(lito.style, 10) + ";" + strconv.FormatInt(lito.color, 10) + "m")
+		b.WriteString("\x1b[1;33m")
 		return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
 	}
 }
 
 func cDebug() func(word string) string {
-	lito := lito{
-		color: 34,
-		style: 1,
-	}
 	return func(word string) string {
 		b := new(bytes.Buffer)
-		b.WriteString("\x1b[" + strconv.FormatInt(lito.style, 10) + ";" + strconv.FormatInt(lito.color, 10) + "m")
+		b.WriteString("\x1b[1;34m")
 		return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
 	}
 }

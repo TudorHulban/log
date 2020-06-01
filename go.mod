@@ -1,4 +1,4 @@
-module github.com/TudorHulban/loginfo
+module github.com/TudorHulban/log
 
 go 1.13
 

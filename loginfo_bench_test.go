@@ -9,7 +9,7 @@ import (
 
 // BenchmarkLogger_Print-4   	  595407	      1978 ns/op	     179 B/op	       3 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
-	logger, _ := New(1, &bytes.Buffer{})
+	logger := New(1, &bytes.Buffer{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -19,7 +19,7 @@ func BenchmarkLogger_Print(b *testing.B) {
 
 // BenchmarkLogger_Info-4   	  232419	      5516 ns/op	     578 B/op	       6 allocs/op
 func BenchmarkLogger_Info(b *testing.B) {
-	logger, _ := New(1, &bytes.Buffer{})
+	logger := New(1, &bytes.Buffer{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -29,7 +29,7 @@ func BenchmarkLogger_Info(b *testing.B) {
 
 // BenchmarkLogger_Warn-4   	  167058	      7035 ns/op	     811 B/op	      11 allocs/op
 func BenchmarkLogger_Warn(b *testing.B) {
-	logger, _ := New(3, &bytes.Buffer{})
+	logger := New(3, &bytes.Buffer{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -39,7 +39,7 @@ func BenchmarkLogger_Warn(b *testing.B) {
 
 // BenchmarkLogger_Debug-4   	  142561	      7325 ns/op	     854 B/op	      11 allocs/op
 func BenchmarkLogger_Debug(b *testing.B) {
-	logger, _ := New(3, &bytes.Buffer{})
+	logger := New(3, &bytes.Buffer{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

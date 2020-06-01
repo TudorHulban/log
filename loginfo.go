@@ -110,14 +110,14 @@ func (i *LogInfo) SetLogLevel(level int) {
 }
 
 // New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
-func New(level int, writeTo io.Writer) (*LogInfo, error) {
+func New(level int, writeTo io.Writer) *LogInfo {
 	lev := convertLevel(level)
 	result := LogInfo{
 		logLevel: lev,
 		writeTo:  writeTo,
 	}
 	result.Printf("Created logger, level %v.", logLevels[lev])
-	return &result, nil
+	return &result
 }
 
 func convertLevel(level int) int {

@@ -2,6 +2,9 @@
 Simple logger. <br/>
 Levels: 0 - nada, 1 - info, 2 - warn, 3 - debug
 
+## How to use
+See external testing file.
+
 ## To assess:
 #### a. New log file at day start.
 #### b. New log file when file reaches x Mb.

@@ -20,7 +20,7 @@ func Test1ELogger(t *testing.T) {
 	output := &bytes.Buffer{}
 
 	obj := T{
-		l: log.New(3, output),
+		l: log.New(3, output, true),
 	}
 	obj.l.Print("xxx")
 	assert.Contains(t, output.String(), "xxx")

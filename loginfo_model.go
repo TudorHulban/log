@@ -17,6 +17,8 @@ var logLevels = []string{"NADA", "INFO", "WARN", "DEBUG"}
 type LogInfo struct {
 	logLevel int
 	writeTo  io.Writer
+	// for shorter form in case do not need caller file.
+	withCaller bool
 }
 
 // Print Method prints without formatting.
@@ -36,10 +38,13 @@ func (i *LogInfo) Printf(format string, args ...interface{}) {
 // Info Method logging info level without formatting.
 func (i *LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
-		_, file, line, _ := runtime.Caller(1)
-
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
+		if i.withCaller {
+			_, file, line, _ := runtime.Caller(1)
+			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
+		} else {
+			buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
+		}
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -47,10 +52,13 @@ func (i *LogInfo) Info(args ...interface{}) {
 // Infof Method logging info level with formatting.
 func (i *LogInfo) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
-		_, file, line, _ := runtime.Caller(1)
-
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
+		if i.withCaller {
+			_, file, line, _ := runtime.Caller(1)
+			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
+		} else {
+			buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
+		}
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -58,10 +66,13 @@ func (i *LogInfo) Infof(format string, args ...interface{}) {
 // Warn Method logging warn level without formatting.
 func (i *LogInfo) Warn(args ...interface{}) {
 	if i.logLevel > 1 {
-		_, file, line, _ := runtime.Caller(1)
-
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
+		if i.withCaller {
+			_, file, line, _ := runtime.Caller(1)
+			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
+		} else {
+			buf.WriteString(timestamp() + " " + cWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
+		}
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -69,10 +80,13 @@ func (i *LogInfo) Warn(args ...interface{}) {
 // Warnf Method logging warn level with formatting.
 func (i *LogInfo) Warnf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
-		_, file, line, _ := runtime.Caller(1)
-
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
+		if i.withCaller {
+			_, file, line, _ := runtime.Caller(1)
+			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
+		} else {
+			buf.WriteString(timestamp() + " " + cWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
+		}
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -80,10 +94,13 @@ func (i *LogInfo) Warnf(format string, args ...interface{}) {
 // Debug Method logging info debug level without formatting.
 func (i *LogInfo) Debug(args ...interface{}) {
 	if i.logLevel > 2 {
-		_, file, line, _ := runtime.Caller(1)
-
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
+		if i.withCaller {
+			_, file, line, _ := runtime.Caller(1)
+			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
+		} else {
+			buf.WriteString(timestamp() + " " + cDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
+		}
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -91,10 +108,14 @@ func (i *LogInfo) Debug(args ...interface{}) {
 // Debugf Method logging info debug level with formatting.
 func (i *LogInfo) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 2 {
-		_, file, line, _ := runtime.Caller(1)
-
 		var buf bytes.Buffer
-		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
+		if i.withCaller {
+			_, file, line, _ := runtime.Caller(1)
+			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
+		} else {
+			buf.WriteString(timestamp() + " " + cDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
+
+		}
 		i.writeTo.Write(buf.Bytes())
 	}
 }
@@ -110,11 +131,12 @@ func (i *LogInfo) SetLogLevel(level int) {
 }
 
 // New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
-func New(level int, writeTo io.Writer) *LogInfo {
+func New(level int, writeTo io.Writer, withCaller bool) *LogInfo {
 	lev := convertLevel(level)
 	result := LogInfo{
-		logLevel: lev,
-		writeTo:  writeTo,
+		logLevel:   lev,
+		writeTo:    writeTo,
+		withCaller: withCaller,
 	}
 	result.Printf("Created logger, level %v.", logLevels[lev])
 	return &result

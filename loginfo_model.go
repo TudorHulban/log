@@ -11,6 +11,7 @@ import (
 
 const delim = ": "
 
+// helpers for constructor
 const (
 	// NADA no logging
 	NADA = 0

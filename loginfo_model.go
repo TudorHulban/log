@@ -11,6 +11,17 @@ import (
 
 const delim = ": "
 
+const (
+	// NADA no logging
+	NADA = 0
+	// INFO level
+	INFO = 1
+	// WARN level
+	WARN = 2
+	// DEBUG level
+	DEBUG = 3
+)
+
 var logLevels = []string{"NADA", "INFO", "WARN", "DEBUG"}
 
 // LogInfo Custom logger with nada, info and debug.

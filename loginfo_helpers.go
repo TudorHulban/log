@@ -3,11 +3,11 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"sync"
 )
 
 /*
 Colour Styles
-const (
 	//Text Colour
 	Black   = 30
 	Red     = 31
@@ -29,7 +29,13 @@ const (
 	Inverse   = 7
 	Hidden    = 8
 	Strikeout = 9
-) */
+*/
+
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return new(bytes.Buffer)
+	},
+}
 
 func cWarn() func(word string) string {
 	return func(word string) string {

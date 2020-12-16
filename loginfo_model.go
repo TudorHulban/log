@@ -35,16 +35,24 @@ type LogInfo struct {
 
 // Print Method prints without formatting.
 func (i *LogInfo) Print(args ...interface{}) {
-	var buf bytes.Buffer
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+
 	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
 	i.writeTo.Write(buf.Bytes())
+
+	bufPool.Put(buf)
 }
 
 // Printf Method prints without formatting.
 func (i *LogInfo) Printf(format string, args ...interface{}) {
-	var buf bytes.Buffer
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+
 	buf.WriteString(timestamp() + " " + fmt.Sprintf(format, args...) + "\n")
 	i.writeTo.Write(buf.Bytes())
+
+	bufPool.Put(buf)
 }
 
 // Info Method logging info level without formatting.

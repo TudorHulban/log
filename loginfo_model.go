@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// Not using defer for release to pool for performance reasons.
+
 const delim = ": "
 
 // helpers for constructor
@@ -58,77 +60,99 @@ func (i *LogInfo) Printf(format string, args ...interface{}) {
 // Info Method logging info level without formatting.
 func (i *LogInfo) Info(args ...interface{}) {
 	if i.logLevel > 0 {
-		var buf bytes.Buffer
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
 		if i.withCaller {
 			_, file, line, _ := runtime.Caller(1)
 			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
 		} else {
 			buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
 		}
+
 		i.writeTo.Write(buf.Bytes())
+		bufPool.Put(buf)
 	}
 }
 
 // Infof Method logging info level with formatting.
 func (i *LogInfo) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
-		var buf bytes.Buffer
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
 		if i.withCaller {
 			_, file, line, _ := runtime.Caller(1)
 			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
 		} else {
 			buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
 		}
+
 		i.writeTo.Write(buf.Bytes())
+		bufPool.Put(buf)
 	}
 }
 
 // Warn Method logging warn level without formatting.
 func (i *LogInfo) Warn(args ...interface{}) {
 	if i.logLevel > 1 {
-		var buf bytes.Buffer
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
 		if i.withCaller {
 			_, file, line, _ := runtime.Caller(1)
 			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
 		} else {
 			buf.WriteString(timestamp() + " " + cWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
 		}
+
 		i.writeTo.Write(buf.Bytes())
+		bufPool.Put(buf)
 	}
 }
 
 // Warnf Method logging warn level with formatting.
 func (i *LogInfo) Warnf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
-		var buf bytes.Buffer
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
 		if i.withCaller {
 			_, file, line, _ := runtime.Caller(1)
 			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
 		} else {
 			buf.WriteString(timestamp() + " " + cWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
 		}
+
 		i.writeTo.Write(buf.Bytes())
+		bufPool.Put(buf)
 	}
 }
 
 // Debug Method logging info debug level without formatting.
 func (i *LogInfo) Debug(args ...interface{}) {
 	if i.logLevel > 2 {
-		var buf bytes.Buffer
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
 		if i.withCaller {
 			_, file, line, _ := runtime.Caller(1)
 			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
 		} else {
 			buf.WriteString(timestamp() + " " + cDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
 		}
+
 		i.writeTo.Write(buf.Bytes())
+		bufPool.Put(buf)
 	}
 }
 
 // Debugf Method logging info debug level with formatting.
 func (i *LogInfo) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 2 {
-		var buf bytes.Buffer
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+
 		if i.withCaller {
 			_, file, line, _ := runtime.Caller(1)
 			buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + cDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
@@ -136,7 +160,9 @@ func (i *LogInfo) Debugf(format string, args ...interface{}) {
 			buf.WriteString(timestamp() + " " + cDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
 
 		}
+
 		i.writeTo.Write(buf.Bytes())
+		bufPool.Put(buf)
 	}
 }
 

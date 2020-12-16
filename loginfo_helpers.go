@@ -39,16 +39,24 @@ var bufPool = sync.Pool{
 
 func cWarn() func(word string) string {
 	return func(word string) string {
-		b := new(bytes.Buffer)
-		b.WriteString("\x1b[1;33m")
-		return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
+		buf := bufPool.Get().(*bytes.Buffer)
+		defer bufPool.Put(buf)
+
+		buf.Reset()
+
+		buf.WriteString("\x1b[1;33m")
+		return fmt.Sprintf("%s%v\x1b[0m", buf.String(), word)
 	}
 }
 
 func cDebug() func(word string) string {
 	return func(word string) string {
-		b := new(bytes.Buffer)
-		b.WriteString("\x1b[1;34m")
-		return fmt.Sprintf("%s%v\x1b[0m", b.String(), word)
+		buf := bufPool.Get().(*bytes.Buffer)
+		defer bufPool.Put(buf)
+
+		buf.Reset()
+
+		buf.WriteString("\x1b[1;34m")
+		return fmt.Sprintf("%s%v\x1b[0m", buf.String(), word)
 	}
 }

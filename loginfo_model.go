@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -179,6 +180,11 @@ func (i *LogInfo) SetLogLevel(level int) {
 // New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
 func New(level int, writeTo io.Writer, withCaller bool) *LogInfo {
 	lev := convertLevel(level)
+
+	if writeTo == nil {
+		writeTo = os.Stdout
+	}
+
 	result := LogInfo{
 		logLevel:   lev,
 		writeTo:    writeTo,

@@ -16,8 +16,8 @@ const delim = ": "
 
 // helpers for constructor
 const (
-	// NADA no logging
-	NADA = 0
+	// NONE no logging
+	NONE = 0
 	// INFO level
 	INFO = 1
 	// WARN level
@@ -26,18 +26,35 @@ const (
 	DEBUG = 3
 )
 
-var logLevels = []string{"NADA", "INFO", "WARN", "DEBUG"}
+var logLevels = []string{"NONE", "INFO", "WARN", "DEBUG"}
 
-// LogInfo Custom logger with nada, info and debug.
-type LogInfo struct {
+// Logger Custom logger with nada, info and debug.
+type Logger struct {
 	logLevel int
 	writeTo  io.Writer
 	// for shorter form in case do not need caller file.
 	withCaller bool
 }
 
+// New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
+func NewLogger(level int, writeTo io.Writer, withCaller bool) *Logger {
+	lev := convertLevel(level)
+
+	if writeTo == nil {
+		writeTo = os.Stdout
+	}
+
+	result := Logger{
+		logLevel:   lev,
+		writeTo:    writeTo,
+		withCaller: withCaller,
+	}
+	result.Printf("Created logger, level %v.", logLevels[lev])
+	return &result
+}
+
 // Print Method prints without formatting.
-func (i *LogInfo) Print(args ...interface{}) {
+func (i *Logger) Print(args ...interface{}) {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 
@@ -48,7 +65,7 @@ func (i *LogInfo) Print(args ...interface{}) {
 }
 
 // Printf Method prints without formatting.
-func (i *LogInfo) Printf(format string, args ...interface{}) {
+func (i *Logger) Printf(format string, args ...interface{}) {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 
@@ -59,7 +76,7 @@ func (i *LogInfo) Printf(format string, args ...interface{}) {
 }
 
 // Info Method logging info level without formatting.
-func (i *LogInfo) Info(args ...interface{}) {
+func (i *Logger) Info(args ...interface{}) {
 	if i.logLevel > 0 {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -77,7 +94,7 @@ func (i *LogInfo) Info(args ...interface{}) {
 }
 
 // Infof Method logging info level with formatting.
-func (i *LogInfo) Infof(format string, args ...interface{}) {
+func (i *Logger) Infof(format string, args ...interface{}) {
 	if i.logLevel > 0 {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -95,7 +112,7 @@ func (i *LogInfo) Infof(format string, args ...interface{}) {
 }
 
 // Warn Method logging warn level without formatting.
-func (i *LogInfo) Warn(args ...interface{}) {
+func (i *Logger) Warn(args ...interface{}) {
 	if i.logLevel > 1 {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -113,7 +130,7 @@ func (i *LogInfo) Warn(args ...interface{}) {
 }
 
 // Warnf Method logging warn level with formatting.
-func (i *LogInfo) Warnf(format string, args ...interface{}) {
+func (i *Logger) Warnf(format string, args ...interface{}) {
 	if i.logLevel > 1 {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -131,7 +148,7 @@ func (i *LogInfo) Warnf(format string, args ...interface{}) {
 }
 
 // Debug Method logging info debug level without formatting.
-func (i *LogInfo) Debug(args ...interface{}) {
+func (i *Logger) Debug(args ...interface{}) {
 	if i.logLevel > 2 {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -149,7 +166,7 @@ func (i *LogInfo) Debug(args ...interface{}) {
 }
 
 // Debugf Method logging info debug level with formatting.
-func (i *LogInfo) Debugf(format string, args ...interface{}) {
+func (i *Logger) Debugf(format string, args ...interface{}) {
 	if i.logLevel > 2 {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -168,30 +185,13 @@ func (i *LogInfo) Debugf(format string, args ...interface{}) {
 }
 
 // GetLogLevel Method returns current log level.
-func (i *LogInfo) GetLogLevel() int {
+func (i *Logger) GetLogLevel() int {
 	return i.logLevel
 }
 
 // SetLogLevel Method sets log level.
-func (i *LogInfo) SetLogLevel(level int) {
+func (i *Logger) SetLogLevel(level int) {
 	i.logLevel = level
-}
-
-// New Constructor with levels 0 - nada, 1 - info, 2 - warn, 3 - debug.
-func New(level int, writeTo io.Writer, withCaller bool) *LogInfo {
-	lev := convertLevel(level)
-
-	if writeTo == nil {
-		writeTo = os.Stdout
-	}
-
-	result := LogInfo{
-		logLevel:   lev,
-		writeTo:    writeTo,
-		withCaller: withCaller,
-	}
-	result.Printf("Created logger, level %v.", logLevels[lev])
-	return &result
 }
 
 func convertLevel(level int) int {

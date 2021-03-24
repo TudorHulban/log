@@ -13,14 +13,14 @@ import (
 )
 
 type T struct {
-	l *log.LogInfo
+	l *log.Logger
 }
 
 func Test01Logger(t *testing.T) {
 	output := &bytes.Buffer{}
 
 	obj := T{
-		l: log.New(log.DEBUG, output, true),
+		l: log.NewLogger(log.DEBUG, output, true),
 	}
 	obj.l.Info("xxx")
 	assert.Contains(t, output.String(), "xxx")
@@ -31,7 +31,7 @@ func Test02Logger(t *testing.T) {
 	output := &bytes.Buffer{}
 
 	obj := T{
-		l: log.New(log.INFO, output, true),
+		l: log.NewLogger(log.INFO, output, true),
 	}
 	obj.l.Debug("xxx")
 	assert.NotContains(t, output.String(), "xxx")

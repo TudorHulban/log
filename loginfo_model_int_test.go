@@ -10,6 +10,7 @@ import (
 
 func Test1Logger(t *testing.T) {
 	l := NewLogger(3, os.Stderr, true)
+
 	l.Print("0")
 	l.Info("1")
 	l.Warn("2")

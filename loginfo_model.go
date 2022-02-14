@@ -49,6 +49,7 @@ func NewLogger(level int, writeTo io.Writer, withCaller bool) *Logger {
 		writeTo:    writeTo,
 		withCaller: withCaller,
 	}
+
 	result.Printf("Created logger, level %v.", logLevels[lev])
 	return &result
 }
@@ -203,6 +204,7 @@ func convertLevel(level int) int {
 	case level == 2:
 		return 2
 	}
+
 	return 3
 }
 

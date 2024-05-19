@@ -1,8 +1,6 @@
 package log_test
 
-/*
-File details how to use logger.
-*/
+// File details how to use logger.
 
 import (
 	"bytes"
@@ -23,6 +21,7 @@ func Test01Logger(t *testing.T) {
 		l: log.NewLogger(log.DEBUG, output, true),
 	}
 	obj.l.Info("xxx")
+
 	assert.Contains(t, output.String(), "xxx")
 }
 
@@ -34,5 +33,6 @@ func Test02Logger(t *testing.T) {
 		l: log.NewLogger(log.INFO, output, true),
 	}
 	obj.l.Debug("xxx")
+
 	assert.NotContains(t, output.String(), "xxx")
 }

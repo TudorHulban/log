@@ -19,6 +19,7 @@ func Test1_Logger(t *testing.T) {
 
 func Test2_GetLevel(t *testing.T) {
 	l := NewLogger(3, os.Stderr, true)
+
 	assert.Equal(t, 3, l.GetLogLevel())
 }
 
@@ -26,6 +27,7 @@ func Test3_SetLevel(t *testing.T) {
 	l := NewLogger(3, os.Stderr, true)
 
 	l.SetLogLevel(1)
+
 	assert.Equal(t, 1, l.GetLogLevel())
 }
 

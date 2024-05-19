@@ -9,22 +9,6 @@ import (
 	"strconv"
 )
 
-const delim = ": "
-
-// helpers for constructor
-const (
-	// NONE no logging
-	NONE = 0
-	// INFO level
-	INFO = 1
-	// WARN level
-	WARN = 2
-	// DEBUG level
-	DEBUG = 3
-)
-
-var logLevels = []string{"NONE", "INFO", "WARN", "DEBUG"}
-
 type Logger struct {
 	logLevel int
 	writeTo  io.Writer
@@ -33,7 +17,6 @@ type Logger struct {
 	withCaller bool
 }
 
-// New Constructor with levels 0 - no logging, 1 - info, 2 - warn, 3 - debug.
 func NewLogger(level int, writeTo io.Writer, withCaller bool) *Logger {
 	lev := convertLevel(level)
 
@@ -47,32 +30,38 @@ func NewLogger(level int, writeTo io.Writer, withCaller bool) *Logger {
 		withCaller: withCaller,
 	}
 
-	res.Printf("Created logger, level %v.", logLevels[lev])
+	go res.Printf(
+		"created logger, level %v.",
+		logLevels[lev],
+	)
+
 	return &res
 }
 
-func (i *Logger) Print(args ...interface{}) {
+func (l *Logger) Print(args ...interface{}) {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 
 	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 
 	bufPool.Put(buf)
 }
 
-func (i *Logger) Printf(format string, args ...interface{}) {
+func (l *Logger) Printf(format string, args ...interface{}) {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 
 	buf.WriteString(timestamp() + " " + fmt.Sprintf(format, args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 
 	bufPool.Put(buf)
 }
 
-func (i *Logger) Info(args ...interface{}) {
-	if i.logLevel == 0 {
+func (l *Logger) Info(args ...interface{}) {
+	if l.logLevel == 0 {
 		return
 	}
 
@@ -81,19 +70,23 @@ func (i *Logger) Info(args ...interface{}) {
 
 	buf.Reset()
 
-	if i.withCaller {
+	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
+
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
-		i.writeTo.Write(buf.Bytes())
+
+		l.writeTo.Write(buf.Bytes())
+
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 }
 
-func (i *Logger) Infof(format string, args ...interface{}) {
-	if i.logLevel == 0 {
+func (l *Logger) Infof(format string, args ...interface{}) {
+	if l.logLevel == 0 {
 		return
 	}
 
@@ -102,19 +95,22 @@ func (i *Logger) Infof(format string, args ...interface{}) {
 
 	buf.Reset()
 
-	if i.withCaller {
+	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
+
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
-		i.writeTo.Write(buf.Bytes())
+
+		l.writeTo.Write(buf.Bytes())
+
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+	l.writeTo.Write(buf.Bytes())
 }
 
-func (i *Logger) Warn(args ...interface{}) {
-	if i.logLevel < 2 {
+func (l *Logger) Warn(args ...interface{}) {
+	if l.logLevel < 2 {
 		return
 	}
 
@@ -123,19 +119,23 @@ func (i *Logger) Warn(args ...interface{}) {
 
 	buf.Reset()
 
-	if i.withCaller {
+	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
+
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
-		i.writeTo.Write(buf.Bytes())
+
+		l.writeTo.Write(buf.Bytes())
+
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 }
 
-func (i *Logger) Warnf(format string, args ...interface{}) {
-	if i.logLevel < 2 {
+func (l *Logger) Warnf(format string, args ...interface{}) {
+	if l.logLevel < 2 {
 		return
 	}
 
@@ -144,19 +144,23 @@ func (i *Logger) Warnf(format string, args ...interface{}) {
 
 	buf.Reset()
 
-	if i.withCaller {
+	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
+
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
-		i.writeTo.Write(buf.Bytes())
+
+		l.writeTo.Write(buf.Bytes())
+
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 }
 
-func (i *Logger) Debug(args ...interface{}) {
-	if i.logLevel < 3 {
+func (l *Logger) Debug(args ...interface{}) {
+	if l.logLevel < 3 {
 		return
 	}
 
@@ -165,19 +169,23 @@ func (i *Logger) Debug(args ...interface{}) {
 
 	buf.Reset()
 
-	if i.withCaller {
+	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
+
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
-		i.writeTo.Write(buf.Bytes())
+
+		l.writeTo.Write(buf.Bytes())
+
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 }
 
-func (i *Logger) Debugf(format string, args ...interface{}) {
-	if i.logLevel < 3 {
+func (l *Logger) Debugf(format string, args ...interface{}) {
+	if l.logLevel < 3 {
 		return
 	}
 
@@ -186,27 +194,31 @@ func (i *Logger) Debugf(format string, args ...interface{}) {
 
 	buf.Reset()
 
-	if i.withCaller {
+	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
+
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
-		i.writeTo.Write(buf.Bytes())
+
+		l.writeTo.Write(buf.Bytes())
+
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
-	i.writeTo.Write(buf.Bytes())
+
+	l.writeTo.Write(buf.Bytes())
 }
 
-func (i *Logger) Fatal(args ...interface{}) {
-	i.Print(args...)
+func (l *Logger) Fatal(args ...interface{}) {
+	l.Print(args...)
 
 	os.Exit(1)
 }
 
-func (i *Logger) GetLogLevel() int {
-	return i.logLevel
+func (l *Logger) GetLogLevel() int {
+	return l.logLevel
 }
 
-func (i *Logger) SetLogLevel(level int) {
-	i.logLevel = level
+func (l *Logger) SetLogLevel(level int) {
+	l.logLevel = level
 }

@@ -5,24 +5,34 @@ import (
 	"time"
 )
 
-// timestamp provides time in format YYYYMonth HH24:Minutes:Seconds.Miliseconds
+// time format: YYYYMonth HH24:Minutes:Seconds.Miliseconds
 func timestamp() string {
 	now := time.Now()
 
-	theMonth := "0" + strconv.FormatInt(int64(now.Month()), 10)
-	theMonth = theMonth[len(theMonth)-2:]
+	theMonth := "0" + strconv.Itoa(
+		int(now.Month()),
+	)
 
-	theHour := "0" + strconv.FormatInt(int64(now.Hour()), 10)
-	theHour = theHour[len(theHour)-2:]
+	theHour := "0" + strconv.Itoa(
+		int(now.Hour()),
+	)
 
-	theMin := "0" + strconv.FormatInt(int64(now.Minute()), 10)
-	theMin = theMin[len(theMin)-2:]
+	theMin := "0" + strconv.Itoa(
+		int(now.Minute()),
+	)
 
-	theSec := "0" + strconv.FormatInt(int64(now.Second()), 10)
-	theSec = theSec[len(theSec)-2:]
+	theSec := "0" + strconv.Itoa(
+		int(now.Second()),
+	)
 
-	theMilisec := "00" + strconv.FormatInt(int64(now.Nanosecond()/1000000), 10)
-	theMilisec = theMilisec[len(theMilisec)-3:]
+	theMilisec := "00" + strconv.Itoa(
+		int(now.Nanosecond()/1000000),
+	)
 
-	return strconv.FormatInt(int64(now.Year()), 10) + theMonth + " " + theHour + ":" + theMin + ":" + theSec + "." + theMilisec
+	return strconv.Itoa(int(now.Year())) +
+		theMonth[len(theMonth)-2:] + " " +
+		theHour[len(theHour)-2:] + ":" +
+		theMin[len(theMin)-2:] + ":" +
+		theSec[len(theSec)-2:] + "." +
+		theMilisec[len(theMilisec)-3:]
 }

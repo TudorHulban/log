@@ -18,10 +18,10 @@ const (
 	DEBUG = 3
 )
 
-var logLevels = []string{"NONE", "INFO", "WARN", "DEBUG"}
+var logLevels = [4]string{"NONE", "INFO", "WARN", "DEBUG"}
 
 var bufPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return new(bytes.Buffer)
 	},
 }

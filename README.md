@@ -38,4 +38,7 @@ type WithLogger interface {
 
 ```html
 https://dave.cheney.net/2017/01/23/the-package-level-logger-anti-pattern
+
+https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
+https://unskilled.blog/posts/lets-dive-a-tour-of-sync.pool-internals/
 ```

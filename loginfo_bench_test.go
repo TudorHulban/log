@@ -22,6 +22,16 @@ func BenchmarkLogger_Print(b *testing.B) {
 	}
 }
 
+func BenchmarkLogger_PrintNew(b *testing.B) {
+	logger := NewLogger(1, &bytes.Buffer{}, true)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		logger.PrintNew("1")
+	}
+}
+
 // BenchmarkLogger_InfoTrue-12    	 1000000	      1099 ns/op	     654 B/op	       5 allocs/op
 func BenchmarkLogger_InfoTrue(b *testing.B) {
 	logger := NewLogger(1, &bytes.Buffer{}, true)

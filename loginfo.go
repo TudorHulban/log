@@ -10,7 +10,7 @@ import (
 )
 
 type Logger struct {
-	logLevel int
+	logLevel int // TODO: move to int8
 	writeTo  io.Writer
 
 	// for shorter form in case do not need caller file.
@@ -40,6 +40,17 @@ func NewLogger(level int, writeTo io.Writer, withCaller bool) *Logger {
 
 func (l *Logger) Print(args ...interface{}) {
 	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+
+	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
+
+	l.writeTo.Write(buf.Bytes())
+
+	bufPool.Put(buf)
+}
+
+func (l *Logger) PrintNew(args ...interface{}) {
+	buf := _pool.Get()
 	buf.Reset()
 
 	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")

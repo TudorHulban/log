@@ -25,3 +25,5 @@ var bufPool = sync.Pool{
 		return new(bytes.Buffer)
 	},
 }
+
+var _pool = NewPool[bytes.Buffer]()

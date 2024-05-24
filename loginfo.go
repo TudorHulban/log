@@ -7,11 +7,13 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+
+	safewriter "github.com/TudorHulban/log/safe-writer"
 )
 
 type Logger struct {
 	logLevel int // TODO: move to int8
-	writeTo  io.Writer
+	w        *safewriter.SafeWriter
 
 	// for shorter form in case do not need caller file.
 	withCaller bool
@@ -26,11 +28,11 @@ func NewLogger(level int, writeTo io.Writer, withCaller bool) *Logger {
 
 	res := Logger{
 		logLevel:   lev,
-		writeTo:    writeTo,
+		w:          safewriter.NewSafeWriter(writeTo),
 		withCaller: withCaller,
 	}
 
-	go res.Printf(
+	go res.PrintfNew(
 		"created logger, level %v.",
 		logLevels[lev],
 	)
@@ -44,7 +46,9 @@ func (l *Logger) Print(args ...interface{}) {
 
 	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
 
 	bufPool.Put(buf)
 }
@@ -55,7 +59,9 @@ func (l *Logger) PrintNew(args ...interface{}) {
 
 	buf.WriteString(timestamp() + " " + fmt.Sprint(args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
 
 	bufPool.Put(buf)
 }
@@ -66,7 +72,22 @@ func (l *Logger) Printf(format string, args ...interface{}) {
 
 	buf.WriteString(timestamp() + " " + fmt.Sprintf(format, args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
+
+	bufPool.Put(buf)
+}
+
+func (l *Logger) PrintfNew(format string, args ...interface{}) {
+	buf := _pool.Get()
+	buf.Reset()
+
+	buf.WriteString(timestamp() + " " + fmt.Sprintf(format, args...) + "\n")
+
+	l.w.Write(
+		buf.Bytes(),
+	)
 
 	bufPool.Put(buf)
 }
@@ -86,14 +107,47 @@ func (l *Logger) Info(args ...interface{}) {
 
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
 
-		l.writeTo.Write(buf.Bytes())
+		l.w.Write(
+			buf.Bytes(),
+		)
 
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
+}
+
+func (l *Logger) InfoNew(args ...interface{}) {
+	if l.logLevel == 0 {
+		return
+	}
+
+	buf := _pool.Get()
+	defer bufPool.Put(buf)
+
+	buf.Reset()
+
+	if l.withCaller {
+		_, file, line, _ := runtime.Caller(1)
+
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
+
+		l.w.Write(
+			buf.Bytes(),
+		)
+
+		return
+	}
+
+	buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n")
+
+	l.w.Write(
+		buf.Bytes(),
+	)
 }
 
 func (l *Logger) Infof(format string, args ...interface{}) {
@@ -111,13 +165,19 @@ func (l *Logger) Infof(format string, args ...interface{}) {
 
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
 
-		l.writeTo.Write(buf.Bytes())
+		l.w.Write(
+			buf.Bytes(),
+		)
 
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n")
-	l.writeTo.Write(buf.Bytes())
+
+	l.w.Write(
+		buf.Bytes(),
+	)
+
 }
 
 func (l *Logger) Warn(args ...interface{}) {
@@ -135,14 +195,18 @@ func (l *Logger) Warn(args ...interface{}) {
 
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
 
-		l.writeTo.Write(buf.Bytes())
+		l.w.Write(
+			buf.Bytes(),
+		)
 
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
 }
 
 func (l *Logger) Warnf(format string, args ...interface{}) {
@@ -160,14 +224,19 @@ func (l *Logger) Warnf(format string, args ...interface{}) {
 
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
 
-		l.writeTo.Write(buf.Bytes())
+		l.w.Write(
+			buf.Bytes(),
+		)
 
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
+
 }
 
 func (l *Logger) Debug(args ...interface{}) {
@@ -185,14 +254,48 @@ func (l *Logger) Debug(args ...interface{}) {
 
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
 
-		l.writeTo.Write(buf.Bytes())
+		l.w.Write(
+			buf.Bytes(),
+		)
 
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
+}
+
+func (l *Logger) DebugNew(args ...interface{}) {
+	if l.logLevel < 3 {
+		return
+	}
+
+	buf := _pool.Get()
+	defer bufPool.Put(buf)
+
+	buf.Reset()
+
+	if l.withCaller {
+		_, file, line, _ := runtime.Caller(1)
+
+		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
+
+		l.w.Write(
+			buf.Bytes(),
+		)
+
+		return
+	}
+
+	buf.WriteString(timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n")
+
+	l.w.Write(
+		buf.Bytes(),
+	)
+
 }
 
 func (l *Logger) Debugf(format string, args ...interface{}) {
@@ -210,14 +313,19 @@ func (l *Logger) Debugf(format string, args ...interface{}) {
 
 		buf.WriteString(timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
 
-		l.writeTo.Write(buf.Bytes())
+		l.w.Write(
+			buf.Bytes(),
+		)
 
 		return
 	}
 
 	buf.WriteString(timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n")
 
-	l.writeTo.Write(buf.Bytes())
+	l.w.Write(
+		buf.Bytes(),
+	)
+
 }
 
 func (l *Logger) Fatal(args ...interface{}) {

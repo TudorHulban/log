@@ -1,7 +1,6 @@
 package log
 
 import (
-	"bytes"
 	"fmt"
 )
 
@@ -32,17 +31,9 @@ Colour Styles
 
 func colorWarn() func(word string) string {
 	return func(word string) string {
-		buf := bufPool.Get().(*bytes.Buffer)
-		defer bufPool.Put(buf)
-
-		buf.Reset()
-
-		buf.WriteString("\x1b[1;33m")
-
 		return fmt.Sprintf(
 			"%s%v\x1b[0m",
-
-			buf.String(),
+			"\x1b[1;33m",
 			word,
 		)
 	}
@@ -50,17 +41,9 @@ func colorWarn() func(word string) string {
 
 func colorDebug() func(word string) string {
 	return func(word string) string {
-		buf := bufPool.Get().(*bytes.Buffer)
-		defer bufPool.Put(buf)
-
-		buf.Reset()
-
-		buf.WriteString("\x1b[1;34m")
-
 		return fmt.Sprintf(
 			"%s%v\x1b[0m",
-
-			buf.String(),
+			"\x1b[1;34m",
 			word,
 		)
 	}

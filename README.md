@@ -1,5 +1,7 @@
 # LogInfo
 
+Do not use. Race conditions currently.
+
 Simple logger.  
 Levels:  
 0 - none,  
@@ -10,6 +12,17 @@ Levels:
 ## How to use
 
 See external testing file.
+
+## Profiling
+
+```sh
+go test -bench=. -run=^$ . -cpuprofile profile.out
+go test -bench=. -benchmem -cpuprofile profile.out
+go test -bench=. -benchmem -memprofile memprofile.out -cpuprofile profile.out
+
+go tool pprof profile.out
+# with option top, web or pdf
+```
 
 ## Roadmap (Writer)
 
@@ -40,5 +53,8 @@ type WithLogger interface {
 https://dave.cheney.net/2017/01/23/the-package-level-logger-anti-pattern
 
 https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
+
 https://unskilled.blog/posts/lets-dive-a-tour-of-sync.pool-internals/
+
+https://medium.com/@felipedutratine/profile-your-benchmark-with-pprof-fb7070ee1a94
 ```

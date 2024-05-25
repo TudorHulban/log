@@ -7,12 +7,14 @@ import (
 )
 
 func TestSafeWriter(t *testing.T) {
-	w := NewSafeWriter(os.Stdout)
+	w := NewSafeWriterInfo(os.Stdout)
+
+	go w.Writer.Listen()
 
 	numberWorkers := 5
 
 	worker := func(work <-chan int) {
-		w.Write(
+		w.Writer.write(
 			[]byte(
 				strconv.Itoa(
 					<-work,

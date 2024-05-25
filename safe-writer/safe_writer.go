@@ -2,25 +2,47 @@ package safewriter
 
 import (
 	"io"
-	"sync"
 )
 
 type SafeWriter struct {
-	writeTo io.Writer
-	mu      sync.Mutex
+	chWrites chan []byte
+	chStop   chan struct{}
+
+	writer io.Writer
 }
 
-var _ io.Writer = &SafeWriter{}
+type SafeWriterInfo struct {
+	Writer   *SafeWriter
+	ChWrites chan []byte
+	ChStop   chan struct{}
+}
 
-func NewSafeWriter(writer io.Writer) *SafeWriter {
-	return &SafeWriter{
-		writeTo: writer,
+func NewSafeWriterInfo(writer io.Writer) *SafeWriterInfo {
+	w := SafeWriter{
+		writer:   writer,
+		chWrites: make(chan []byte),
+		chStop:   make(chan struct{}),
+	}
+
+	return &SafeWriterInfo{
+		Writer:   &w,
+		ChWrites: w.chWrites,
+		ChStop:   w.chStop,
 	}
 }
 
-func (safe *SafeWriter) Write(payload []byte) (n int, err error) {
-	safe.mu.Lock()
-	defer safe.mu.Unlock()
+func (safe *SafeWriter) Listen() {
+	for {
+		select {
+		case <-safe.chStop:
+			return
 
-	return safe.writeTo.Write(payload)
+		case msg := <-safe.chWrites:
+			safe.writer.Write(msg)
+		}
+	}
+}
+
+func (safe *SafeWriter) write(payload []byte) {
+	safe.chWrites <- payload
 }

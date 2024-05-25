@@ -1,6 +1,6 @@
 package log
 
-func convertLevel(level int) int {
+func convertLevel(level Level) int8 {
 	switch {
 	case level < 1:
 		return 0

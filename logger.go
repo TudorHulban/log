@@ -9,23 +9,26 @@ import (
 type Level int8
 
 type Logger struct {
-	w        *safewriter.SafeWriterInfo
-	logLevel int8
+	w           *safewriter.SafeWriterInfo
+	localWriter io.Writer
+	logLevel    int8
 
 	withCaller bool // for shorter form in case do not need caller file.
 }
 
-func NewLogger(level Level, writeTo io.Writer, withCaller bool) Logger {
+func NewLogger(level Level, writer io.Writer, withCaller bool) Logger {
 	lev := convertLevel(level)
 
-	if writeTo == nil {
-		writeTo = io.Discard
+	if writer == nil {
+		writer = io.Discard
 	}
 
 	res := Logger{
 		logLevel:   lev,
-		w:          safewriter.NewSafeWriterInfo(writeTo),
+		w:          safewriter.NewSafeWriterInfo(writer),
 		withCaller: withCaller,
+
+		localWriter: writer,
 	}
 
 	go res.w.Writer.Listen()

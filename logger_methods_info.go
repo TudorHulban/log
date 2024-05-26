@@ -27,7 +27,8 @@ func (l *Logger) Info(args ...any) {
 
 	l.write(
 		[]byte(
-			timestamp() + " " + logLevels[1] + delim + fmt.Sprint(args...) + "\n",
+			timestamp() + " " + logLevels[1] + delim +
+				fmt.Sprint(args...) + "\n",
 		),
 	)
 }
@@ -53,7 +54,8 @@ func (l *Logger) Infof(format string, args ...any) {
 
 	l.write(
 		[]byte(
-			timestamp() + " " + logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n",
+			timestamp() + " " + logLevels[1] + delim +
+				fmt.Sprintf(format, args...) + "\n",
 		),
 	)
 }

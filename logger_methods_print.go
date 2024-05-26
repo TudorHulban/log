@@ -4,14 +4,18 @@ import (
 	"fmt"
 )
 
-func renderPrint(msg string) string {
-	return timestamp() + " " + msg + "\n"
-}
-
 func (l *Logger) PrintMessage(msg string) {
 	l.write(
 		[]byte(
-			renderPrint(msg),
+			timestamp() + " " + msg + "\n",
+		),
+	)
+}
+
+func (l *Logger) PrintLocal(msg string) {
+	l.localWriter.Write(
+		[]byte(
+			timestamp() + " " + msg + "\n",
 		),
 	)
 }

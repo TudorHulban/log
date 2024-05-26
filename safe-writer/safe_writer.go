@@ -20,7 +20,7 @@ type SafeWriterInfo struct {
 func NewSafeWriterInfo(writer io.Writer) *SafeWriterInfo {
 	w := SafeWriter{
 		writer:   writer,
-		chWrites: make(chan []byte),
+		chWrites: make(chan []byte, 100),
 		chStop:   make(chan struct{}),
 	}
 

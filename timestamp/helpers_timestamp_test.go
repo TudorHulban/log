@@ -1,4 +1,4 @@
-package log
+package timestamp
 
 import (
 	"testing"
@@ -12,6 +12,6 @@ func BenchmarkTimestamp(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		timestamp()
+		TimestampYYYYMonth()
 	}
 }

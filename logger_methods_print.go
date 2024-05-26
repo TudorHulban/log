@@ -5,33 +5,25 @@ import (
 )
 
 func (l *Logger) PrintMessage(msg string) {
-	l.write(
-		[]byte(
-			timestamp() + " " + msg + "\n",
-		),
-	)
-}
-
-func (l *Logger) PrintLocal(msg string) {
 	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + msg + "\n",
+			l.withl.withTimestamp() + " " + msg + "\n",
 		),
 	)
 }
 
 func (l *Logger) Print(args ...any) {
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + fmt.Sprint(args...) + "\n",
+			l.withl.withTimestamp() + " " + fmt.Sprint(args...) + "\n",
 		),
 	)
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + fmt.Sprintf(format, args...) + "\n",
+			l.withTimestamp() + " " + fmt.Sprintf(format, args...) + "\n",
 		),
 	)
 }

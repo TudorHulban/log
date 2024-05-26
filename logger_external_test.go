@@ -7,31 +7,28 @@ import (
 	"testing"
 
 	"github.com/TudorHulban/log"
+	"github.com/TudorHulban/log/timestamp"
 )
 
 type T struct {
 	l log.Logger
 }
 
-func Test01Logger(t *testing.T) {
-	var output bytes.Buffer
-
+func TestExternal(t *testing.T) {
 	obj := T{
-		l: log.NewLogger(log.LevelDEBUG, &output, true),
+		l: log.NewLogger(
+			&log.ParamsNewLogger{
+				LoggerLevel:  log.LevelDEBUG,
+				LoggerWriter: new(bytes.Buffer),
+
+				WithTimestamp: timestamp.TimestampNano,
+				WithCaller:    true,
+			},
+		),
 	}
+
 	obj.l.Info("xxx")
+	obj.l.Debug("yyy")
 
 	// assert.Contains(t, output.String(), "xxx") - race condition
-}
-
-// higher log levels are not sent when lower log level defined
-func Test02Logger(t *testing.T) {
-	var output bytes.Buffer
-
-	obj := T{
-		l: log.NewLogger(log.LevelINFO, &output, true),
-	}
-	obj.l.Debug("xxx")
-
-	// assert.NotContains(t, output.String(), "xxx") - race condition
 }

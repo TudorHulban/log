@@ -14,9 +14,9 @@ func (l *Logger) Info(args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.write(
+		l.localWriter.Write(
 			[]byte(
-				timestamp() + " " + file + " Line" + delim +
+				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					logLevels[1] + delim + fmt.Sprint(args...) + "\n",
 			),
@@ -25,9 +25,9 @@ func (l *Logger) Info(args ...any) {
 		return
 	}
 
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + logLevels[1] + delim +
+			l.withTimestamp() + " " + logLevels[1] + delim +
 				fmt.Sprint(args...) + "\n",
 		),
 	)
@@ -41,9 +41,9 @@ func (l *Logger) Infof(format string, args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.write(
+		l.localWriter.Write(
 			[]byte(
-				timestamp() + " " + file + " Line" + delim +
+				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n",
 			),
@@ -52,9 +52,9 @@ func (l *Logger) Infof(format string, args ...any) {
 		return
 	}
 
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + logLevels[1] + delim +
+			l.withTimestamp() + " " + logLevels[1] + delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)

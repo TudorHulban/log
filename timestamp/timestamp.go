@@ -1,12 +1,19 @@
-package log
+package timestamp
 
 import (
 	"strconv"
 	"time"
 )
 
-// time format: YYYYMonth HH24:Minutes:Seconds.Miliseconds
-func timestamp() string {
+type Timestamp func() string
+
+var TimestampNano = func() string {
+	return strconv.Itoa(
+		int(time.Now().UnixNano()),
+	)
+}
+
+var TimestampYYYYMonth = func() string {
 	now := time.Now()
 
 	theMonth := "0" + strconv.Itoa(
@@ -26,7 +33,7 @@ func timestamp() string {
 	)
 
 	theMilisec := "00" + strconv.Itoa(
-		int(now.Nanosecond()/1000000),
+		int(now.Nanosecond()/1000000), //TODO: try now miliseconds
 	)
 
 	return strconv.Itoa(int(now.Year())) +

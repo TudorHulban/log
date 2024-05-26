@@ -14,9 +14,9 @@ func (l *Logger) Debug(args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.write(
+		l.localWriter.Write(
 			[]byte(
-				timestamp() + " " + file + " Line" + delim +
+				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n",
 			),
@@ -25,9 +25,9 @@ func (l *Logger) Debug(args ...any) {
 		return
 	}
 
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n",
+			l.withTimestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprint(args...) + "\n",
 		),
 	)
 }
@@ -40,9 +40,9 @@ func (l *Logger) Debugf(format string, args ...interface{}) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.write(
+		l.localWriter.Write(
 			[]byte(
-				timestamp() + " " + file + " Line" + delim +
+				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n",
 			),
@@ -51,9 +51,9 @@ func (l *Logger) Debugf(format string, args ...interface{}) {
 		return
 	}
 
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n",
+			l.withTimestamp() + " " + colorDebug()(logLevels[3]) + delim + fmt.Sprintf(format, args...) + "\n",
 		),
 	)
 

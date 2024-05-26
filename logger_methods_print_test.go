@@ -3,22 +3,25 @@ package log
 import (
 	"os"
 	"testing"
+	"time"
+
+	"github.com/TudorHulban/log/timestamp"
 )
 
 func TestPrint(t *testing.T) {
 	l := NewLogger(
-		LevelDEBUG,
-		os.Stdout,
-		true,
+		&ParamsNewLogger{
+			LoggerLevel:   LevelDEBUG,
+			LoggerWriter:  os.Stdout,
+			WithTimestamp: timestamp,
+		},
 	)
 
 	go l.PrintLocal("xxx1")
 	go l.PrintLocal("xxx2")
 	go l.PrintLocal("xxx3")
 
-	l.PrintMessage("0")
-
-	// <-l.w.ChStop
+	time.Sleep(1 * time.Second)
 }
 
 func Benchmark_Print_Logger(b *testing.B) {
@@ -39,11 +42,11 @@ func Benchmark_Print_Logger(b *testing.B) {
 	)
 }
 
-func Benchmark_Local_Print_Logger(b *testing.B) {
+func Benchmark_Local_TimestampNano_Logger(b *testing.B) {
 	logger := NewLogger(
-		LevelINFO,
-		nil,
-		false,
+		&ParamsNewLogger{
+			WithTimestamp: timestamp.TimestampNano,
+		},
 	)
 
 	b.ResetTimer()
@@ -51,7 +54,7 @@ func Benchmark_Local_Print_Logger(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				logger.PrintLocal("1")
+				logger.Print("1")
 			}
 		},
 	)

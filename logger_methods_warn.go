@@ -14,18 +14,18 @@ func (l *Logger) Warn(args ...interface{}) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.write(
+		l.localWriter.Write(
 			[]byte(
-				timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n",
+				l.withTimestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n",
 			),
 		)
 
 		return
 	}
 
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n",
+			l.withTimestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprint(args...) + "\n",
 		),
 	)
 }
@@ -38,18 +38,18 @@ func (l *Logger) Warnf(format string, args ...interface{}) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.write(
+		l.localWriter.Write(
 			[]byte(
-				timestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n",
+				l.withTimestamp() + " " + file + " Line" + delim + strconv.FormatInt(int64(line), 10) + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n",
 			),
 		)
 
 		return
 	}
 
-	l.write(
+	l.localWriter.Write(
 		[]byte(
-			timestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n",
+			l.withTimestamp() + " " + colorWarn()(logLevels[2]) + delim + fmt.Sprintf(format, args...) + "\n",
 		),
 	)
 

@@ -7,7 +7,7 @@ import (
 )
 
 func (l Logger) Debug(args ...any) {
-	if l.logLevel < 3 {
+	if l.logLevel < LevelDEBUG {
 		return
 	}
 
@@ -35,7 +35,7 @@ func (l Logger) Debug(args ...any) {
 }
 
 func (l Logger) Debugf(format string, args ...any) {
-	if l.logLevel < 3 {
+	if l.logLevel < LevelDEBUG {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (l Logger) Debugf(format string, args ...any) {
 }
 
 func (l Logger) Debugw(msg string, keysAndValues ...any) {
-	if l.logLevel < 3 {
+	if l.logLevel < LevelDEBUG {
 		return
 	}
 

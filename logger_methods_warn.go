@@ -7,7 +7,7 @@ import (
 )
 
 func (l Logger) Warn(args ...any) {
-	if l.logLevel < 2 {
+	if l.logLevel < LevelWARN {
 		return
 	}
 
@@ -35,7 +35,7 @@ func (l Logger) Warn(args ...any) {
 }
 
 func (l Logger) Warnf(format string, args ...any) {
-	if l.logLevel < 2 {
+	if l.logLevel < LevelWARN {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (l Logger) Warnf(format string, args ...any) {
 }
 
 func (l Logger) Warnw(msg string, keysAndValues ...any) {
-	if l.logLevel < 2 {
+	if l.logLevel < LevelWARN {
 		return
 	}
 

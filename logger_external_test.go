@@ -4,13 +4,10 @@ package log_test
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	"github.com/TudorHulban/log"
 	"github.com/TudorHulban/log/timestamp"
-	"github.com/gofiber/fiber/v2"
-	fiberlog "github.com/gofiber/fiber/v2/log"
 )
 
 type T struct {
@@ -34,22 +31,4 @@ func TestExternal(t *testing.T) {
 	obj.l.Debug("yyy")
 
 	// assert.Contains(t, output.String(), "xxx") - race condition
-}
-
-func TestFiber(t *testing.T) {
-	l := log.NewLogger(
-		&log.ParamsNewLogger{
-			LoggerLevel:   log.LevelDEBUG,
-			LoggerWriter:  os.Stdout,
-			WithTimestamp: timestamp.TimestampNano,
-		},
-	)
-
-	fiberlog.SetLogger(l) // does not work!
-
-	app := fiber.New()
-
-	app.Use(l)
-
-	l.Fatal(app.Listen(":3000"))
 }

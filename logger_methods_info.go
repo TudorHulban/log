@@ -7,7 +7,7 @@ import (
 )
 
 func (l Logger) Info(args ...any) {
-	if l.logLevel == 0 {
+	if l.logLevel == LevelNONE {
 		return
 	}
 
@@ -35,7 +35,7 @@ func (l Logger) Info(args ...any) {
 }
 
 func (l Logger) Infof(format string, args ...any) {
-	if l.logLevel == 0 {
+	if l.logLevel == LevelNONE {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (l Logger) Infof(format string, args ...any) {
 }
 
 func (l Logger) Infow(msg string, keysAndValues ...any) {
-	if l.logLevel == 0 {
+	if l.logLevel == LevelNONE {
 		return
 	}
 

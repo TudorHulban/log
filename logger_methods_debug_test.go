@@ -26,9 +26,7 @@ func TestDebug(t *testing.T) {
 func Benchmark_Debug(b *testing.B) {
 	l := NewLogger(
 		&ParamsNewLogger{
-			LoggerLevel: LevelDEBUG,
-
-			WithCaller:    true,
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
 		},
 	)
@@ -38,7 +36,7 @@ func Benchmark_Debug(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				l.Info("1")
+				l.Debug("1")
 			}
 		},
 	)

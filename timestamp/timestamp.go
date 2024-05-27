@@ -7,6 +7,10 @@ import (
 
 type Timestamp func() string
 
+var TimestampNil = func() string {
+	return ""
+}
+
 var TimestampNano = func() string {
 	return strconv.Itoa(
 		int(time.Now().UnixNano()),

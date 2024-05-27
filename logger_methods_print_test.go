@@ -13,22 +13,31 @@ func TestPrint(t *testing.T) {
 		&ParamsNewLogger{
 			LoggerLevel:   LevelDEBUG,
 			LoggerWriter:  os.Stdout,
-			WithTimestamp: timestamp,
+			WithTimestamp: timestamp.TimestampNano,
 		},
 	)
 
-	go l.PrintLocal("xxx1")
-	go l.PrintLocal("xxx2")
-	go l.PrintLocal("xxx3")
+	go l.PrintMessage("xxx1")
+	go l.PrintMessage("xxx2")
+	go l.PrintMessage("xxx3")
+
+	l.Printw(
+		"message:",
+		[]string{
+			"x1",
+			"x2",
+		},
+		"x3",
+	)
 
 	time.Sleep(1 * time.Second)
 }
 
 func Benchmark_Print_Logger(b *testing.B) {
-	logger := NewLogger(
-		LevelINFO,
-		nil,
-		false,
+	l := NewLogger(
+		&ParamsNewLogger{
+			WithTimestamp: timestamp.TimestampNil,
+		},
 	)
 
 	b.ResetTimer()
@@ -36,7 +45,7 @@ func Benchmark_Print_Logger(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				logger.PrintMessage("1")
+				l.PrintMessage("1")
 			}
 		},
 	)

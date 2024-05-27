@@ -3,11 +3,17 @@ package log
 import (
 	"testing"
 
+	"github.com/TudorHulban/log/timestamp"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetLogLevel(t *testing.T) {
-	l := NewLogger(LevelDEBUG, nil, true)
+	l := NewLogger(
+		&ParamsNewLogger{
+			LoggerLevel:   LevelDEBUG,
+			WithTimestamp: timestamp.TimestampNil,
+		},
+	)
 
 	assert.EqualValues(t,
 		LevelDEBUG,
@@ -16,7 +22,11 @@ func Test_GetLogLevel(t *testing.T) {
 }
 
 func Test_SetLogLevel(t *testing.T) {
-	l := NewLogger(LevelDEBUG, nil, true)
+	l := NewLogger(
+		&ParamsNewLogger{
+			WithTimestamp: timestamp.TimestampNil,
+		},
+	)
 
 	l.SetLogLevel(LevelINFO)
 

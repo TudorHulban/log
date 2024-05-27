@@ -3,27 +3,29 @@ package log
 import (
 	"os"
 	"testing"
+
+	"github.com/TudorHulban/log/timestamp"
 )
 
 func TestWarn(t *testing.T) {
 	l := NewLogger(
-		LevelDEBUG,
-		os.Stdout,
-		true,
+		&ParamsNewLogger{
+			LoggerLevel:   LevelDEBUG,
+			LoggerWriter:  os.Stdout,
+			WithTimestamp: timestamp.TimestampNano,
+		},
 	)
 
 	l.Warn("0")
 
 	l.Warnf("%d", 1)
-
-	// <-l.w.ChStop
 }
 
 func BenchmarkLogger_Warn(b *testing.B) {
-	logger := NewLogger(
-		LevelDEBUG,
-		nil,
-		false,
+	l := NewLogger(
+		&ParamsNewLogger{
+			WithTimestamp: timestamp.TimestampNil,
+		},
 	)
 
 	b.ResetTimer()
@@ -31,7 +33,7 @@ func BenchmarkLogger_Warn(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				logger.Warn("1")
+				l.Warn("1")
 			}
 		},
 	)

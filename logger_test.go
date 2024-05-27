@@ -1,12 +1,19 @@
 package log
 
-import "testing"
+import (
+	"os"
+	"testing"
+
+	"github.com/TudorHulban/log/timestamp"
+)
 
 func TestLogger(t *testing.T) {
 	l := NewLogger(
-		LevelDEBUG,
-		nil,
-		false,
+		&ParamsNewLogger{
+			LoggerLevel:   LevelDEBUG,
+			LoggerWriter:  os.Stdout,
+			WithTimestamp: timestamp.TimestampNano,
+		},
 	)
 
 	go l.PrintMessage("xxxx")

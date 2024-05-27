@@ -9,4 +9,4 @@ const (
 	LevelDEBUG = 3
 )
 
-var logLevels = [4]string{"NONE", "INFO", "WARN", "DEBUG"}
+var logLevels = [5]string{"NONE", "INFO", "WARN", "DEBUG", "ERROR"}

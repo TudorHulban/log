@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func (l *Logger) Info(args ...any) {
+func (l Logger) Info(args ...any) {
 	if l.logLevel == 0 {
 		return
 	}
@@ -18,7 +18,8 @@ func (l *Logger) Info(args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					logLevels[1] + delim + fmt.Sprint(args...) + "\n",
+					logLevels[1] + delim +
+					fmt.Sprint(args...) + "\n",
 			),
 		)
 
@@ -33,7 +34,7 @@ func (l *Logger) Info(args ...any) {
 	)
 }
 
-func (l *Logger) Infof(format string, args ...any) {
+func (l Logger) Infof(format string, args ...any) {
 	if l.logLevel == 0 {
 		return
 	}
@@ -45,7 +46,8 @@ func (l *Logger) Infof(format string, args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					logLevels[1] + delim + fmt.Sprintf(format, args...) + "\n",
+					logLevels[1] + delim +
+					fmt.Sprintf(format, args...) + "\n",
 			),
 		)
 
@@ -56,6 +58,34 @@ func (l *Logger) Infof(format string, args ...any) {
 		[]byte(
 			l.withTimestamp() + " " + logLevels[1] + delim +
 				fmt.Sprintf(format, args...) + "\n",
+		),
+	)
+}
+
+func (l Logger) Infow(msg string, keysAndValues ...any) {
+	if l.logLevel == 0 {
+		return
+	}
+
+	if l.withCaller {
+		_, file, line, _ := runtime.Caller(1)
+
+		l.localWriter.Write(
+			[]byte(
+				l.withTimestamp() + " " + msg + "\n" + file + " Line" + delim +
+					strconv.FormatInt(int64(line), 10) + " " +
+					logLevels[1] + delim +
+					fmt.Sprint(keysAndValues...) + "\n",
+			),
+		)
+
+		return
+	}
+
+	l.localWriter.Write(
+		[]byte(
+			l.withTimestamp() + " " + logLevels[1] + delim +
+				fmt.Sprint(keysAndValues...) + "\n",
 		),
 	)
 }

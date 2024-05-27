@@ -1,46 +1,35 @@
 package log
 
 import (
-	"bytes"
 	"os"
 	"testing"
+
+	"github.com/TudorHulban/log/timestamp"
 )
 
 func TestInfo(t *testing.T) {
 	l := NewLogger(
-		LevelDEBUG,
-		os.Stdout,
-		true,
+		&ParamsNewLogger{
+			LoggerLevel:  LevelDEBUG,
+			LoggerWriter: os.Stdout,
+
+			WithCaller:    true,
+			WithTimestamp: timestamp.TimestampYYYYMonth,
+		},
 	)
 
 	l.Info("0")
 
 	l.Infof("%d", 1)
-
-	// <-l.w.ChStop
 }
 
-func TestWithCheckInfo(t *testing.T) {
-	var output bytes.Buffer
-
-	l := NewLogger(
-		LevelDEBUG,
-		&output,
-		true,
-	)
-
-	l.Info("0")
-
-	l.Infof("%d", 1)
-
-	// <-l.w.ChStop
-}
-
+// profile
+// go test -bench=Benchmark_Info_Logger -run=^$ . -cpuprofile profile.out
 func Benchmark_Info_Logger(b *testing.B) {
-	logger := NewLogger(
-		LevelINFO,
-		nil,
-		false,
+	l := NewLogger(
+		&ParamsNewLogger{
+			WithTimestamp: timestamp.TimestampNil,
+		},
 	)
 
 	b.ResetTimer()
@@ -48,7 +37,7 @@ func Benchmark_Info_Logger(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				logger.Info("1")
+				l.Info("1")
 			}
 		},
 	)

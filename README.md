@@ -17,7 +17,6 @@ See external testing file.
 
 ```sh
 go test -bench=. -run=^$ . -cpuprofile profile.out
-go test -bench=Benchmark_Info_Logger -run=^$ . -cpuprofile profile.out
 go test -bench=Benchmark_Local_Print_Logger -run=^$ . -cpuprofile profile.out
 go test -bench=Benchmark_Local_TimestampNano_Logger -run=^$ . -cpuprofile profile.out
 go test -bench=. -benchmem -cpuprofile profile.out

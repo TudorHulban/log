@@ -47,7 +47,7 @@ func NewLogger(params *ParamsNewLogger) *Logger {
 	}
 
 	result.Printf(
-		"created logger, level %v.",
+		"created logger, level %v",
 		logLevels[params.LoggerLevel],
 	)
 

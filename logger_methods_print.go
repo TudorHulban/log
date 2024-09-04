@@ -32,9 +32,21 @@ func (l *Logger) Printw(msg string, args ...any) {
 
 func (l *Logger) Printf(format string, args ...any) {
 	l.localWriter.Write(
-		[]byte(
-			l.withTimestamp() + " " +
-				fmt.Sprintf(format, args...) + "\n",
+		ternary(
+			l.withJSON,
+
+			json(
+				&paramsJSONWCaller{
+					timestamp: l.withTimestamp(),
+					level:     l.labelInfo(),
+					message:   fmt.Sprintf(format, args...),
+				},
+			),
+
+			[]byte(
+				l.withTimestamp()+" "+
+					fmt.Sprintf(format, args...)+"\n",
+			),
 		),
 	)
 }

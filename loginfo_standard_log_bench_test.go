@@ -1,7 +1,7 @@
 package log
 
 import (
-	"bytes"
+	"io"
 	"testing"
 
 	"log"
@@ -9,7 +9,7 @@ import (
 
 func Benchmark_StandardLogger(b *testing.B) {
 	logger := log.New(
-		&bytes.Buffer{},
+		io.Discard,
 		"",
 		log.LstdFlags,
 	)

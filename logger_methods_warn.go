@@ -6,6 +6,15 @@ import (
 	"strconv"
 )
 
+func (l Logger) labelWarn() string {
+	return ternary(
+		l.withColor,
+
+		colorWarn(logLevels[LevelWARN]),
+		logLevels[LevelWARN],
+	)
+}
+
 func (l Logger) Warn(args ...any) {
 	if l.logLevel < LevelWARN {
 		return
@@ -18,7 +27,8 @@ func (l Logger) Warn(args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorWarn()(logLevels[2]) + delim +
+					l.labelWarn() +
+					delim +
 					fmt.Sprint(args...) + "\n",
 			),
 		)
@@ -28,7 +38,9 @@ func (l Logger) Warn(args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorWarn()(logLevels[2]) + delim +
+			l.withTimestamp() + " " +
+				l.labelWarn() +
+				delim +
 				fmt.Sprint(args...) + "\n",
 		),
 	)
@@ -46,7 +58,8 @@ func (l Logger) Warnf(format string, args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorWarn()(logLevels[2]) + delim +
+					l.labelWarn() +
+					delim +
 					fmt.Sprintf(format, args...) + "\n",
 			),
 		)
@@ -56,7 +69,9 @@ func (l Logger) Warnf(format string, args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorWarn()(logLevels[2]) + delim +
+			l.withTimestamp() + " " +
+				l.labelWarn() +
+				delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)
@@ -74,7 +89,8 @@ func (l Logger) Warnw(msg string, keysAndValues ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorWarn()(logLevels[2]) + delim +
+					l.labelWarn() +
+					delim +
 					fmt.Sprint(keysAndValues...) + "\n",
 			),
 		)
@@ -84,7 +100,9 @@ func (l Logger) Warnw(msg string, keysAndValues ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorWarn()(logLevels[2]) + delim +
+			l.withTimestamp() + " " +
+				l.labelWarn() +
+				delim +
 				fmt.Sprint(keysAndValues...) + "\n",
 		),
 	)

@@ -14,6 +14,7 @@ type Logger struct {
 
 	withTimestamp timestamp.Timestamp
 	withCaller    bool // for shorter form in case do not need caller file.
+	withColor     bool
 }
 
 type ParamsNewLogger struct {
@@ -22,6 +23,7 @@ type ParamsNewLogger struct {
 
 	WithTimestamp timestamp.Timestamp
 	WithCaller    bool
+	WithColor     bool
 }
 
 func NewLogger(params *ParamsNewLogger) Logger {
@@ -30,6 +32,7 @@ func NewLogger(params *ParamsNewLogger) Logger {
 
 		withCaller:    params.WithCaller,
 		withTimestamp: params.WithTimestamp,
+		withColor:     params.WithColor,
 
 		localWriter: params.LoggerWriter,
 	}

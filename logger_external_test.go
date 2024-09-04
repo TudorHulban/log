@@ -23,6 +23,7 @@ func TestExternal(t *testing.T) {
 
 				WithTimestamp: timestamp.TimestampNano,
 				WithCaller:    true,
+				WithColor:     true,
 			},
 		),
 	}

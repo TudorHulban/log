@@ -6,6 +6,15 @@ import (
 	"strconv"
 )
 
+func (l Logger) labelError() string {
+	return ternary(
+		l.withColor,
+
+		colorError(logLevels[LevelERROR]),
+		logLevels[LevelERROR],
+	)
+}
+
 func (l Logger) Error(args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
@@ -14,7 +23,8 @@ func (l Logger) Error(args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorDebug()(logLevels[4]) + delim +
+					l.labelError() +
+					delim +
 					fmt.Sprint(args...) + "\n",
 			),
 		)
@@ -24,7 +34,9 @@ func (l Logger) Error(args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorDebug()(logLevels[4]) + delim +
+			l.withTimestamp() + " " +
+				l.labelError() +
+				delim +
 				fmt.Sprint(args...) + "\n",
 		),
 	)
@@ -38,7 +50,8 @@ func (l Logger) Errorf(format string, args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorDebug()(logLevels[4]) + delim +
+					l.labelError() +
+					delim +
 					fmt.Sprintf(format, args...) + "\n",
 			),
 		)
@@ -48,7 +61,9 @@ func (l Logger) Errorf(format string, args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorDebug()(logLevels[4]) + delim +
+			l.withTimestamp() + " " +
+				l.labelError() +
+				delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)
@@ -62,7 +77,8 @@ func (l Logger) Errorw(format string, args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorDebug()(logLevels[4]) + delim +
+					l.labelError() +
+					delim +
 					fmt.Sprintf(format, args...) + "\n",
 			),
 		)
@@ -72,7 +88,9 @@ func (l Logger) Errorw(format string, args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorDebug()(logLevels[4]) + delim +
+			l.withTimestamp() + " " +
+				l.labelError() +
+				delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)

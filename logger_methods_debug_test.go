@@ -15,6 +15,7 @@ func TestDebug(t *testing.T) {
 
 			WithCaller:    true,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
+			WithColor:     true,
 		},
 	)
 

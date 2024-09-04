@@ -20,30 +20,30 @@ var TimestampNano = func() string {
 var TimestampYYYYMonth = func() string {
 	now := time.Now()
 
-	theMonth := "0" + strconv.Itoa(
+	month := "0" + strconv.Itoa(
 		int(now.Month()),
 	)
 
-	theHour := "0" + strconv.Itoa(
+	hour := "0" + strconv.Itoa(
 		int(now.Hour()),
 	)
 
-	theMin := "0" + strconv.Itoa(
+	minute := "0" + strconv.Itoa(
 		int(now.Minute()),
 	)
 
-	theSec := "0" + strconv.Itoa(
+	second := "0" + strconv.Itoa(
 		int(now.Second()),
 	)
 
-	theMilisec := "00" + strconv.Itoa(
-		int(now.Nanosecond()/1000000), //TODO: try now miliseconds
+	milisecond := "00" + strconv.Itoa(
+		int(now.Nanosecond()/1000000), // with miliseconds performance was worse
 	)
 
 	return strconv.Itoa(int(now.Year())) +
-		theMonth[len(theMonth)-2:] + " " +
-		theHour[len(theHour)-2:] + ":" +
-		theMin[len(theMin)-2:] + ":" +
-		theSec[len(theSec)-2:] + "." +
-		theMilisec[len(theMilisec)-3:]
+		month[len(month)-2:] + " " +
+		hour[len(hour)-2:] + ":" +
+		minute[len(minute)-2:] + ":" +
+		second[len(second)-2:] + "." +
+		milisecond[len(milisecond)-3:]
 }

@@ -6,6 +6,15 @@ import (
 	"strconv"
 )
 
+func (l Logger) labelDebug() string {
+	return ternary(
+		l.withColor,
+
+		colorDebug(logLevels[LevelDEBUG]),
+		logLevels[LevelDEBUG],
+	)
+}
+
 func (l Logger) Debug(args ...any) {
 	if l.logLevel < LevelDEBUG {
 		return
@@ -16,9 +25,11 @@ func (l Logger) Debug(args ...any) {
 
 		l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
+				l.withTimestamp() +
+					" " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorDebug()(logLevels[3]) + delim +
+					l.labelDebug() +
+					delim +
 					fmt.Sprint(args...) + "\n",
 			),
 		)
@@ -28,7 +39,10 @@ func (l Logger) Debug(args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorDebug()(logLevels[3]) + delim +
+			l.withTimestamp() +
+				" " +
+				l.labelDebug() +
+				delim +
 				fmt.Sprint(args...) + "\n",
 		),
 	)
@@ -44,9 +58,11 @@ func (l Logger) Debugf(format string, args ...any) {
 
 		l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
+				l.withTimestamp() +
+					" " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorDebug()(logLevels[3]) + delim +
+					l.labelDebug() +
+					delim +
 					fmt.Sprintf(format, args...) + "\n",
 			),
 		)
@@ -56,7 +72,9 @@ func (l Logger) Debugf(format string, args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + colorDebug()(logLevels[3]) + delim +
+			l.withTimestamp() + " " +
+				l.labelDebug() +
+				delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)
@@ -72,9 +90,11 @@ func (l Logger) Debugw(msg string, keysAndValues ...any) {
 
 		l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + msg + "\n" + file + " Line" + delim +
+				l.withTimestamp() +
+					" " + msg + "\n" + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					colorDebug()(logLevels[3]) + delim +
+					l.labelDebug() +
+					delim +
 					fmt.Sprint(keysAndValues...) + "\n",
 			),
 		)
@@ -84,8 +104,10 @@ func (l Logger) Debugw(msg string, keysAndValues ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + msg + "\n" +
-				colorDebug()(logLevels[3]) + delim +
+			l.withTimestamp() +
+				" " + msg + "\n" +
+				l.labelDebug() +
+				delim +
 				fmt.Sprint(keysAndValues...) + "\n",
 		),
 	)

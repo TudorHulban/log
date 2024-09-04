@@ -13,6 +13,7 @@ func TestWarn(t *testing.T) {
 			LoggerLevel:   LevelDEBUG,
 			LoggerWriter:  os.Stdout,
 			WithTimestamp: timestamp.TimestampNano,
+			WithColor:     true,
 		},
 	)
 

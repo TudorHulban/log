@@ -6,6 +6,15 @@ import (
 	"strconv"
 )
 
+func (l Logger) labelInfo() string {
+	return ternary(
+		l.withColor,
+
+		colorWarn(logLevels[LevelINFO]),
+		logLevels[LevelINFO],
+	)
+}
+
 func (l Logger) Info(args ...any) {
 	if l.logLevel == LevelNONE {
 		return
@@ -18,7 +27,8 @@ func (l Logger) Info(args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					logLevels[1] + delim +
+					l.labelInfo() +
+					delim +
 					fmt.Sprint(args...) + "\n",
 			),
 		)
@@ -28,7 +38,9 @@ func (l Logger) Info(args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + logLevels[1] + delim +
+			l.withTimestamp() + " " +
+				l.labelInfo() +
+				delim +
 				fmt.Sprint(args...) + "\n",
 		),
 	)
@@ -46,7 +58,8 @@ func (l Logger) Infof(format string, args ...any) {
 			[]byte(
 				l.withTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					logLevels[1] + delim +
+					l.labelInfo() +
+					delim +
 					fmt.Sprintf(format, args...) + "\n",
 			),
 		)
@@ -56,7 +69,9 @@ func (l Logger) Infof(format string, args ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + logLevels[1] + delim +
+			l.withTimestamp() + " " +
+				l.labelInfo() +
+				delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)

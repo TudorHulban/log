@@ -15,6 +15,7 @@ func TestInfo(t *testing.T) {
 
 			WithCaller:    true,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
+			WithColor:     true,
 		},
 	)
 

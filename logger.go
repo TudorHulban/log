@@ -9,24 +9,26 @@ import (
 type Level int8
 
 type Logger struct {
-	localWriter io.Writer
-	logLevel    int8
-
+	localWriter   io.Writer
 	withTimestamp timestamp.Timestamp
-	withCaller    bool // for shorter form in case do not need caller file.
-	withColor     bool
+
+	logLevel int8
+
+	withCaller bool // for shorter form in case do not need caller file.
+	withColor  bool
 }
 
 type ParamsNewLogger struct {
-	LoggerLevel  Level
-	LoggerWriter io.Writer
-
+	LoggerWriter  io.Writer
 	WithTimestamp timestamp.Timestamp
-	WithCaller    bool
-	WithColor     bool
+
+	LoggerLevel Level
+
+	WithCaller bool
+	WithColor  bool
 }
 
-func NewLogger(params *ParamsNewLogger) Logger {
+func NewLogger(params *ParamsNewLogger) *Logger {
 	result := Logger{
 		logLevel: convertLevel(params.LoggerLevel),
 
@@ -46,5 +48,5 @@ func NewLogger(params *ParamsNewLogger) Logger {
 		logLevels[params.LoggerLevel],
 	)
 
-	return result
+	return &result
 }

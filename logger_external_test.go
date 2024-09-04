@@ -4,22 +4,27 @@ package log_test
 
 import (
 	"bytes"
+	"os"
+	"sync"
 	"testing"
 
 	"github.com/TudorHulban/log"
 	"github.com/TudorHulban/log/timestamp"
+	"github.com/stretchr/testify/require"
 )
 
 type T struct {
-	l log.Logger
+	l *log.Logger
 }
 
-func TestExternal(t *testing.T) {
+func TestSimpleExternal(t *testing.T) {
+	var writer bytes.Buffer
+
 	obj := T{
 		l: log.NewLogger(
 			&log.ParamsNewLogger{
 				LoggerLevel:  log.LevelDEBUG,
-				LoggerWriter: new(bytes.Buffer),
+				LoggerWriter: &writer,
 
 				WithTimestamp: timestamp.TimestampNano,
 				WithCaller:    true,
@@ -28,8 +33,47 @@ func TestExternal(t *testing.T) {
 		),
 	}
 
-	obj.l.Info("xxx")
-	obj.l.Debug("yyy")
+	msg1 := "xxxxx"
 
-	// assert.Contains(t, output.String(), "xxx") - race condition
+	obj.l.Info(msg1)
+
+	require.Contains(t,
+		writer.String(),
+		msg1,
+	)
+}
+
+func TestMultiExternal(t *testing.T) {
+	writer := os.Stdout
+
+	obj := T{
+		l: log.NewLogger(
+			&log.ParamsNewLogger{
+				LoggerLevel:  log.LevelDEBUG,
+				LoggerWriter: writer,
+
+				WithTimestamp: timestamp.TimestampNano,
+				WithCaller:    true,
+				WithColor:     true,
+			},
+		),
+	}
+
+	var wg sync.WaitGroup
+
+	noWorkers := 5
+
+	wg.Add(noWorkers)
+
+	work := func(text any) {
+		obj.l.Info(text)
+
+		wg.Done()
+	}
+
+	for i := 0; i < noWorkers; i++ {
+		go work(i)
+	}
+
+	wg.Wait()
 }

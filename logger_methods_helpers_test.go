@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/TudorHulban/log/timestamp"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_GetLogLevel(t *testing.T) {
@@ -15,7 +15,7 @@ func Test_GetLogLevel(t *testing.T) {
 		},
 	)
 
-	assert.EqualValues(t,
+	require.EqualValues(t,
 		LevelDEBUG,
 		l.GetLogLevel(),
 	)
@@ -30,7 +30,7 @@ func Test_SetLogLevel(t *testing.T) {
 
 	l.SetLogLevel(LevelINFO)
 
-	assert.EqualValues(t,
+	require.EqualValues(t,
 		LevelINFO,
 		l.GetLogLevel(),
 	)

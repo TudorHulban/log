@@ -5,7 +5,8 @@ import (
 	"testing"
 )
 
-// Benchmark_Vanilla_Logger-16    	100000000	        10.07 ns/op	       1 B/op	       1 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// Benchmark_Vanilla_Logger_Parallel-16    	908120602	         1.316 ns/op	       1 B/op	       1 allocs/op
 func Benchmark_Vanilla_Logger_Parallel(b *testing.B) {
 	w := io.Discard
 
@@ -24,7 +25,8 @@ func Benchmark_Vanilla_Logger_Parallel(b *testing.B) {
 	)
 }
 
-// Benchmark_Vanilla_Logger-16    	24263023	        53.31 ns/op	       1 B/op	       1 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// Benchmark_Vanilla_Logger-16    	135784692	         8.801 ns/op	       1 B/op	       1 allocs/op
 func Benchmark_Vanilla_Logger(b *testing.B) {
 	w := io.Discard
 

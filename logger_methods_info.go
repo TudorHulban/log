@@ -99,7 +99,9 @@ func (l Logger) Infow(msg string, keysAndValues ...any) {
 
 	l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " + logLevels[1] + delim +
+			l.withTimestamp() + " " +
+				logLevels[1] +
+				delim +
 				fmt.Sprint(keysAndValues...) + "\n",
 		),
 	)

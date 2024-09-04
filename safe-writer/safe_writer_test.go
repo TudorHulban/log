@@ -3,36 +3,42 @@ package safewriter
 import (
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 )
 
 func TestSafeWriter(t *testing.T) {
-	w := NewSafeWriterInfo(os.Stdout)
-
-	go w.Writer.Listen()
+	w := NewSafeWriter(os.Stdout)
+	defer w.Stop()
 
 	numberWorkers := 5
 
-	worker := func(work <-chan int) {
-		w.Writer.write(
+	chPayload := make(chan int)
+	defer close(chPayload)
+
+	var wg sync.WaitGroup
+
+	worker := func() {
+		defer wg.Done()
+
+		w.Write(
 			[]byte(
 				strconv.Itoa(
-					<-work,
+					<-chPayload,
 				),
 			),
 		)
 	}
 
-	chPayload := make(chan int)
-	defer close(chPayload)
+	for ix := 0; ix < numberWorkers; ix++ {
+		wg.Add(1)
 
-	for range numberWorkers {
-		go worker(
-			chPayload,
-		)
+		go worker()
 	}
 
-	for ix := range numberWorkers {
+	for ix := 0; ix < numberWorkers; ix++ {
 		chPayload <- ix
 	}
+
+	wg.Wait()
 }

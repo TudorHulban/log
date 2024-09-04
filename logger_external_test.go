@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/TudorHulban/log"
+	safewriter "github.com/TudorHulban/log/safe-writer"
 	"github.com/TudorHulban/log/timestamp"
 	"github.com/stretchr/testify/require"
 )
@@ -18,13 +19,13 @@ type T struct {
 }
 
 func TestSimpleExternal(t *testing.T) {
-	var writer bytes.Buffer
+	var output bytes.Buffer
 
 	obj := T{
 		l: log.NewLogger(
 			&log.ParamsNewLogger{
 				LoggerLevel:  log.LevelDEBUG,
-				LoggerWriter: &writer,
+				LoggerWriter: &output,
 
 				WithTimestamp: timestamp.TimestampNano,
 				WithCaller:    true,
@@ -38,19 +39,19 @@ func TestSimpleExternal(t *testing.T) {
 	obj.l.Info(msg1)
 
 	require.Contains(t,
-		writer.String(),
+		output.String(),
 		msg1,
 	)
 }
 
 func TestMultiExternal(t *testing.T) {
-	writer := os.Stdout
+	output := safewriter.NewSafeWriter(os.Stdout)
 
 	obj := T{
 		l: log.NewLogger(
 			&log.ParamsNewLogger{
 				LoggerLevel:  log.LevelDEBUG,
-				LoggerWriter: writer,
+				LoggerWriter: output,
 
 				WithTimestamp: timestamp.TimestampNano,
 				WithCaller:    true,

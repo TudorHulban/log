@@ -5,44 +5,46 @@ import (
 )
 
 type SafeWriter struct {
-	chWrites chan []byte
-	chStop   chan struct{}
+	chWrite chan []byte
+	chStop  chan struct{}
 
 	writer io.Writer
 }
 
-type SafeWriterInfo struct {
-	Writer   *SafeWriter
-	ChWrites chan []byte
-	ChStop   chan struct{}
-}
+var _ io.Writer = &SafeWriter{}
 
-func NewSafeWriterInfo(writer io.Writer) *SafeWriterInfo {
-	w := SafeWriter{
-		writer:   writer,
-		chWrites: make(chan []byte, 100),
-		chStop:   make(chan struct{}),
+func NewSafeWriter(writer io.Writer) *SafeWriter {
+	result := SafeWriter{
+		writer: writer,
+
+		chWrite: make(chan []byte),
+		chStop:  make(chan struct{}),
 	}
 
-	return &SafeWriterInfo{
-		Writer:   &w,
-		ChWrites: w.chWrites,
-		ChStop:   w.chStop,
-	}
+	go result.listen()
+
+	return &result
 }
 
-func (safe *SafeWriter) Listen() {
+func (safe *SafeWriter) listen() {
 	for {
 		select {
 		case <-safe.chStop:
 			return
 
-		case msg := <-safe.chWrites:
+		case msg := <-safe.chWrite:
 			safe.writer.Write(msg)
 		}
 	}
 }
 
-func (safe *SafeWriter) write(payload []byte) {
-	safe.chWrites <- payload
+func (safe *SafeWriter) Write(payload []byte) (int, error) {
+	safe.chWrite <- payload
+
+	return len(payload),
+		nil
+}
+
+func (safe *SafeWriter) Stop() {
+	safe.chStop <- struct{}{}
 }

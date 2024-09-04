@@ -13,13 +13,14 @@ func TestInfo(t *testing.T) {
 			LoggerLevel:  LevelDEBUG,
 			LoggerWriter: os.Stdout,
 
-			WithCaller:    true,
+			// WithCaller:    true,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
 			WithColor:     true,
+			WithJSON:      true,
 		},
 	)
 
-	l.Info("0")
+	l.Info("some log message")
 
 	l.Infof("%d", 1)
 }

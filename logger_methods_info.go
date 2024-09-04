@@ -24,12 +24,26 @@ func (l Logger) Info(args ...any) {
 		_, file, line, _ := runtime.Caller(1)
 
 		l.localWriter.Write(
-			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
-					strconv.FormatInt(int64(line), 10) + " " +
-					l.labelInfo() +
-					delim +
-					fmt.Sprint(args...) + "\n",
+			ternary(
+				l.withJSON,
+
+				jsonWCaller(
+					&paramsJSONWCaller{
+						timestamp: l.withTimestamp(),
+						file:      file,
+						line:      line,
+						level:     l.labelInfo(),
+						message:   fmt.Sprint(args...),
+					},
+				),
+
+				[]byte(
+					l.withTimestamp()+" "+file+" Line"+delim+
+						strconv.FormatInt(int64(line), 10)+" "+
+						l.labelInfo()+
+						delim+
+						fmt.Sprint(args...)+"\n",
+				),
 			),
 		)
 
@@ -37,11 +51,23 @@ func (l Logger) Info(args ...any) {
 	}
 
 	l.localWriter.Write(
-		[]byte(
-			l.withTimestamp() + " " +
-				l.labelInfo() +
-				delim +
-				fmt.Sprint(args...) + "\n",
+		ternary(
+			l.withJSON,
+
+			json(
+				&paramsJSONWCaller{
+					timestamp: l.withTimestamp(),
+					level:     l.labelInfo(),
+					message:   fmt.Sprint(args...),
+				},
+			),
+
+			[]byte(
+				l.withTimestamp()+" "+
+					l.labelInfo()+
+					delim+
+					fmt.Sprint(args...)+"\n",
+			),
 		),
 	)
 }
@@ -55,12 +81,26 @@ func (l Logger) Infof(format string, args ...any) {
 		_, file, line, _ := runtime.Caller(1)
 
 		l.localWriter.Write(
-			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
-					strconv.FormatInt(int64(line), 10) + " " +
-					l.labelInfo() +
-					delim +
-					fmt.Sprintf(format, args...) + "\n",
+			ternary(
+				l.withJSON,
+
+				jsonWCaller(
+					&paramsJSONWCaller{
+						timestamp: l.withTimestamp(),
+						file:      file,
+						line:      line,
+						level:     l.labelInfo(),
+						message:   fmt.Sprintf(format, args...),
+					},
+				),
+
+				[]byte(
+					l.withTimestamp()+" "+file+" Line"+delim+
+						strconv.FormatInt(int64(line), 10)+" "+
+						l.labelInfo()+
+						delim+
+						fmt.Sprintf(format, args...)+"\n",
+				),
 			),
 		)
 
@@ -68,11 +108,23 @@ func (l Logger) Infof(format string, args ...any) {
 	}
 
 	l.localWriter.Write(
-		[]byte(
-			l.withTimestamp() + " " +
-				l.labelInfo() +
-				delim +
-				fmt.Sprintf(format, args...) + "\n",
+		ternary(
+			l.withJSON,
+
+			json(
+				&paramsJSONWCaller{
+					timestamp: l.withTimestamp(),
+					level:     l.labelInfo(),
+					message:   fmt.Sprintf(format, args...),
+				},
+			),
+
+			[]byte(
+				l.withTimestamp()+" "+
+					l.labelInfo()+
+					delim+
+					fmt.Sprintf(format, args...)+"\n",
+			),
 		),
 	)
 }

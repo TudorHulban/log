@@ -15,7 +15,7 @@ func Benchmark_Vanilla_Logger_Parallel(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				w.Write(
+				_, _ = w.Write(
 					[]byte(
 						"1",
 					),
@@ -33,7 +33,7 @@ func Benchmark_Vanilla_Logger(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		w.Write(
+		_, _ = w.Write(
 			[]byte(
 				"1",
 			),

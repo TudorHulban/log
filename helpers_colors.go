@@ -32,6 +32,7 @@ Colour Styles
 func colorWarn(word string) string {
 	return fmt.Sprintf(
 		"%s%v\x1b[0m",
+
 		"\x1b[1;33m",
 		word,
 	)
@@ -40,6 +41,7 @@ func colorWarn(word string) string {
 func colorDebug(word string) string {
 	return fmt.Sprintf(
 		"%s%v\x1b[0m",
+
 		"\x1b[1;34m",
 		word,
 	)
@@ -48,6 +50,7 @@ func colorDebug(word string) string {
 func colorError(word string) string {
 	return fmt.Sprintf(
 		"%s%v\x1b[0m",
+
 		"\x1b[1;31m",
 		word,
 	)
@@ -56,6 +59,7 @@ func colorError(word string) string {
 func colorInfo(word string) string {
 	return fmt.Sprintf(
 		"%s%v\x1b[0m",
+
 		"\x1b[1;32m",
 		word,
 	)

@@ -23,7 +23,7 @@ func (l Logger) Debug(args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.localWriter.Write(
+		_, _ = l.localWriter.Write(
 			[]byte(
 				l.withTimestamp() +
 					" " + file + " Line" + delim +
@@ -37,7 +37,7 @@ func (l Logger) Debug(args ...any) {
 		return
 	}
 
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() +
 				" " +
@@ -56,7 +56,7 @@ func (l Logger) Debugf(format string, args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.localWriter.Write(
+		_, _ = l.localWriter.Write(
 			[]byte(
 				l.withTimestamp() +
 					" " + file + " Line" + delim +
@@ -70,7 +70,7 @@ func (l Logger) Debugf(format string, args ...any) {
 		return
 	}
 
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() + " " +
 				l.labelDebug() +
@@ -88,7 +88,7 @@ func (l Logger) Debugw(msg string, keysAndValues ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.localWriter.Write(
+		_, _ = l.localWriter.Write(
 			[]byte(
 				l.withTimestamp() +
 					" " + msg + "\n" + file + " Line" + delim +
@@ -102,7 +102,7 @@ func (l Logger) Debugw(msg string, keysAndValues ...any) {
 		return
 	}
 
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() +
 				" " + msg + "\n" +

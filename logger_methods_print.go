@@ -5,7 +5,7 @@ import (
 )
 
 func (l *Logger) PrintMessage(msg string) {
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() + " " + msg + "\n",
 		),
@@ -13,7 +13,7 @@ func (l *Logger) PrintMessage(msg string) {
 }
 
 func (l *Logger) Print(args ...any) {
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() + " " +
 				fmt.Sprint(args...) + "\n",
@@ -22,7 +22,7 @@ func (l *Logger) Print(args ...any) {
 }
 
 func (l *Logger) Printw(msg string, args ...any) {
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() + " " + msg + "\n" +
 				fmt.Sprint(args...) + "\n",
@@ -31,7 +31,7 @@ func (l *Logger) Printw(msg string, args ...any) {
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		ternary(
 			l.withJSON,
 

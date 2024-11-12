@@ -1,8 +1,8 @@
 # LogInfo
 
-Do not use. Race conditions currently.
+Simple logger with colors or with JSON.  
+Tested for race conditions.  
 
-Simple logger.  
 Levels:  
 0 - none,  
 1 - info,  
@@ -39,13 +39,13 @@ go tool pprof profile.out
 ```go
 // WithLogger is a logger interface that output logs with a message and key-value pairs.
 type WithLogger interface {
-	Tracew(msg string, keysAndValues ...any)
-	Debugw(msg string, keysAndValues ...any)
-	Infow(msg string, keysAndValues ...any)
-	Warnw(msg string, keysAndValues ...any)
-	Errorw(msg string, keysAndValues ...any)
-	Fatalw(msg string, keysAndValues ...any)
-	Panicw(msg string, keysAndValues ...any)
+    Tracew(msg string, keysAndValues ...any)
+    Debugw(msg string, keysAndValues ...any)
+    Infow(msg string, keysAndValues ...any)
+    Warnw(msg string, keysAndValues ...any)
+    Errorw(msg string, keysAndValues ...any)
+    Fatalw(msg string, keysAndValues ...any)
+    Panicw(msg string, keysAndValues ...any)
 }
 ```
 

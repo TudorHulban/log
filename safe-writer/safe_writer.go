@@ -33,7 +33,7 @@ func (safe *SafeWriter) listen() {
 			return
 
 		case msg := <-safe.chWrite:
-			safe.writer.Write(msg)
+			_, _ = safe.writer.Write(msg)
 		}
 	}
 }

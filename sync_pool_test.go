@@ -15,7 +15,7 @@ func TestPool(t *testing.T) {
 
 	buf1.WriteString("x")
 
-	buf1.WriteTo(os.Stdout)
+	_, _ = buf1.WriteTo(os.Stdout)
 
 	require.NoError(t,
 		p.Put(buf1),
@@ -23,7 +23,7 @@ func TestPool(t *testing.T) {
 
 	buf2 := p.Get()
 
-	buf2.WriteTo(os.Stdout)
+	_, _ = buf2.WriteTo(os.Stdout)
 
 	require.NoError(t,
 		p.Put(buf2),

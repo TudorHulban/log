@@ -10,7 +10,7 @@ func (l Logger) labelInfo() string {
 	return ternary(
 		l.withColor,
 
-		colorWarn(logLevels[LevelINFO]),
+		colorInfo(logLevels[LevelINFO]),
 		logLevels[LevelINFO],
 	)
 }
@@ -23,7 +23,7 @@ func (l Logger) Info(args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.localWriter.Write(
+		_, _ = l.localWriter.Write(
 			ternary(
 				l.withJSON,
 
@@ -50,7 +50,7 @@ func (l Logger) Info(args ...any) {
 		return
 	}
 
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		ternary(
 			l.withJSON,
 
@@ -80,7 +80,7 @@ func (l Logger) Infof(format string, args ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.localWriter.Write(
+		_, _ = l.localWriter.Write(
 			ternary(
 				l.withJSON,
 
@@ -107,7 +107,7 @@ func (l Logger) Infof(format string, args ...any) {
 		return
 	}
 
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		ternary(
 			l.withJSON,
 
@@ -137,7 +137,7 @@ func (l Logger) Infow(msg string, keysAndValues ...any) {
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
-		l.localWriter.Write(
+		_, _ = l.localWriter.Write(
 			[]byte(
 				l.withTimestamp() + " " + msg + "\n" + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
@@ -149,7 +149,7 @@ func (l Logger) Infow(msg string, keysAndValues ...any) {
 		return
 	}
 
-	l.localWriter.Write(
+	_, _ = l.localWriter.Write(
 		[]byte(
 			l.withTimestamp() + " " +
 				logLevels[1] +

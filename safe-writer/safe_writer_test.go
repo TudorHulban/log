@@ -21,7 +21,7 @@ func TestSafeWriter(t *testing.T) {
 	worker := func() {
 		defer wg.Done()
 
-		w.Write(
+		_, _ = w.Write(
 			[]byte(
 				strconv.Itoa(
 					<-chPayload,

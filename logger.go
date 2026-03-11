@@ -3,7 +3,7 @@ package log
 import (
 	"io"
 
-	"github.com/TudorHulban/log/timestamp"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 type Level int8

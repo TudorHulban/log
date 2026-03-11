@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TudorHulban/log"
-	"github.com/TudorHulban/log/timestamp"
 	fiberlog "github.com/gofiber/fiber/v2/log"
+	"github.com/tudorhulban/log"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestFiber(t *testing.T) {

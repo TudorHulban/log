@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TudorHulban/log/timestamp"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestMix(t *testing.T) {
@@ -19,5 +19,6 @@ func TestMix(t *testing.T) {
 	go l.Print("0")
 	go l.Info("1")
 	go l.Warn("2")
+
 	l.Debug("3")
 }

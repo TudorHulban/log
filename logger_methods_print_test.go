@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TudorHulban/log/timestamp"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestPrint(t *testing.T) {

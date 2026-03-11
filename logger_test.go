@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TudorHulban/log/timestamp"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestLogger(t *testing.T) {

@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/TudorHulban/log"
-	safewriter "github.com/TudorHulban/log/safe-writer"
-	"github.com/TudorHulban/log/timestamp"
 	"github.com/stretchr/testify/require"
+	"github.com/tudorhulban/log"
+	safewriter "github.com/tudorhulban/log/safe-writer"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 type T struct {
@@ -72,8 +72,8 @@ func TestMultiExternal(t *testing.T) {
 		wg.Done()
 	}
 
-	for i := 0; i < noWorkers; i++ {
-		go work(i)
+	for ix := range noWorkers {
+		go work(ix)
 	}
 
 	wg.Wait()

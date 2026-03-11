@@ -30,13 +30,13 @@ func TestSafeWriter(t *testing.T) {
 		)
 	}
 
-	for ix := 0; ix < numberWorkers; ix++ {
+	for range numberWorkers {
 		wg.Add(1)
 
 		go worker()
 	}
 
-	for ix := 0; ix < numberWorkers; ix++ {
+	for ix := range numberWorkers {
 		chPayload <- ix
 	}
 

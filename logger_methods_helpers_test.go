@@ -3,8 +3,8 @@ package log
 import (
 	"testing"
 
-	"github.com/TudorHulban/log/timestamp"
 	"github.com/stretchr/testify/require"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 func Test_GetLogLevel(t *testing.T) {

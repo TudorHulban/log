@@ -19,5 +19,6 @@ func TestMix(t *testing.T) {
 	go l.Print("0")
 	go l.Info("1")
 	go l.Warn("2")
+
 	l.Debug("3")
 }

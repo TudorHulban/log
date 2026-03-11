@@ -25,25 +25,25 @@ var TimestampYYYYMonth = func() string {
 	)
 
 	hour := "0" + strconv.Itoa(
-		int(now.Hour()),
+		(now.Hour()),
 	)
 
 	minute := "0" + strconv.Itoa(
-		int(now.Minute()),
+		(now.Minute()),
 	)
 
 	second := "0" + strconv.Itoa(
-		int(now.Second()),
+		(now.Second()),
 	)
 
-	milisecond := "00" + strconv.Itoa(
-		int(now.Nanosecond()/1000000), // with miliseconds performance was worse
+	millisecond := "00" + strconv.Itoa(
+		(now.Nanosecond() / 1000000), // with miliseconds performance was worse
 	)
 
-	return strconv.Itoa(int(now.Year())) +
+	return strconv.Itoa(now.Year()) +
 		month[len(month)-2:] + " " +
 		hour[len(hour)-2:] + ":" +
 		minute[len(minute)-2:] + ":" +
 		second[len(second)-2:] + "." +
-		milisecond[len(milisecond)-3:]
+		millisecond[len(millisecond)-3:]
 }

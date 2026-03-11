@@ -5,13 +5,13 @@ import (
 	"os"
 )
 
-func (l Logger) Panic(args ...any) {
+func (Logger) Panic(args ...any) {
 	panic(
 		fmt.Sprint(args...),
 	)
 }
 
-func (l Logger) Panicf(format string, args ...any) {
+func (Logger) Panicf(format string, args ...any) {
 	panic(
 		fmt.Sprintf(format, args...),
 	)

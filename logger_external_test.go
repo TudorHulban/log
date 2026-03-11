@@ -72,8 +72,8 @@ func TestMultiExternal(t *testing.T) {
 		wg.Done()
 	}
 
-	for i := 0; i < noWorkers; i++ {
-		go work(i)
+	for ix := range noWorkers {
+		go work(ix)
 	}
 
 	wg.Wait()

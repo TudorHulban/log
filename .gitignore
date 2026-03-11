@@ -1,4 +1,8 @@
+.linting
+
+*.pprof
 *.out
 *.pdf
+*.test
 
 log.test

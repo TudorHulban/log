@@ -5,48 +5,58 @@ import (
 )
 
 func (l *Logger) PrintMessage(msg string) {
-	_, _ = l.localWriter.Write(
-		[]byte(
-			l.withTimestamp() + " " + msg + "\n",
-		),
-	)
+	var arr [256]byte
+	buf := arr[:0] // stack-allocated, no heap alloc
+
+	buf = append(buf, l.fnTimestamp(buf)...)
+	buf = append(buf, ' ')
+	buf = append(buf, []byte(msg)...)
+	buf = append(buf, '\n')
+
+	_, _ = l.localWriter.Write(buf)
 }
 
 func (l *Logger) Print(args ...any) {
-	_, _ = l.localWriter.Write(
-		[]byte(
-			l.withTimestamp() + " " +
-				fmt.Sprint(args...) + "\n",
-		),
-	)
+	var arr [256]byte
+	buf := arr[:0] // stack-allocated, no heap alloc
+
+	buf = append(buf, l.fnTimestamp(buf)...)
+	buf = append(buf, ' ')
+	buf = append(buf, fmt.Sprint(args...)...)
+	buf = append(buf, '\n')
+
+	_, _ = l.localWriter.Write(buf)
 }
 
 func (l *Logger) Printw(msg string, args ...any) {
-	_, _ = l.localWriter.Write(
-		[]byte(
-			l.withTimestamp() + " " + msg + "\n" +
-				fmt.Sprint(args...) + "\n",
-		),
-	)
+	var arr [256]byte
+	buf := arr[:0] // stack-allocated, no heap alloc
+
+	buf = append(buf, l.fnTimestamp(buf)...)
+	buf = append(buf, ' ')
+	buf = append(buf, []byte(msg)...)
+	buf = append(buf, '\n')
+	buf = append(buf, fmt.Sprint(args...)...)
+	buf = append(buf, '\n')
+
+	_, _ = l.localWriter.Write(buf)
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	_, _ = l.localWriter.Write(
-		ternary(
-			l.withJSON,
+	if l.withJSON {
+		buf := make([]byte, 0, 256)
+		buf = l.appendJSON(buf, l.fnTimestamp(buf), l.labelInfo(), format, args...)
 
-			json(
-				&paramsJSONWCaller{
-					timestamp: l.withTimestamp(),
-					level:     l.labelInfo(),
-					message:   fmt.Sprintf(format, args...),
-				},
-			),
+		_, _ = l.localWriter.Write(buf)
+	} else {
+		var arr [256]byte
+		buf := arr[:0] // stack-allocated, no heap alloc
 
-			[]byte(
-				l.withTimestamp()+" "+
-					fmt.Sprintf(format, args...)+"\n",
-			),
-		),
-	)
+		buf = append(buf, l.fnTimestamp(buf)...)
+		buf = append(buf, ' ')
+		buf = fmt.Appendf(buf, format, args...)
+		buf = append(buf, '\n')
+
+		_, _ = l.localWriter.Write(buf)
+	}
 }

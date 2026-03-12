@@ -25,7 +25,7 @@ func (l Logger) Debug(args ...any) {
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() +
+				l.fnTimestamp() +
 					" " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					l.labelDebug() +
@@ -39,7 +39,7 @@ func (l Logger) Debug(args ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() +
+			l.fnTimestamp() +
 				" " +
 				l.labelDebug() +
 				delim +
@@ -58,7 +58,7 @@ func (l Logger) Debugf(format string, args ...any) {
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() +
+				l.fnTimestamp() +
 					" " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					l.labelDebug() +
@@ -72,7 +72,7 @@ func (l Logger) Debugf(format string, args ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " +
+			l.fnTimestamp() + " " +
 				l.labelDebug() +
 				delim +
 				fmt.Sprintf(format, args...) + "\n",
@@ -90,7 +90,7 @@ func (l Logger) Debugw(msg string, keysAndValues ...any) {
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() +
+				l.fnTimestamp() +
 					" " + msg + "\n" + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					l.labelDebug() +
@@ -104,7 +104,7 @@ func (l Logger) Debugw(msg string, keysAndValues ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() +
+			l.fnTimestamp() +
 				" " + msg + "\n" +
 				l.labelDebug() +
 				delim +

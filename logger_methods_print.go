@@ -6,6 +6,7 @@ import (
 
 func (l *Logger) PrintMessage(msg string) {
 	var arr [256]byte
+
 	buf := arr[:0] // stack-allocated, no heap alloc
 
 	buf = append(buf, l.fnTimestamp(buf)...)
@@ -18,6 +19,7 @@ func (l *Logger) PrintMessage(msg string) {
 
 func (l *Logger) Print(args ...any) {
 	var arr [256]byte
+
 	buf := arr[:0] // stack-allocated, no heap alloc
 
 	buf = append(buf, l.fnTimestamp(buf)...)
@@ -30,6 +32,7 @@ func (l *Logger) Print(args ...any) {
 
 func (l *Logger) Printw(msg string, args ...any) {
 	var arr [256]byte
+
 	buf := arr[:0] // stack-allocated, no heap alloc
 
 	buf = append(buf, l.fnTimestamp(buf)...)
@@ -43,20 +46,18 @@ func (l *Logger) Printw(msg string, args ...any) {
 }
 
 func (l *Logger) Printf(format string, args ...any) {
+	l.buf = l.buf[:0] // reset without allocating
+
 	if l.withJSON {
-		buf := make([]byte, 0, 256)
-		buf = l.appendJSON(buf, l.fnTimestamp(buf), l.labelInfo(), format, args...)
+		l.buf = l.appendJSON(l.buf, l.fnTimestamp(l.buf), l.labelInfo(), format, args...)
 
-		_, _ = l.localWriter.Write(buf)
+		_, _ = l.localWriter.Write(l.buf)
 	} else {
-		var arr [256]byte
-		buf := arr[:0] // stack-allocated, no heap alloc
+		l.buf = append(l.buf, l.fnTimestamp(l.buf)...)
+		l.buf = append(l.buf, ' ')
+		l.buf = fmt.Appendf(l.buf, format, args...)
+		l.buf = append(l.buf, '\n')
 
-		buf = append(buf, l.fnTimestamp(buf)...)
-		buf = append(buf, ' ')
-		buf = fmt.Appendf(buf, format, args...)
-		buf = append(buf, '\n')
-
-		_, _ = l.localWriter.Write(buf)
+		_, _ = l.localWriter.Write(l.buf)
 	}
 }

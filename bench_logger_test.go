@@ -6,7 +6,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkLogger-16    	 5513952	       218.3 ns/op	     288 B/op	       3 allocs/op
+// BenchmarkLogger-16    	 8522778	       145.4 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger(b *testing.B) {
 	b.ReportAllocs()
 

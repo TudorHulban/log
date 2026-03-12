@@ -15,6 +15,9 @@ type Logger struct {
 
 	logLevel int8
 
+	// scratch buffer reused on every log call
+	buf []byte
+
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool
 	withJSON   bool
@@ -41,6 +44,8 @@ func NewLogger(params *ParamsNewLogger) *Logger {
 		withJSON:    params.WithJSON,
 
 		localWriter: params.LoggerWriter,
+
+		buf: make([]byte, 0, 256),
 	}
 
 	if params.LoggerWriter == nil {
@@ -59,9 +64,9 @@ func NewLogger(params *ParamsNewLogger) *Logger {
 	return &result
 }
 
-func (l *Logger) appendJSON(buf, timestamp []byte, level, format string, args ...any) []byte {
+func (*Logger) appendJSON(buf, ts []byte, level, format string, args ...any) []byte {
 	buf = append(buf, `{"timestamp":"`...)
-	buf = append(buf, timestamp...)
+	buf = append(buf, ts...)
 	buf = append(buf, `","level":"`...)
 	buf = append(buf, level...)
 	buf = append(buf, `","message":"`...)

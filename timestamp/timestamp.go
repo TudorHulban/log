@@ -11,23 +11,13 @@ var TimestampNil = func(buf []byte) []byte {
 	return nil
 }
 
+// TimestampNano provides true nanosecond‑accurate timestamps.
+// On Linux time.Now() costs ~40–70 ns by itself.
+// UnixNano() + AppendInt adds ~10–15 ns.
+//
+// Due to above, cost is around 150 ns.
 func TimestampNano(buf []byte) []byte {
 	return strconv.AppendInt(buf[:0], time.Now().UnixNano(), 10)
-}
-
-func TimestampNano2() []byte {
-	// 20 bytes is enough for any int64 in base 10
-	var b [20]byte
-	n := time.Now().UnixNano()
-
-	i := len(b)
-	for n > 0 {
-		i--
-		b[i] = byte('0' + n%10)
-		n /= 10
-	}
-
-	return b[i:]
 }
 
 func TimestampYYYYMonth(buf []byte) string {

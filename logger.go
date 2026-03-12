@@ -13,10 +13,10 @@ type Logger struct {
 	localWriter io.Writer
 	fnTimestamp timestamp.Timestamp
 
-	logLevel int8
-
 	// scratch buffer reused on every log call
 	buf []byte
+
+	logLevel int8
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool

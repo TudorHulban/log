@@ -20,33 +20,14 @@ func TimestampNano(buf []byte) []byte {
 	return strconv.AppendInt(buf[:0], time.Now().UnixNano(), 10)
 }
 
-func TimestampYYYYMonth(buf []byte) string {
-	now := time.Now()
+func TimestampStandard(buf []byte) []byte {
+	updateTimeCache()
 
-	month := "0" + strconv.Itoa(
-		int(now.Month()),
-	)
+	return append(buf, tc.stdBuf[:tc.stdLen]...)
+}
 
-	hour := "0" + strconv.Itoa(
-		(now.Hour()),
-	)
+func TimestampYYYYMonth(buf []byte) []byte {
+	updateTimeCache()
 
-	minute := "0" + strconv.Itoa(
-		(now.Minute()),
-	)
-
-	second := "0" + strconv.Itoa(
-		(now.Second()),
-	)
-
-	millisecond := "00" + strconv.Itoa(
-		(now.Nanosecond() / 1000000), // with miliseconds performance was worse
-	)
-
-	return strconv.Itoa(now.Year()) +
-		month[len(month)-2:] + " " +
-		hour[len(hour)-2:] + ":" +
-		minute[len(minute)-2:] + ":" +
-		second[len(second)-2:] + "." +
-		millisecond[len(millisecond)-3:]
+	return append(buf, tc.customBuf[:tc.customLen]...)
 }

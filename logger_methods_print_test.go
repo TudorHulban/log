@@ -8,7 +8,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-func TestPrint(t *testing.T) {
+func TestNanoPrint(t *testing.T) {
 	l := NewLogger(
 		&ParamsNewLogger{
 			LoggerLevel:   LevelDEBUG,
@@ -33,38 +33,27 @@ func TestPrint(t *testing.T) {
 	time.Sleep(1 * time.Second)
 }
 
-func Benchmark_Print_Logger(b *testing.B) {
+func TestYYYYPrint(t *testing.T) {
 	l := NewLogger(
 		&ParamsNewLogger{
-			WithTimestamp: timestamp.TimestampNil,
+			LoggerLevel:   LevelDEBUG,
+			LoggerWriter:  os.Stdout,
+			WithTimestamp: timestamp.TimestampYYYYMonth,
 		},
 	)
 
-	b.ResetTimer()
+	go l.PrintMessage("xxx1")
+	go l.PrintMessage("xxx2")
+	go l.PrintMessage("xxx3")
 
-	b.RunParallel(
-		func(pb *testing.PB) {
-			for pb.Next() {
-				l.PrintMessage("1")
-			}
+	l.Printw(
+		"message:",
+		[]string{
+			"x1",
+			"x2",
 		},
-	)
-}
-
-func Benchmark_Local_TimestampNano_Logger(b *testing.B) {
-	logger := NewLogger(
-		&ParamsNewLogger{
-			WithTimestamp: timestamp.TimestampNano,
-		},
+		"x3",
 	)
 
-	b.ResetTimer()
-
-	b.RunParallel(
-		func(pb *testing.PB) {
-			for pb.Next() {
-				logger.Print("1")
-			}
-		},
-	)
+	time.Sleep(1 * time.Second)
 }

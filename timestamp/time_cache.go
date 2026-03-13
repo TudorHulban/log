@@ -6,7 +6,7 @@ import (
 )
 
 type timeCache struct {
-	ms int64
+	currentTimestamp int64
 
 	// your custom format
 	customBuf [32]byte
@@ -21,13 +21,13 @@ var tc timeCache
 
 func updateTimeCache() {
 	now := time.Now()
-	ms := now.UnixNano() / 1e6
+	nowTimestamp := now.UnixNano() / 1e6
 
-	if ms == tc.ms {
+	if nowTimestamp == tc.currentTimestamp { // update timestamp every millisecond. TTL = 1 millisecond.
 		return
 	}
 
-	tc.ms = ms
+	tc.currentTimestamp = nowTimestamp
 
 	year, month, day := now.Date()
 	hour, minute, sec := now.Clock()

@@ -59,14 +59,20 @@ func NewManager(arenaSize int64, w io.Writer) *Manager {
 // StartConsumer launches the consumer loop in a goroutine.
 // The caller provides the flush function, which receives the
 // raw bytes of each sealed arena.
-func (m *Manager) StartConsumer(ctx context.Context) {
-	go m.ConsumerLoop(
-		ctx,
-		func(a *Arena, used int64) {
-			// Delegate to flushArena for the actual write.
-			m.flushArena(a)
-		},
-	)
+func (m *Manager) StartConsumer(ctx context.Context) <-chan struct{} {
+	chSignalStarted := make(chan struct{})
+
+	go func() {
+		defer close(chSignalStarted)
+		m.ConsumerLoop(
+			ctx,
+			func(a *Arena, used int64) {
+				m.flushArena(a)
+			},
+		)
+	}()
+
+	return chSignalStarted
 }
 
 // Write attempts to write n bytes into the active arena.

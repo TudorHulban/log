@@ -15,6 +15,7 @@ import (
 // Verifies: Shutdown happens promptly, no hangs
 func TestContextCancelDuringWait(t *testing.T) {
 	var out bytes.Buffer
+
 	m := NewManager(1024, &out)
 
 	// Start a write that never completes
@@ -32,6 +33,7 @@ func TestContextCancelDuringWait(t *testing.T) {
 	defer cancel()
 
 	done := make(chan struct{})
+
 	go func() {
 		m.ConsumerLoop(ctx, func(a *Arena, used int64) {
 			m.flushArena(a)

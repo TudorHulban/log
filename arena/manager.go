@@ -64,6 +64,7 @@ func (m *Manager) StartConsumer(ctx context.Context) <-chan struct{} {
 
 	go func() {
 		defer close(chSignalStarted)
+
 		m.ConsumerLoop(
 			ctx,
 			func(a *Arena, used int64) {
@@ -93,35 +94,6 @@ func (m *Manager) Write(n int64, fn func(dst []byte)) bool {
 	m.EndWrite(r)
 
 	return true
-}
-
-// rotate seals the current active arena and switches to the other one.
-// It returns the sealed arena (the one that was active before the switch).
-//
-// This function does NOT wait for writers to drain and does NOT flush.
-// Waiting for writers and flushing are handled by the consumer logic.
-func (m *Manager) rotate() *Arena {
-	// Load current active arena.
-	current := m.active.Load()
-	if current == nil {
-		return nil
-	}
-
-	// Determine the next arena.
-	var next *Arena
-	if current == m.a0 {
-		next = m.a1
-	} else {
-		next = m.a0
-	}
-
-	// Mark current as sealed.
-	m.sealed.Store(current)
-
-	// Switch active to the next arena.
-	m.active.Store(next)
-
-	return current
 }
 
 // Active returns the currently active arena.
@@ -194,68 +166,14 @@ func (m *Manager) resetArena(a *Arena) {
 	a.rollback.Store(0)
 }
 
-// tick performs one consumer iteration:
-// - checks if active arena should be sealed
-// - rotates if needed
-// - drains writers
-// - flushes sealed arena
-func (m *Manager) tick(flush func(a *Arena, used int64)) {
-	active := m.active.Load()
-	if active == nil {
-		return
-	}
-
-	// Check if we should seal the active arena.
-	// Threshold logic is implemented elsewhere.
-	if !m.shouldSeal(active) {
-		return
-	}
-
-	// Rotate: active becomes sealed, other becomes active.
-	sealed := m.rotate()
-	if sealed == nil {
-		return
-	}
-
-	// Wait for writers to finish.
-	m.waitForWriters(sealed)
-
-	// Flush sealed arena.
-	used := sealed.cursor.Load()
-	if used > 0 {
-		flush(sealed, used)
-	}
-
-	// Reset sealed arena for reuse.
-	m.resetArena(sealed)
-}
-
 // waitForWriters blocks until writers-in-flight reaches zero.
 // Context cancellation is handled by the caller.
-func (m *Manager) waitForWriters(a *Arena) {
+func (*Manager) waitForWriters(a *Arena) {
 	for {
 		if a.writers.Load() == 0 {
 			return
 		}
+
 		time.Sleep(1 * time.Microsecond)
-	}
-}
-
-// flushOnShutdown flushes both arenas best-effort.
-func (m *Manager) flushOnShutdown(flush func(a *Arena, used int64)) {
-	// Flush active arena.
-	if a := m.active.Load(); a != nil {
-		used := a.cursor.Load()
-		if used > 0 {
-			flush(a, used)
-		}
-	}
-
-	// Flush sealed arena.
-	if s := m.sealed.Load(); s != nil {
-		used := s.cursor.Load()
-		if used > 0 {
-			flush(s, used)
-		}
 	}
 }

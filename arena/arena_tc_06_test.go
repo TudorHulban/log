@@ -12,7 +12,7 @@ import (
 // Test: Producer reserves space exactly as consumer seals
 // Verifies: No writes to arena after it's sealed
 func TestReserveVsSealRace(t *testing.T) {
-	m := NewManager(1024, &bytes.Buffer{})
+	manager := NewManager(1024, &bytes.Buffer{})
 
 	// Channel to coordinate race
 	ready := make(chan struct{})
@@ -23,15 +23,18 @@ func TestReserveVsSealRace(t *testing.T) {
 		<-ready // Wait for signal
 
 		// Attempt to reserve
-		r, ok := m.BeginWrite(100)
+		r, ok := manager.BeginWrite(100)
 		if ok {
 			// If we got a region, it must be in active arena
-			if r.a != m.active.Load() {
+			if r.a != manager.active.Load() {
 				done <- false
+
 				return
 			}
-			m.EndWrite(r)
+
+			manager.EndWrite(r)
 		}
+
 		done <- true
 	}()
 
@@ -40,7 +43,7 @@ func TestReserveVsSealRace(t *testing.T) {
 		<-ready // Wait for same signal
 
 		// Rotate arenas
-		sealed := m.rotate()
+		sealed := manager.rotate()
 		_ = sealed
 	}()
 
@@ -51,9 +54,9 @@ func TestReserveVsSealRace(t *testing.T) {
 	require.True(t, <-done)
 
 	// Verify invariant: No writes to sealed arena
-	sealed := m.sealed.Load()
+	sealed := manager.sealed.Load()
 	if sealed != nil {
 		writers := sealed.writers.Load()
-		require.True(t, writers == 0 || m.active.Load() == sealed)
+		require.True(t, writers == 0 || manager.active.Load() == sealed)
 	}
 }

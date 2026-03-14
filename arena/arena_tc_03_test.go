@@ -15,59 +15,72 @@ import (
 // Verifies: In-flight writes complete successfully, no writes to sealed arena
 func TestSealDuringActiveWrites(t *testing.T) {
 	var out bytes.Buffer
-	m := NewManager(1024, &out)
 
-	// Start 5 producers that write slowly
+	manager := NewManager(1024, &out)
+
 	var wg sync.WaitGroup
-	writesStarted := make(chan struct{})
 
-	for i := 0; i < 5; i++ {
+	chWritesStarted := make(chan struct{})
+
+	noProducers := 5 // Start producers that write slowly
+
+	for range noProducers {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
 			// Slow write that takes time
-			r, ok := m.BeginWrite(100)
-			if !ok {
+			reserve, couldWrite := manager.BeginWrite(100)
+			if !couldWrite {
 				return
 			}
 
-			writesStarted <- struct{}{}
+			chWritesStarted <- struct{}{}
 
 			// Simulate slow write (50ms)
 			time.Sleep(50 * time.Millisecond)
 
 			// Write data
-			copy(r.Buf(), bytes.Repeat([]byte("x"), 100))
-			m.EndWrite(r)
+			copy(reserve.Buf(), bytes.Repeat([]byte("x"), 100))
+
+			manager.EndWrite(reserve)
 		}()
 	}
 
 	// Wait for all producers to start writing
-	for i := 0; i < 5; i++ {
-		<-writesStarted
+	for range noProducers {
+		<-chWritesStarted
 	}
 
 	// Seal arena while writes are in progress
-	sealed := m.rotate()
-	require.NotNil(t, sealed)
+	sealedArena := manager.rotate()
+	require.NotNil(t, sealedArena)
 
 	// Try to write to active arena (should be new one)
-	r, ok := m.BeginWrite(10)
-	require.True(t, ok)
-	require.Equal(t, m.a1, r.a) // Should be other arena
-	m.EndWrite(r)
+	reserve, couldWrite := manager.BeginWrite(10)
+	require.True(t, couldWrite)
+	require.Equal(t, manager.a1, reserve.a) // Should be other arena
+	manager.EndWrite(reserve)
 
 	// Wait for all slow writes to complete
 	wg.Wait()
 
 	// Verify: Sealed arena has writers=0
-	require.Equal(t, int64(0), sealed.writers.Load())
+	require.Equal(t,
+		int64(0),
+		sealedArena.writers.Load(),
+	)
 
 	// Now safe to flush
-	used := sealed.cursor.Load()
-	m.flushArena(sealed)
-	m.resetArena(sealed)
+	used := sealedArena.cursor.Load()
+	require.Equal(t,
+		used,
+		out.Len(),
+	)
+
+	manager.flushArena(sealedArena)
+	manager.resetArena(sealedArena)
 
 	// Verify: All 5 writes were flushed
 	require.Equal(t, 5*100, len(out.String()))

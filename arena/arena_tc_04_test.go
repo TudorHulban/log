@@ -22,6 +22,7 @@ func TestRollbackStorm(t *testing.T) {
 	a.cursor.Store(950)
 
 	var wg sync.WaitGroup
+
 	rollbacks := atomic.Int64{}
 	successes := atomic.Int64{}
 

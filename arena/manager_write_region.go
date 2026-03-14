@@ -24,8 +24,16 @@ func (m *Manager) BeginWrite(n int64) (WriteRegion, bool) {
 		return WriteRegion{}, false
 	}
 
-	// Mark producer as active.
+	// Enter BEFORE reserving, but we must validate we're still on the
+	// active arena. A rotation could have happened between Load and Enter.
 	a.Enter()
+
+	// Re-check: if the active arena changed after we entered, this arena
+	// is now sealed. Leave immediately — the cursor may be reset under us.
+	if m.active.Load() != a {
+		a.Leave()
+		return WriteRegion{}, false
+	}
 
 	// Reserve space.
 	offset := a.Reserve(n)
@@ -37,7 +45,6 @@ func (m *Manager) BeginWrite(n int64) (WriteRegion, bool) {
 		return WriteRegion{}, false
 	}
 
-	// Success.
 	return WriteRegion{
 		a:      a,
 		offset: offset,

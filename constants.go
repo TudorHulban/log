@@ -1,7 +1,5 @@
 package log
 
-const delim = ": "
-
 const (
 	LevelNONE  = 0
 	LevelINFO  = 1

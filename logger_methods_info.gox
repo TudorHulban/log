@@ -6,15 +6,6 @@ import (
 	"strconv"
 )
 
-func (l Logger) labelInfo() string {
-	return ternary(
-		l.withColor,
-
-		colorInfo(logLevels[LevelINFO]),
-		logLevels[LevelINFO],
-	)
-}
-
 func (l Logger) Info(args ...any) {
 	if l.logLevel == LevelNONE {
 		return
@@ -29,7 +20,7 @@ func (l Logger) Info(args ...any) {
 
 				jsonWCaller(
 					&paramsJSONWCaller{
-						timestamp: l.withTimestamp(),
+						timestamp: l.fnTimestamp(),
 						file:      file,
 						line:      line,
 						level:     l.labelInfo(),
@@ -38,7 +29,7 @@ func (l Logger) Info(args ...any) {
 				),
 
 				[]byte(
-					l.withTimestamp()+" "+file+" Line"+delim+
+					l.fnTimestamp()+" "+file+" Line"+delim+
 						strconv.FormatInt(int64(line), 10)+" "+
 						l.labelInfo()+
 						delim+
@@ -56,14 +47,14 @@ func (l Logger) Info(args ...any) {
 
 			json(
 				&paramsJSONWCaller{
-					timestamp: l.withTimestamp(),
+					timestamp: l.fnTimestamp(),
 					level:     l.labelInfo(),
 					message:   fmt.Sprint(args...),
 				},
 			),
 
 			[]byte(
-				l.withTimestamp()+" "+
+				l.fnTimestamp()+" "+
 					l.labelInfo()+
 					delim+
 					fmt.Sprint(args...)+"\n",
@@ -86,7 +77,7 @@ func (l Logger) Infof(format string, args ...any) {
 
 				jsonWCaller(
 					&paramsJSONWCaller{
-						timestamp: l.withTimestamp(),
+						timestamp: l.fnTimestamp(),
 						file:      file,
 						line:      line,
 						level:     l.labelInfo(),
@@ -95,7 +86,7 @@ func (l Logger) Infof(format string, args ...any) {
 				),
 
 				[]byte(
-					l.withTimestamp()+" "+file+" Line"+delim+
+					l.fnTimestamp()+" "+file+" Line"+delim+
 						strconv.FormatInt(int64(line), 10)+" "+
 						l.labelInfo()+
 						delim+
@@ -113,14 +104,14 @@ func (l Logger) Infof(format string, args ...any) {
 
 			json(
 				&paramsJSONWCaller{
-					timestamp: l.withTimestamp(),
+					timestamp: l.fnTimestamp(),
 					level:     l.labelInfo(),
 					message:   fmt.Sprintf(format, args...),
 				},
 			),
 
 			[]byte(
-				l.withTimestamp()+" "+
+				l.fnTimestamp()+" "+
 					l.labelInfo()+
 					delim+
 					fmt.Sprintf(format, args...)+"\n",
@@ -139,7 +130,7 @@ func (l Logger) Infow(msg string, keysAndValues ...any) {
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + msg + "\n" + file + " Line" + delim +
+				l.fnTimestamp() + " " + msg + "\n" + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
 					logLevels[1] + delim +
 					fmt.Sprint(keysAndValues...) + "\n",
@@ -151,7 +142,7 @@ func (l Logger) Infow(msg string, keysAndValues ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " +
+			l.fnTimestamp() + " " +
 				logLevels[1] +
 				delim +
 				fmt.Sprint(keysAndValues...) + "\n",

@@ -6,24 +6,28 @@ import (
 	"strconv"
 )
 
-func (l Logger) labelError() string {
+func (l Logger) labelWarn() string {
 	return ternary(
 		l.withColor,
 
-		colorError(logLevels[LevelERROR]),
-		logLevels[LevelERROR],
+		colorWarn(logLevels[LevelWARN]),
+		logLevels[LevelWARN],
 	)
 }
 
-func (l Logger) Error(args ...any) {
+func (l Logger) Warn(args ...any) {
+	if l.logLevel < LevelWARN {
+		return
+	}
+
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
+				l.fnTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					l.labelError() +
+					l.labelWarn() +
 					delim +
 					fmt.Sprint(args...) + "\n",
 			),
@@ -34,23 +38,27 @@ func (l Logger) Error(args ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " +
-				l.labelError() +
+			l.fnTimestamp() + " " +
+				l.labelWarn() +
 				delim +
 				fmt.Sprint(args...) + "\n",
 		),
 	)
 }
 
-func (l Logger) Errorf(format string, args ...any) {
+func (l Logger) Warnf(format string, args ...any) {
+	if l.logLevel < LevelWARN {
+		return
+	}
+
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
+				l.fnTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					l.labelError() +
+					l.labelWarn() +
 					delim +
 					fmt.Sprintf(format, args...) + "\n",
 			),
@@ -61,25 +69,29 @@ func (l Logger) Errorf(format string, args ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " +
-				l.labelError() +
+			l.fnTimestamp() + " " +
+				l.labelWarn() +
 				delim +
 				fmt.Sprintf(format, args...) + "\n",
 		),
 	)
 }
 
-func (l Logger) Errorw(format string, args ...any) {
+func (l Logger) Warnw(msg string, keysAndValues ...any) {
+	if l.logLevel < LevelWARN {
+		return
+	}
+
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
 		_, _ = l.localWriter.Write(
 			[]byte(
-				l.withTimestamp() + " " + file + " Line" + delim +
+				l.fnTimestamp() + " " + file + " Line" + delim +
 					strconv.FormatInt(int64(line), 10) + " " +
-					l.labelError() +
+					l.labelWarn() +
 					delim +
-					fmt.Sprintf(format, args...) + "\n",
+					fmt.Sprint(keysAndValues...) + "\n",
 			),
 		)
 
@@ -88,10 +100,10 @@ func (l Logger) Errorw(format string, args ...any) {
 
 	_, _ = l.localWriter.Write(
 		[]byte(
-			l.withTimestamp() + " " +
-				l.labelError() +
+			l.fnTimestamp() + " " +
+				l.labelWarn() +
 				delim +
-				fmt.Sprintf(format, args...) + "\n",
+				fmt.Sprint(keysAndValues...) + "\n",
 		),
 	)
 }

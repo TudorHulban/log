@@ -34,28 +34,34 @@ func (m *Manager) flushArena(a *Arena) {
 
 // flushOnShutdown flushes both arenas best-effort.
 func (m *Manager) flushOnShutdown(flush func(a *Arena, used int64)) {
-	// Seal active arena to stop new writes.
-	sealed := m.rotate()
+	// First rotation: seal whatever is currently active (call it A).
+	firstSealed := m.rotate()
 
-	// Flush the arena that was active (now sealed).
-	if sealed != nil {
-		m.waitForWriters(sealed)
-		used := sealed.cursor.Load()
+	// Second rotation: seal the other arena (B) which just became active.
+	// Any producer that got bumped from A by the first rotate and retried
+	// into B will be captured here.
+	secondSealed := m.rotate()
+
+	// Flush second-sealed first (it became active most recently,
+	// producers who retried land here — wait for them first).
+	if secondSealed != nil {
+		m.waitForWriters(secondSealed)
+
+		used := secondSealed.cursor.Load()
+
 		if used > 0 {
-			flush(sealed, used)
+			flush(secondSealed, used)
 		}
-		m.resetArena(sealed)
 	}
 
-	// Flush the other arena only if it has unflushed data
-	// (i.e. it was sealed by tick but not yet flushed, which shouldn't
-	// happen since tick flushes inline — but guard anyway).
-	other := m.sealed.Load()
-	if other != nil && other != sealed {
-		m.waitForWriters(other)
-		used := other.cursor.Load()
+	// Flush first-sealed.
+	if firstSealed != nil && firstSealed != secondSealed {
+		m.waitForWriters(firstSealed)
+
+		used := firstSealed.cursor.Load()
+
 		if used > 0 {
-			flush(other, used)
+			flush(firstSealed, used)
 		}
 	}
 }

@@ -40,16 +40,21 @@ func (m *Manager) BeginWrite(n int64) (WriteRegion, bool) {
 
 	// Check for overflow.
 	if offset < 0 || offset+n > m.arenaSize {
+		// undo reservation
+		a.cursor.Add(-n)
+
 		a.AddRollback()
 		a.Leave()
+
 		return WriteRegion{}, false
 	}
 
 	return WriteRegion{
-		a:      a,
-		offset: offset,
-		size:   n,
-	}, true
+			a:      a,
+			offset: offset,
+			size:   n,
+		},
+		true
 }
 
 // Buf returns the writable slice for the reserved region.

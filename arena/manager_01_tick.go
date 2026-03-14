@@ -27,6 +27,7 @@ func (m *Manager) tick(flush func(a *Arena, used int64)) {
 		flush(sealed, used)
 	}
 
-	m.resetArena(sealed)
-	m.sealed.Store(nil) // clear so flushOnShutdown doesn't re-flush this
+	// Do NOT call resetArena here.
+	// The flush callback owns the full lifecycle: waitForWriters + flush + reset.
+	m.sealed.Store(nil)
 }

@@ -9,9 +9,9 @@ package arena
 // It does NOT loop indefinitely and does NOT block.
 func (m *Manager) TryWrite(n int64) (WriteRegion, bool) {
 	// First attempt.
-	r, ok := m.BeginWrite(n)
-	if ok {
-		return r, true
+	region, canWrite := m.BeginWrite(n)
+	if canWrite {
+		return region, true
 	}
 
 	// Reload active arena — rotation may have occurred.

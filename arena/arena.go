@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 )
 
+// TODO: move to uint32 aatomics for less cache pressure, smaller.
+
 // arena represents a single fixed-size logging buffer used in a
 // double-buffered, lock-free producer/consumer setup.
 //

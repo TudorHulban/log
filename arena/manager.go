@@ -3,6 +3,7 @@ package arena
 import (
 	"context"
 	"io"
+	"runtime"
 	"sync/atomic"
 	"time"
 )
@@ -76,26 +77,6 @@ func (m *Manager) StartConsumer(ctx context.Context) <-chan struct{} {
 	return chSignalStarted
 }
 
-// Write attempts to write n bytes into the active arena.
-// The caller provides a function that writes into the reserved buffer.
-//
-// The write function receives a byte slice of length n and must fill it.
-func (m *Manager) Write(n int64, fn func(dst []byte)) bool {
-	// Try to reserve space (with one retry).
-	r, ok := m.TryWrite(n)
-	if !ok {
-		return false
-	}
-
-	// Write into the reserved region.
-	fn(r.Buf())
-
-	// Mark write complete.
-	m.EndWrite(r)
-
-	return true
-}
-
 // Active returns the currently active arena.
 func (m *Manager) Active() *Arena {
 	return m.active.Load()
@@ -120,6 +101,7 @@ func (m *Manager) ConsumerLoop(ctx context.Context, flush func(a *Arena, used in
 		case <-ctx.Done():
 			// Shutdown: flush both arenas best-effort.
 			m.flushOnShutdown(flush)
+
 			return
 
 		case <-ticker.C:
@@ -168,12 +150,8 @@ func (m *Manager) resetArena(a *Arena) {
 
 // waitForWriters blocks until writers-in-flight reaches zero.
 // Context cancellation is handled by the caller.
-func (*Manager) waitForWriters(a *Arena) {
-	for {
-		if a.writers.Load() == 0 {
-			return
-		}
-
-		time.Sleep(1 * time.Microsecond)
+func (m *Manager) waitForWriters(a *Arena) {
+	for a.writers.Load() != 0 {
+		runtime.Gosched()
 	}
 }

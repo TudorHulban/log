@@ -90,7 +90,7 @@ func (m *RawLogger) consumerLoop(ctx context.Context, flusher func(a *Arena, use
 		select {
 		case <-ctx.Done():
 			// Shutdown: flush both arenas best-effort.
-			m.flushOnShutdown(flusher)
+			m.flushOnShutdown(ctx, flusher)
 
 			return
 
@@ -109,9 +109,45 @@ func (m *RawLogger) resetArena(a *Arena) {
 }
 
 // waitForWriters blocks until writers-in-flight reaches zero.
-// Context cancellation is handled by the caller.
+// should be used in tick.
 func (m *RawLogger) waitForWriters(a *Arena) {
-	for a.numberWriters.Load() != 0 {
+	writers := &a.numberWriters
+
+	spin := 0
+
+	for writers.Load() != 0 {
+		spin++
+
+		if spin < 64 {
+			continue
+		}
+
+		spin = 0
 		runtime.Gosched()
+	}
+}
+
+func (m *RawLogger) waitForWritersCtx(ctx context.Context, a *Arena) bool {
+	spin := 0
+
+	for {
+		if a.numberWriters.Load() == 0 {
+			return true
+		}
+
+		spin++
+
+		if spin < 50 {
+			runtime.Gosched()
+			continue
+		}
+
+		select {
+		case <-ctx.Done():
+			return false
+		default:
+		}
+
+		time.Sleep(time.Microsecond)
 	}
 }

@@ -1,5 +1,7 @@
 package arena
 
+import "context"
+
 // Flush sealed arena contents using the provided writer function.
 //
 // The writer receives:
@@ -33,7 +35,7 @@ func (m *RawLogger) flushArena(a *Arena) {
 }
 
 // flushOnShutdown flushes both arenas best-effort.
-func (m *RawLogger) flushOnShutdown(flush func(a *Arena, used int64)) {
+func (m *RawLogger) flushOnShutdown(ctx context.Context, flusher func(a *Arena, used int64)) {
 	// First rotation: seal whatever is currently active (call it A).
 	firstSealed := m.rotate()
 
@@ -45,23 +47,23 @@ func (m *RawLogger) flushOnShutdown(flush func(a *Arena, used int64)) {
 	// Flush second-sealed first (it became active most recently,
 	// producers who retried land here — wait for them first).
 	if secondSealed != nil {
-		m.waitForWriters(secondSealed)
+		m.waitForWritersCtx(ctx, secondSealed)
 
 		used := secondSealed.cursor.Load()
 
 		if used > 0 {
-			flush(secondSealed, used)
+			flusher(secondSealed, used)
 		}
 	}
 
 	// Flush first-sealed.
 	if firstSealed != nil && firstSealed != secondSealed {
-		m.waitForWriters(firstSealed)
+		m.waitForWritersCtx(ctx, firstSealed)
 
 		used := firstSealed.cursor.Load()
 
 		if used > 0 {
-			flush(firstSealed, used)
+			flusher(firstSealed, used)
 		}
 	}
 }

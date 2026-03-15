@@ -12,26 +12,37 @@ import (
 // Test: Writes of exact arena size, writes larger than arena
 // Verifies: Flood handling as described in Arena.md
 func TestExactAndOversizedWrites(t *testing.T) {
-	m := NewRawLogger(100, &bytes.Buffer{})
+	var sizeArena int64 = 100
+
+	rawLogger := NewRawLogger(sizeArena, &bytes.Buffer{})
 
 	// Case 1: Write exactly arena size
-	r, ok := m.BeginWrite(100)
-	require.True(t, ok)
-	require.Equal(t, int64(0), r.offset)
-	m.EndWrite(r)
-	require.Equal(t, int64(100), m.active.Load().cursor.Load())
+	region, canWrite := rawLogger.BeginWrite(sizeArena)
+	require.True(t, canWrite)
+	require.Zero(t, region.offset)
+
+	rawLogger.EndWrite(region)
+
+	require.Equal(t,
+		sizeArena,
+		rawLogger.active.Load().cursor.Load(),
+	)
 
 	// Reset
-	m.rotate()
+	rawLogger.rotate()
 
 	// Case 2: Write larger than arena (flooding)
-	r, ok = m.BeginWrite(101)
-	require.False(t, ok)
+	region, canWrite = rawLogger.BeginWrite(sizeArena + 1)
+	require.False(t, canWrite)
+	require.Zero(t, region)
 
 	// Rollback should increment
-	a := m.active.Load()
-	require.Equal(t, int64(1), a.rollback.Load())
+	arenaActive := rawLogger.active.Load()
+	require.EqualValues(t,
+		1,
+		arenaActive.rollbackCounter.Load(),
+	)
 
 	// But cursor should NOT move
-	require.Equal(t, int64(0), a.cursor.Load())
+	require.Zero(t, arenaActive.cursor.Load())
 }

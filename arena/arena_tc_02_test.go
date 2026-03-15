@@ -34,7 +34,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	require.Zero(t, regionZero)
 	require.Equal(t,
 		int64(1),
-		arena.rollback.Load(),
+		arena.rollbackCounter.Load(),
 	)
 
 	// Complete first write

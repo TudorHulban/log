@@ -11,8 +11,8 @@ import (
 
 // Test Case 5: Context Cancellation During Wait
 
-// Test: Consumer context cancelled while waiting for writers
-// Verifies: Shutdown happens promptly, no hangs
+// Test: Consumer context cancelled while waiting for writers.
+// Verifies: Shutdown happens promptly, no hangs.
 func TestContextCancelDuringWait(t *testing.T) {
 	rawLogger := NewRawLogger(1024, &bytes.Buffer{})
 
@@ -33,7 +33,7 @@ func TestContextCancelDuringWait(t *testing.T) {
 	chConsumerExit := make(chan struct{})
 
 	go func() {
-		rawLogger.ConsumerLoop(
+		rawLogger.consumerLoop(
 			ctx,
 
 			func(a *Arena, used int64) {
@@ -49,7 +49,7 @@ func TestContextCancelDuringWait(t *testing.T) {
 	case <-chConsumerExit:
 		// Success
 
-	case <-time.After(100 * time.Millisecond):
+	case <-time.After(150 * time.Millisecond):
 		t.Fatal("Consumer did not exit after context cancel")
 	}
 

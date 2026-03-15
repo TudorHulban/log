@@ -10,53 +10,55 @@ import (
 // Test Case 6: Race Between Reserve and Seal
 
 // Test: Producer reserves space exactly as consumer seals
-// Verifies: No writes to arena after it's sealed
+// Verifies: No writes to arena after it is sealed
 func TestReserveVsSealRace(t *testing.T) {
-	manager := NewRawLogger(1024, &bytes.Buffer{})
+	rawLogger := NewRawLogger(1024, &bytes.Buffer{})
 
 	// Channel to coordinate race
-	ready := make(chan struct{})
-	done := make(chan bool)
+	chReady := make(chan struct{})
+	chDone := make(chan bool)
 
 	// Producer goroutine
 	go func() {
-		<-ready // Wait for signal
+		<-chReady // Wait for signal
 
 		// Attempt to reserve
-		r, ok := manager.BeginWrite(100)
-		if ok {
+		region, canWrite := rawLogger.BeginWrite(100)
+		if canWrite {
 			// If we got a region, it must be in active arena
-			if r.arena != manager.active.Load() {
-				done <- false
+			if region.arena != rawLogger.active.Load() {
+				chDone <- false
 
 				return
 			}
 
-			manager.EndWrite(r)
+			rawLogger.EndWrite(region)
 		}
 
-		done <- true
+		chDone <- true
 	}()
 
 	// Consumer goroutine
 	go func() {
-		<-ready // Wait for same signal
+		<-chReady // Wait for same signal
 
 		// Rotate arenas
-		sealed := manager.rotate()
+		sealed := rawLogger.rotate()
 		_ = sealed
 	}()
 
 	// Start both simultaneously
-	close(ready)
+	close(chReady)
 
 	// Wait for result
-	require.True(t, <-done)
+	require.True(t, <-chDone)
 
 	// Verify invariant: No writes to sealed arena
-	sealed := manager.sealed.Load()
+	sealed := rawLogger.sealed.Load()
+
 	if sealed != nil {
-		writers := sealed.writers.Load()
-		require.True(t, writers == 0 || manager.active.Load() == sealed)
+		require.True(t,
+			sealed.numberWriters.Load() == 0 || rawLogger.active.Load() == sealed,
+		)
 	}
 }

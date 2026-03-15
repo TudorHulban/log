@@ -58,7 +58,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	require.NotNil(t, sealedArena)
 
 	// no rollbacks should have occured
-	require.Zero(t, sealedArena.rollback.Load())
+	require.Zero(t, sealedArena.rollbackCounter.Load())
 
 	// Try to write to active arena (should be new one)
 	region, couldWrite := rawLogger.BeginWrite(10)
@@ -77,7 +77,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	// Verify: Sealed arena has writers=0
 	require.Equal(t,
 		int64(0),
-		sealedArena.writers.Load(),
+		sealedArena.numberWriters.Load(),
 	)
 
 	// Now safe to flush

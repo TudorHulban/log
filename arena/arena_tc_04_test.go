@@ -53,7 +53,7 @@ func TestRollbackStorm(t *testing.T) {
 	wgProducers.Wait()
 
 	// Verify: Rollback counter matches failures
-	require.Equal(t, rollbacks.Load(), arena.rollback.Load())
+	require.Equal(t, rollbacks.Load(), arena.rollbackCounter.Load())
 	require.True(t, successes.Load() > 0 || rollbacks.Load() > 0)
 	require.True(t, arena.cursor.Load() <= 1000) // Never exceed
 }

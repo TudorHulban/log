@@ -20,15 +20,15 @@ type Arena struct { //nolint:govet
 	cursor atomic.Int64
 	_      [56]byte // pad to 64 bytes (typical cache line size)
 
-	// writers tracks the number of producers currently writing into this arena.
+	// numberWriters tracks the number of producers currently writing into this arena.
 	// The consumer waits for this to reach zero before flushing.
-	writers atomic.Int64
-	_       [56]byte // pad to 64 bytes
+	numberWriters atomic.Int64
+	_             [56]byte // pad to 64 bytes
 
-	// rollback counts failed reservations near the end of the arena.
+	// rollbackCounter counts failed reservations near the end of the arena.
 	// Used by the consumer as a signal that the arena is under pressure.
-	rollback atomic.Int64
-	_        [56]byte // pad to 64 bytes
+	rollbackCounter atomic.Int64
+	_               [56]byte // pad to 64 bytes
 
 	// buf is the underlying byte storage for this arena.
 	// Its capacity defines the arena size.
@@ -58,17 +58,17 @@ func (a *Arena) Reserve(n int64) int64 {
 // Enter increments the writers-in-flight counter.
 // Producers must call this before attempting a reservation.
 func (a *Arena) Enter() {
-	a.writers.Add(1)
+	a.numberWriters.Add(1)
 }
 
 // Leave decrements the writers-in-flight counter.
 // Producers must call this after finishing their write.
 func (a *Arena) Leave() {
-	a.writers.Add(-1)
+	a.numberWriters.Add(-1)
 }
 
 // AddRollback increments the rollback counter.
 // Producers call this when a reservation overflows the arena.
 func (a *Arena) AddRollback() {
-	a.rollback.Add(1)
+	a.rollbackCounter.Add(1)
 }

@@ -66,8 +66,9 @@ func (m *RawLogger) StartConsumer(ctx context.Context) <-chan struct{} {
 	go func() {
 		defer close(chSignalStarted)
 
-		m.ConsumerLoop(
+		m.consumerLoop(
 			ctx,
+
 			func(a *Arena, used int64) {
 				m.flushArena(a)
 			},
@@ -87,12 +88,12 @@ func (m *RawLogger) Sealed() *Arena {
 	return m.sealed.Load()
 }
 
-// ConsumerLoop is the main consumer goroutine.
+// consumerLoop is the main consumer goroutine.
 // It monitors the active arena, seals it when needed, waits for writers,
 // flushes it, and resets it.
 //
 // This is only the skeleton — flushing and thresholds are implemented elsewhere.
-func (m *RawLogger) ConsumerLoop(ctx context.Context, flush func(a *Arena, used int64)) {
+func (m *RawLogger) consumerLoop(ctx context.Context, flusher func(a *Arena, used int64)) {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -100,12 +101,12 @@ func (m *RawLogger) ConsumerLoop(ctx context.Context, flush func(a *Arena, used 
 		select {
 		case <-ctx.Done():
 			// Shutdown: flush both arenas best-effort.
-			m.flushOnShutdown(flush)
+			m.flushOnShutdown(flusher)
 
 			return
 
 		case <-ticker.C:
-			m.tick(flush)
+			m.tick(flusher)
 		}
 	}
 }
@@ -133,7 +134,7 @@ func (m *RawLogger) shouldSeal(a *Arena) bool {
 
 	// Rollback pressure: many producers failed to reserve space.
 	// This indicates high contention near the end of the arena.
-	if a.rollback.Load() > 0 {
+	if a.rollbackCounter.Load() > 0 {
 		return true
 	}
 
@@ -144,14 +145,14 @@ func (m *RawLogger) shouldSeal(a *Arena) bool {
 // This does NOT reallocate the buffer.
 func (m *RawLogger) resetArena(a *Arena) {
 	a.cursor.Store(0)
-	a.writers.Store(0)
-	a.rollback.Store(0)
+	a.numberWriters.Store(0)
+	a.rollbackCounter.Store(0)
 }
 
 // waitForWriters blocks until writers-in-flight reaches zero.
 // Context cancellation is handled by the caller.
 func (m *RawLogger) waitForWriters(a *Arena) {
-	for a.writers.Load() != 0 {
+	for a.numberWriters.Load() != 0 {
 		runtime.Gosched()
 	}
 }

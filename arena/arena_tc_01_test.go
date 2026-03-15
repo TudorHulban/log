@@ -31,7 +31,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 	// Start consumer with aggressive rotation
 	wgConsumer.Go(
 		func() {
-			rawLogger.ConsumerLoop(
+			rawLogger.consumerLoop(
 				ctx,
 
 				func(a *Arena, used int64) {
@@ -81,8 +81,9 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 	}
 
 	wgProducers.Wait()
-	wgConsumer.Wait()
 	cancel()
+
+	wgConsumer.Wait()
 
 	// Verify: All successful writes appear in output
 	output := out.String()

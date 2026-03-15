@@ -1,6 +1,7 @@
 package arena
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -12,22 +13,23 @@ import (
 
 // Test Case 7: Memory Corruption Check
 
-// Test: Concurrent writes don't corrupt each other's data
-// Verifies: Each log entry remains intact and contiguous
-// Enhanced version with write validation
+// Test: Concurrent writes do not corrupt each other's data
+// Verifies: Each log entry remains intact and contiguous.
+// Enhanced version with write validation.
 func TestNoMemoryCorruption_Enhanced(t *testing.T) {
-	var out bytes.Buffer
-
-	m := NewRawLogger(64*1024, &out)
+	rawLogger := NewRawLogger(64*1024, &bytes.Buffer{})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
-	validationCh := make(chan string, 10000)
+	var wgConsumer sync.WaitGroup
+	wgConsumer.Add(1)
+
+	chValidation := make(chan string, 10000)
 
 	// Consumer with validation
 	go func() {
-		for line := range validationCh {
+		for line := range chValidation {
 			// Validate format immediately
 			if !strings.HasPrefix(line, "P") {
 				t.Errorf("Invalid line format: %q", line)
@@ -35,47 +37,66 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 		}
 	}()
 
-	go m.ConsumerLoop(ctx, func(a *Arena, used int64) {
-		// Capture output for validation
-		data := a.buf[:used]
-		lines := strings.Split(string(data), "\n")
-		for _, line := range lines {
-			if line != "" {
-				validationCh <- line
-			}
-		}
+	go func() {
+		defer wgConsumer.Done()
 
-		m.flushArena(a)
-		m.resetArena(a)
-	})
+		rawLogger.consumerLoop(
+			ctx,
 
-	var wg sync.WaitGroup
+			func(a *Arena, used int64) {
+				// Capture output for validation
+				data := a.buf[:used]
+
+				scanner := bufio.NewScanner(bytes.NewReader(data))
+				for scanner.Scan() {
+					line := string(scanner.Bytes())
+
+					if line != "" {
+						chValidation <- line
+					}
+				}
+
+				rawLogger.flushArena(a)
+				rawLogger.resetArena(a)
+			},
+		)
+	}()
+
+	var wgProducers sync.WaitGroup
+
+	noProducers := 20
+
+	wgProducers.Add(noProducers)
 
 	// Each producer writes a unique pattern
-	for i := 0; i < 20; i++ {
-		wg.Add(1)
-
+	for ix := range noProducers {
 		go func(producerID int) {
-			defer wg.Done()
+			defer wgProducers.Done()
 
-			for j := 0; j < 1000; j++ {
+			for j := range 1000 {
 				payload := fmt.Sprintf("P%d-%d-%s", producerID, j,
 					strings.Repeat("x", 50))
 
-				m.Write(int64(len(payload)), func(dst []byte) {
-					// Double-check destination before writing
-					if len(dst) != len(payload) {
-						t.Errorf("Buffer size mismatch: got %d, want %d",
-							len(dst), len(payload))
-					}
+				rawLogger.Write(
+					int64(len(payload)),
 
-					copy(dst, []byte(payload))
-				})
+					func(dst []byte) {
+						// Double-check destination before writing
+						if len(dst) != len(payload) {
+							t.Errorf("Buffer size mismatch: got %d, want %d",
+								len(dst), len(payload))
+						}
+
+						copy(dst, []byte(payload))
+					},
+				)
 			}
-		}(i)
+		}(ix)
 	}
 
-	wg.Wait()
+	wgProducers.Wait()
 	cancel()
-	close(validationCh)
+
+	wgConsumer.Wait()
+	close(chValidation)
 }

@@ -5,29 +5,30 @@ package arena
 // - rotates if needed
 // - drains writers
 // - flushes sealed arena
-func (m *RawLogger) tick(flush func(a *Arena, used int64)) {
-	active := m.active.Load()
-	if active == nil {
+func (m *RawLogger) tick(flusher func(a *Arena, used int64)) {
+	activeArena := m.active.Load()
+	if activeArena == nil {
 		return
 	}
 
-	if !m.shouldSeal(active) {
+	if !m.shouldSeal(activeArena) {
 		return
 	}
 
-	sealed := m.rotate()
-	if sealed == nil {
+	sealedArena := m.rotate()
+	if sealedArena == nil {
 		return
 	}
 
-	m.waitForWriters(sealed)
+	m.waitForWriters(sealedArena)
 
-	used := sealed.cursor.Load()
+	used := sealedArena.cursor.Load()
 	if used > 0 {
-		flush(sealed, used)
+		flusher(sealedArena, used)
 	}
 
 	// Do NOT call resetArena here.
-	// The flush callback owns the full lifecycle: waitForWriters + flush + reset.
+	// The flush callback owns the full lifecycle:
+	// waitForWriters + flush + reset.
 	m.sealed.Store(nil)
 }

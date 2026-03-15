@@ -9,7 +9,7 @@ import (
 )
 
 // RawLogger owns the two arenas and coordinates which one is active.
-// It contains only data layout — rotation logic is implemented elsewhere.
+// It also handles the rotation and flush on context cancellation.
 type RawLogger struct {
 	writer io.Writer
 
@@ -37,30 +37,29 @@ func NewRawLogger(arenaSize int64, w io.Writer) *RawLogger {
 		buf: make([]byte, arenaSize),
 	}
 
-	a1 := &Arena{
-		buf: make([]byte, arenaSize),
-	}
+	result := RawLogger{
+		arenaFirst: a0,
+		arenaSecond: &Arena{
+			buf: make([]byte, arenaSize),
+		},
 
-	m := RawLogger{
-		arenaFirst:  a0,
-		arenaSecond: a1,
-		arenaSize:   arenaSize,
-		writer:      w,
+		arenaSize: arenaSize,
+		writer:    w,
 	}
 
 	// Set active arena to a0.
-	m.active.Store(a0)
+	result.active.Store(a0)
 
 	// No sealed arena yet.
-	m.sealed.Store(nil)
+	result.sealed.Store(nil)
 
-	return &m
+	return &result
 }
 
-// StartConsumer launches the consumer loop in a goroutine.
+// StartIngestion launches the consumer loop in a goroutine.
 // The caller provides the flush function, which receives the
 // raw bytes of each sealed arena.
-func (m *RawLogger) StartConsumer(ctx context.Context) <-chan struct{} {
+func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
 	chSignalStarted := make(chan struct{})
 
 	go func() {
@@ -76,16 +75,6 @@ func (m *RawLogger) StartConsumer(ctx context.Context) <-chan struct{} {
 	}()
 
 	return chSignalStarted
-}
-
-// Active returns the currently active arena.
-func (m *RawLogger) Active() *Arena {
-	return m.active.Load()
-}
-
-// Sealed returns the currently sealed arena (may be nil).
-func (m *RawLogger) Sealed() *Arena {
-	return m.sealed.Load()
 }
 
 // consumerLoop is the main consumer goroutine.
@@ -109,36 +98,6 @@ func (m *RawLogger) consumerLoop(ctx context.Context, flusher func(a *Arena, use
 			m.tick(flusher)
 		}
 	}
-}
-
-// shouldSeal determines whether the active arena should be sealed.
-//
-// This is a simple heuristic combining:
-//   - cursor threshold (almost full)
-//   - rollback pressure (many failed reservations)
-//
-// The exact thresholds can be tuned later.
-func (m *RawLogger) shouldSeal(a *Arena) bool {
-	used := a.cursor.Load()
-
-	// Hard threshold: near capacity.
-	if used >= m.arenaSize {
-		return true
-	}
-
-	// Soft threshold: "almost full".
-	// Example: seal when 90% full.
-	if used >= (m.arenaSize*9)/10 {
-		return true
-	}
-
-	// Rollback pressure: many producers failed to reserve space.
-	// This indicates high contention near the end of the arena.
-	if a.rollbackCounter.Load() > 0 {
-		return true
-	}
-
-	return false
 }
 
 // resetArena clears the arena state so it can be reused after flushing.

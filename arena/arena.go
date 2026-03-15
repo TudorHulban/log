@@ -47,12 +47,12 @@ type Arena struct { //nolint:govet
 //
 // This function does NOT roll back the cursor; rollback is logical only.
 // The consumer will reset the arena when rotating.
+//
+// Returns the offset at which the producer is entitled to write.
 func (a *Arena) Reserve(n int64) int64 {
 	// Atomically reserve space by bumping the cursor.
 	// offset = old cursor value
-	offset := a.cursor.Add(n) - n
-
-	return offset
+	return a.cursor.Add(n) - n
 }
 
 // Enter increments the writers-in-flight counter.

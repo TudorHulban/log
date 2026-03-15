@@ -19,7 +19,7 @@ func TestManagerSingleWrite(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
 
-	done := m.StartConsumer(ctx)
+	done := m.StartIngestion(ctx)
 
 	payload := "hi!"
 

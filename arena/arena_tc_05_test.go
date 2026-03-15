@@ -14,41 +14,45 @@ import (
 // Test: Consumer context cancelled while waiting for writers
 // Verifies: Shutdown happens promptly, no hangs
 func TestContextCancelDuringWait(t *testing.T) {
-	var out bytes.Buffer
-
-	m := NewManager(1024, &out)
+	rawLogger := NewRawLogger(1024, &bytes.Buffer{})
 
 	// Start a write that never completes
-	r, ok := m.BeginWrite(100)
-	require.True(t, ok)
+	region, couldWrite := rawLogger.BeginWrite(100)
+	require.True(t, couldWrite)
 
 	// Don't call EndWrite() - simulate stuck producer
 
 	// Rotate arena
-	sealed := m.rotate()
-	require.Equal(t, m.a0, sealed)
+	sealed := rawLogger.rotate()
+	require.Equal(t, rawLogger.arenaFirst, sealed)
 
 	// Start consumer with short-lived context
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
 
-	done := make(chan struct{})
+	chConsumerExit := make(chan struct{})
 
 	go func() {
-		m.ConsumerLoop(ctx, func(a *Arena, used int64) {
-			m.flushArena(a)
-		})
-		close(done)
+		rawLogger.ConsumerLoop(
+			ctx,
+
+			func(a *Arena, used int64) {
+				rawLogger.flushArena(a)
+			},
+		)
+
+		close(chConsumerExit)
 	}()
 
 	// Should exit within timeout, not hang forever
 	select {
-	case <-done:
+	case <-chConsumerExit:
 		// Success
+
 	case <-time.After(100 * time.Millisecond):
-		t.Fatal("Consumer didn't exit after context cancel")
+		t.Fatal("Consumer did not exit after context cancel")
 	}
 
 	// Clean up stuck producer
-	m.EndWrite(r)
+	rawLogger.EndWrite(region)
 }

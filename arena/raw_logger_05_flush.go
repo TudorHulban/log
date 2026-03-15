@@ -13,7 +13,7 @@ package arena
 //   - handle errors
 //
 // Those responsibilities belong to the consumer loop.
-func (m *Manager) flushArena(a *Arena) {
+func (m *RawLogger) flushArena(a *Arena) {
 	if a == nil {
 		return
 	}
@@ -33,7 +33,7 @@ func (m *Manager) flushArena(a *Arena) {
 }
 
 // flushOnShutdown flushes both arenas best-effort.
-func (m *Manager) flushOnShutdown(flush func(a *Arena, used int64)) {
+func (m *RawLogger) flushOnShutdown(flush func(a *Arena, used int64)) {
 	// First rotation: seal whatever is currently active (call it A).
 	firstSealed := m.rotate()
 

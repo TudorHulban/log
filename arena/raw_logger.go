@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// Manager owns the two arenas and coordinates which one is active.
+// RawLogger owns the two arenas and coordinates which one is active.
 // It contains only data layout — rotation logic is implemented elsewhere.
-type Manager struct {
+type RawLogger struct {
 	writer io.Writer
 
 	// Pointer to the currently active arena.
@@ -18,8 +18,8 @@ type Manager struct {
 	active atomic.Pointer[Arena]
 
 	// The two arenas used in double-buffer rotation.
-	a0 *Arena
-	a1 *Arena
+	arenaFirst  *Arena
+	arenaSecond *Arena
 
 	// The arena currently sealed and waiting to be flushed.
 	// This is informational; consumer logic will use it.
@@ -29,9 +29,9 @@ type Manager struct {
 	arenaSize int64
 }
 
-// NewManager allocates two arenas of the given size and initializes
+// NewRawLogger allocates two arenas of the given size and initializes
 // the Manager with a0 as the active arena and a1 as the standby arena.
-func NewManager(arenaSize int64, w io.Writer) *Manager {
+func NewRawLogger(arenaSize int64, w io.Writer) *RawLogger {
 	// Allocate arena buffers.
 	a0 := &Arena{
 		buf: make([]byte, arenaSize),
@@ -41,11 +41,11 @@ func NewManager(arenaSize int64, w io.Writer) *Manager {
 		buf: make([]byte, arenaSize),
 	}
 
-	m := Manager{
-		a0:        a0,
-		a1:        a1,
-		arenaSize: arenaSize,
-		writer:    w,
+	m := RawLogger{
+		arenaFirst:  a0,
+		arenaSecond: a1,
+		arenaSize:   arenaSize,
+		writer:      w,
 	}
 
 	// Set active arena to a0.
@@ -60,7 +60,7 @@ func NewManager(arenaSize int64, w io.Writer) *Manager {
 // StartConsumer launches the consumer loop in a goroutine.
 // The caller provides the flush function, which receives the
 // raw bytes of each sealed arena.
-func (m *Manager) StartConsumer(ctx context.Context) <-chan struct{} {
+func (m *RawLogger) StartConsumer(ctx context.Context) <-chan struct{} {
 	chSignalStarted := make(chan struct{})
 
 	go func() {
@@ -78,12 +78,12 @@ func (m *Manager) StartConsumer(ctx context.Context) <-chan struct{} {
 }
 
 // Active returns the currently active arena.
-func (m *Manager) Active() *Arena {
+func (m *RawLogger) Active() *Arena {
 	return m.active.Load()
 }
 
 // Sealed returns the currently sealed arena (may be nil).
-func (m *Manager) Sealed() *Arena {
+func (m *RawLogger) Sealed() *Arena {
 	return m.sealed.Load()
 }
 
@@ -92,7 +92,7 @@ func (m *Manager) Sealed() *Arena {
 // flushes it, and resets it.
 //
 // This is only the skeleton — flushing and thresholds are implemented elsewhere.
-func (m *Manager) ConsumerLoop(ctx context.Context, flush func(a *Arena, used int64)) {
+func (m *RawLogger) ConsumerLoop(ctx context.Context, flush func(a *Arena, used int64)) {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -117,7 +117,7 @@ func (m *Manager) ConsumerLoop(ctx context.Context, flush func(a *Arena, used in
 //   - rollback pressure (many failed reservations)
 //
 // The exact thresholds can be tuned later.
-func (m *Manager) shouldSeal(a *Arena) bool {
+func (m *RawLogger) shouldSeal(a *Arena) bool {
 	used := a.cursor.Load()
 
 	// Hard threshold: near capacity.
@@ -142,7 +142,7 @@ func (m *Manager) shouldSeal(a *Arena) bool {
 
 // resetArena clears the arena state so it can be reused after flushing.
 // This does NOT reallocate the buffer.
-func (m *Manager) resetArena(a *Arena) {
+func (m *RawLogger) resetArena(a *Arena) {
 	a.cursor.Store(0)
 	a.writers.Store(0)
 	a.rollback.Store(0)
@@ -150,7 +150,7 @@ func (m *Manager) resetArena(a *Arena) {
 
 // waitForWriters blocks until writers-in-flight reaches zero.
 // Context cancellation is handled by the caller.
-func (m *Manager) waitForWriters(a *Arena) {
+func (m *RawLogger) waitForWriters(a *Arena) {
 	for a.writers.Load() != 0 {
 		runtime.Gosched()
 	}

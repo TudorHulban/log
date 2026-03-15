@@ -12,7 +12,7 @@ import (
 // Test: Producer reserves space exactly as consumer seals
 // Verifies: No writes to arena after it's sealed
 func TestReserveVsSealRace(t *testing.T) {
-	manager := NewManager(1024, &bytes.Buffer{})
+	manager := NewRawLogger(1024, &bytes.Buffer{})
 
 	// Channel to coordinate race
 	ready := make(chan struct{})
@@ -26,7 +26,7 @@ func TestReserveVsSealRace(t *testing.T) {
 		r, ok := manager.BeginWrite(100)
 		if ok {
 			// If we got a region, it must be in active arena
-			if r.a != manager.active.Load() {
+			if r.arena != manager.active.Load() {
 				done <- false
 
 				return

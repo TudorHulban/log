@@ -21,29 +21,27 @@ import (
 func TestConcurrentWritesWithRotation(t *testing.T) {
 	var out bytes.Buffer
 
-	manager := NewManager(1024, &out)
+	rawLogger := NewRawLogger(1024, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
 	var wgConsumer sync.WaitGroup
-	wgConsumer.Add(1)
 
 	// Start consumer with aggressive rotation
-	go func() {
+	wgConsumer.Go(
+		func() {
+			rawLogger.ConsumerLoop(
+				ctx,
 
-		defer wgConsumer.Done()
-
-		manager.ConsumerLoop(
-			ctx,
-
-			func(a *Arena, used int64) {
-				manager.waitForWriters(a)
-				manager.flushArena(a)
-				manager.resetArena(a)
-			},
-		)
-	}()
+				func(a *Arena, used int64) {
+					rawLogger.waitForWriters(a)
+					rawLogger.flushArena(a)
+					rawLogger.resetArena(a)
+				},
+			)
+		},
+	)
 
 	var wgProducers sync.WaitGroup
 
@@ -52,9 +50,9 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 
 	noProducers := 10
 
-	for ix := range noProducers {
-		wgProducers.Add(1)
+	wgProducers.Add(noProducers)
 
+	for ix := range noProducers {
 		go func(id int) {
 			defer wgProducers.Done()
 
@@ -65,7 +63,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 					j,
 				)
 
-				canWrite := manager.Write(
+				canWrite := rawLogger.Write(
 					int64(len(payload)),
 					func(dst []byte) {
 						copy(dst, []byte(payload))

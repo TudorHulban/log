@@ -12,7 +12,7 @@ import (
 // Test: Writes of exact arena size, writes larger than arena
 // Verifies: Flood handling as described in Arena.md
 func TestExactAndOversizedWrites(t *testing.T) {
-	m := NewManager(100, &bytes.Buffer{})
+	m := NewRawLogger(100, &bytes.Buffer{})
 
 	// Case 1: Write exactly arena size
 	r, ok := m.BeginWrite(100)

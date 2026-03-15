@@ -16,22 +16,22 @@ import (
 func TestSealDuringActiveWrites(t *testing.T) {
 	var out bytes.Buffer
 
-	manager := NewManager(1024, &out)
+	rawLogger := NewRawLogger(1024, &out)
 
-	var wg sync.WaitGroup
+	var wgProducers sync.WaitGroup
 
 	chWritesStarted := make(chan struct{})
 
 	noProducers := 5 // Start producers that write slowly
 
-	for range noProducers {
-		wg.Add(1)
+	wgProducers.Add(noProducers)
 
+	for range noProducers {
 		go func() {
-			defer wg.Done()
+			defer wgProducers.Done()
 
 			// Slow write that takes time
-			reserve, couldWrite := manager.BeginWrite(100)
+			region, couldWrite := rawLogger.BeginWrite(100)
 			if !couldWrite {
 				return
 			}
@@ -42,9 +42,9 @@ func TestSealDuringActiveWrites(t *testing.T) {
 			time.Sleep(50 * time.Millisecond)
 
 			// Write data
-			copy(reserve.Buf(), bytes.Repeat([]byte("x"), 100))
+			copy(region.Buf(), bytes.Repeat([]byte("x"), 100))
 
-			manager.EndWrite(reserve)
+			rawLogger.EndWrite(region)
 		}()
 	}
 
@@ -54,17 +54,25 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	}
 
 	// Seal arena while writes are in progress
-	sealedArena := manager.rotate()
+	sealedArena := rawLogger.rotate()
 	require.NotNil(t, sealedArena)
 
+	// no rollbacks should have occured
+	require.Zero(t, sealedArena.rollback.Load())
+
 	// Try to write to active arena (should be new one)
-	reserve, couldWrite := manager.BeginWrite(10)
+	region, couldWrite := rawLogger.BeginWrite(10)
 	require.True(t, couldWrite)
-	require.Equal(t, manager.a1, reserve.a) // Should be other arena
-	manager.EndWrite(reserve)
+
+	// Should be other arena
+	require.Equal(t,
+		rawLogger.arenaSecond,
+		region.arena,
+	)
+	rawLogger.EndWrite(region)
 
 	// Wait for all slow writes to complete
-	wg.Wait()
+	wgProducers.Wait()
 
 	// Verify: Sealed arena has writers=0
 	require.Equal(t,
@@ -74,13 +82,18 @@ func TestSealDuringActiveWrites(t *testing.T) {
 
 	// Now safe to flush
 	used := sealedArena.cursor.Load()
-	require.Equal(t,
+
+	rawLogger.flushArena(sealedArena)
+	require.EqualValues(t,
+		used,
+		out.Len(),
+
+		"used in sealed arena: %d different than what was written to writer: %d",
 		used,
 		out.Len(),
 	)
 
-	manager.flushArena(sealedArena)
-	manager.resetArena(sealedArena)
+	rawLogger.resetArena(sealedArena)
 
 	// Verify: All 5 writes were flushed
 	require.Equal(t, 5*100, len(out.String()))

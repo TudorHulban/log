@@ -14,7 +14,7 @@ import (
 func TestManagerSingleWrite(t *testing.T) {
 	var out bytes.Buffer
 
-	m := NewManager(1024, &out)
+	m := NewRawLogger(1024, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
@@ -47,7 +47,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 
 	sink := helpers.CountWriter{}
 
-	manager := NewManager(1024, &sink)
+	manager := NewRawLogger(1024, &sink)
 
 	b.ResetTimer()
 
@@ -73,7 +73,7 @@ func BenchmarkArenaWrite(b *testing.B) {
 	b.ReportAllocs()
 
 	sink := helpers.CountWriter{}
-	manager := NewManager(1024*1024, &sink)
+	manager := NewRawLogger(1024*1024, &sink)
 
 	payload := []byte(`{"level":"info","msg":"user login","user_id":123}`)
 

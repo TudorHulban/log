@@ -15,7 +15,7 @@ func TestFalseSharingResistance(t *testing.T) {
 		t.Skip("Skipping performance test in short mode")
 	}
 
-	m := NewManager(1024*1024, &bytes.Buffer{})
+	m := NewRawLogger(1024*1024, &bytes.Buffer{})
 	a := m.active.Load()
 
 	// Goroutine 1: Hammer cursor

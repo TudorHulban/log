@@ -12,7 +12,7 @@ import (
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic
 func TestProducerPanic(t *testing.T) {
-	manager := NewManager(1024, &bytes.Buffer{})
+	manager := NewRawLogger(1024, &bytes.Buffer{})
 
 	// Use defer/recover to simulate panic in producer
 	func() {

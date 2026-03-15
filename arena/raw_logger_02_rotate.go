@@ -5,7 +5,7 @@ package arena
 //
 // This function does NOT wait for writers to drain and does NOT flush.
 // Waiting for writers and flushing are handled by the consumer logic.
-func (m *Manager) rotate() *Arena {
+func (m *RawLogger) rotate() *Arena {
 	// Load current active arena.
 	current := m.active.Load()
 	if current == nil {
@@ -14,10 +14,10 @@ func (m *Manager) rotate() *Arena {
 
 	// Determine the next arena.
 	var next *Arena
-	if current == m.a0 {
-		next = m.a1
+	if current == m.arenaFirst {
+		next = m.arenaSecond
 	} else {
-		next = m.a0
+		next = m.arenaFirst
 	}
 
 	// Mark current as sealed.

@@ -5,7 +5,7 @@ package arena
 // - rotates if needed
 // - drains writers
 // - flushes sealed arena
-func (m *Manager) tick(flush func(a *Arena, used int64)) {
+func (m *RawLogger) tick(flush func(a *Arena, used int64)) {
 	active := m.active.Load()
 	if active == nil {
 		return

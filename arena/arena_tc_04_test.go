@@ -12,33 +12,37 @@ import (
 
 // Test Case 4: Overflow and Rollback Storm
 
-// Test: Many producers simultaneously attempt writes near arena end
-// Verifies: Rollback counter correctly tracks failures, no deadlocks
+// Test: Many producers simultaneously attempt writes near arena end.
+// Verifies: Rollback counter correctly tracks failures, no deadlocks.
 func TestRollbackStorm(t *testing.T) {
-	m := NewManager(1000, &bytes.Buffer{})
-	a := m.active.Load()
+	rawLogger := NewRawLogger(1000, &bytes.Buffer{})
+	arena := rawLogger.active.Load()
 
 	// Fill arena near capacity
-	a.cursor.Store(950)
+	arena.cursor.Store(950)
 
-	var wg sync.WaitGroup
+	var wgProducers sync.WaitGroup
 
 	rollbacks := atomic.Int64{}
 	successes := atomic.Int64{}
 
-	// 100 concurrent producers each trying to write varying sizes
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
+	noProducers := 100
+
+	wgProducers.Add(noProducers)
+
+	// concurrent producers each trying to write varying sizes
+	for range noProducers {
 		go func() {
-			defer wg.Done()
-			for j := 0; j < 10; j++ {
+			defer wgProducers.Done()
+
+			for range 10 {
 				// Random size between 10-100 bytes
 				size := int64(10 + rand.Intn(90))
 
-				r, ok := m.BeginWrite(size)
-				if ok {
+				region, couldWrite := rawLogger.BeginWrite(size)
+				if couldWrite {
 					successes.Add(1)
-					m.EndWrite(r)
+					rawLogger.EndWrite(region)
 				} else {
 					rollbacks.Add(1)
 				}
@@ -46,10 +50,10 @@ func TestRollbackStorm(t *testing.T) {
 		}()
 	}
 
-	wg.Wait()
+	wgProducers.Wait()
 
 	// Verify: Rollback counter matches failures
-	require.Equal(t, rollbacks.Load(), a.rollback.Load())
+	require.Equal(t, rollbacks.Load(), arena.rollback.Load())
 	require.True(t, successes.Load() > 0 || rollbacks.Load() > 0)
-	require.True(t, a.cursor.Load() <= 1000) // Never exceed
+	require.True(t, arena.cursor.Load() <= 1000) // Never exceed
 }

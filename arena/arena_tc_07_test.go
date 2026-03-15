@@ -18,7 +18,7 @@ import (
 func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 	var out bytes.Buffer
 
-	m := NewManager(64*1024, &out)
+	m := NewRawLogger(64*1024, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()

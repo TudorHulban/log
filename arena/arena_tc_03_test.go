@@ -75,8 +75,8 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	wgProducers.Wait()
 
 	// Verify: Sealed arena has writers=0
-	require.Equal(t,
-		int64(0),
+	require.EqualValues(t,
+		0,
 		sealedArena.numberWriters.Load(),
 	)
 

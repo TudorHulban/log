@@ -34,7 +34,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 			rawLogger.consumerLoop(
 				ctx,
 
-				func(a *Arena, used int64) {
+				func(a *Arena, used int32) {
 					rawLogger.waitForWriters(a)
 					rawLogger.flushArena(a)
 					rawLogger.resetArena(a)
@@ -64,7 +64,8 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 				)
 
 				canWrite := rawLogger.Write(
-					int64(len(payload)),
+					uint32(len(payload)),
+
 					func(dst []byte) {
 						copy(dst, []byte(payload))
 					},

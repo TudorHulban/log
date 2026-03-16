@@ -4,7 +4,7 @@ package arena
 // The caller provides a function that writes into the reserved buffer.
 //
 // The write function receives a byte slice of length n and must fill it.
-func (m *RawLogger) Write(n int64, fn func(dst []byte)) bool {
+func (m *RawLogger) Write(n uint32, fn func(dst []byte)) bool {
 	// Try to region space (with one retry).
 	region, canWrite := m.TryWrite(n)
 	if !canWrite {

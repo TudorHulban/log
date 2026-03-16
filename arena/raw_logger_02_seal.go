@@ -8,7 +8,7 @@ package arena
 //
 // The exact thresholds can be tuned later.
 func (m *RawLogger) shouldSeal(a *Arena) bool {
-	used := a.cursor.Load()
+	used := uint32(a.cursor.Load())
 
 	// Hard threshold: near capacity.
 	if used >= m.arenaSize {

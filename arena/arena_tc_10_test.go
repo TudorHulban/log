@@ -28,7 +28,10 @@ func TestProducerPanic(t *testing.T) {
 
 	// writers should still be 1 (leaked!)
 	activeArena := rawLogger.active.Load()
-	require.Equal(t, int64(1), activeArena.numberWriters.Load())
+	require.EqualValues(t,
+		1,
+		activeArena.numberWriters.Load(),
+	)
 
 	// This would hang consumer forever - need timeout mechanism
 	// Real implementation should handle this case

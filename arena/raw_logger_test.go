@@ -25,7 +25,7 @@ func TestManagerSingleWrite(t *testing.T) {
 
 	require.True(t,
 		m.Write(
-			int64(len(payload)),
+			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, []byte(payload))
 			},
@@ -58,7 +58,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 		)
 
 		manager.Write(
-			int64(len(payload)),
+			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, []byte(payload))
 			},
@@ -81,7 +81,7 @@ func BenchmarkArenaWrite(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		manager.Write(
-			int64(len(payload)),
+			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, payload)
 			},

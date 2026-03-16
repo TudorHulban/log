@@ -26,12 +26,12 @@ type RawLogger struct {
 	sealed atomic.Pointer[Arena]
 
 	// Size of each arena (capacity of Arena.Buf).
-	arenaSize int64
+	arenaSize uint32
 }
 
 // NewRawLogger allocates two arenas of the given size and initializes
 // the Manager with a0 as the active arena and a1 as the standby arena.
-func NewRawLogger(arenaSize int64, w io.Writer) *RawLogger {
+func NewRawLogger(arenaSize uint32, w io.Writer) *RawLogger {
 	// Allocate arena buffers.
 	a0 := &Arena{
 		buf: make([]byte, arenaSize),
@@ -68,7 +68,7 @@ func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
 		m.consumerLoop(
 			ctx,
 
-			func(a *Arena, used int64) {
+			func(a *Arena, used int32) {
 				m.flushArena(a)
 			},
 		)
@@ -82,7 +82,7 @@ func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
 // flushes it, and resets it.
 //
 // This is only the skeleton — flushing and thresholds are implemented elsewhere.
-func (m *RawLogger) consumerLoop(ctx context.Context, flusher func(a *Arena, used int64)) {
+func (m *RawLogger) consumerLoop(ctx context.Context, flusher flusher) {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 

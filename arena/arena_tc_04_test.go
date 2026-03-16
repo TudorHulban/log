@@ -37,7 +37,7 @@ func TestRollbackStorm(t *testing.T) {
 
 			for range 10 {
 				// Random size between 10-100 bytes
-				size := int64(10 + rand.Intn(90))
+				size := uint32(10 + rand.Intn(90))
 
 				region, couldWrite := rawLogger.BeginWrite(size)
 				if couldWrite {
@@ -53,7 +53,10 @@ func TestRollbackStorm(t *testing.T) {
 	wgProducers.Wait()
 
 	// Verify: Rollback counter matches failures
-	require.Equal(t, rollbacks.Load(), arena.rollbackCounter.Load())
+	require.EqualValues(t,
+		rollbacks.Load(),
+		arena.rollbackCounter.Load(),
+	)
 	require.True(t, successes.Load() > 0 || rollbacks.Load() > 0)
 	require.True(t, arena.cursor.Load() <= 1000) // Never exceed
 }

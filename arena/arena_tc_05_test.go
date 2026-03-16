@@ -36,7 +36,7 @@ func TestContextCancelDuringWait(t *testing.T) {
 		rawLogger.consumerLoop(
 			ctx,
 
-			func(a *Arena, used int64) {
+			func(a *Arena, used int32) {
 				rawLogger.flushArena(a)
 			},
 		)

@@ -2,9 +2,10 @@ package arena
 
 // WriteRegion describes a reserved region inside an arena.
 type WriteRegion struct {
-	arena  *Arena
-	offset int64
-	size   int64
+	arena *Arena
+
+	offset uint32
+	size   uint32
 }
 
 // BeginWrite attempts to reserve n bytes in the current active arena.
@@ -19,7 +20,7 @@ type WriteRegion struct {
 //   - reservation if reversed
 //   - rollback counter is incremented
 //   - ok == false
-func (m *RawLogger) BeginWrite(n int64) (WriteRegion, bool) {
+func (m *RawLogger) BeginWrite(n uint32) (WriteRegion, bool) {
 	arena := m.active.Load()
 	if arena == nil {
 		return WriteRegion{}, false
@@ -43,7 +44,7 @@ func (m *RawLogger) BeginWrite(n int64) (WriteRegion, bool) {
 	// Check for overflow.
 	if offset < 0 || offset+n > m.arenaSize {
 		// undo reservation
-		arena.cursor.Add(-n)
+		arena.cursor.Add(int32(-n))
 
 		arena.AddRollback()
 		arena.Leave()

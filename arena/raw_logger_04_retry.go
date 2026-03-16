@@ -7,7 +7,7 @@ package arena
 // "try once, rotate may have happened, try again" pattern.
 //
 // It does NOT loop indefinitely and does NOT block.
-func (m *RawLogger) TryWrite(n int64) (WriteRegion, bool) {
+func (m *RawLogger) TryWrite(n uint32) (WriteRegion, bool) {
 	// First attempt.
 	region, canWrite := m.BeginWrite(n)
 	if canWrite {

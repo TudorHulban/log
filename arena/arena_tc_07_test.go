@@ -43,7 +43,7 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 		rawLogger.consumerLoop(
 			ctx,
 
-			func(a *Arena, used int64) {
+			func(a *Arena, used int32) {
 				// Capture output for validation
 				data := a.buf[:used]
 
@@ -78,7 +78,7 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 					strings.Repeat("x", 50))
 
 				rawLogger.Write(
-					int64(len(payload)),
+					uint32(len(payload)),
 
 					func(dst []byte) {
 						// Double-check destination before writing

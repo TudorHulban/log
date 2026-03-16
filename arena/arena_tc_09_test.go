@@ -12,7 +12,7 @@ import (
 // Test: Writes of exact arena size, writes larger than arena
 // Verifies: Flood handling as described in Arena.md
 func TestExactAndOversizedWrites(t *testing.T) {
-	var sizeArena int64 = 100
+	var sizeArena uint32 = 100
 
 	rawLogger := NewRawLogger(sizeArena, &bytes.Buffer{})
 
@@ -23,7 +23,7 @@ func TestExactAndOversizedWrites(t *testing.T) {
 
 	rawLogger.EndWrite(region)
 
-	require.Equal(t,
+	require.EqualValues(t,
 		sizeArena,
 		rawLogger.active.Load().cursor.Load(),
 	)

@@ -20,8 +20,8 @@ func (m *RawLogger) flushArena(a *Arena) {
 		return
 	}
 
-	used := a.cursor.Load()
-	if used <= 0 {
+	used := uint32(a.cursor.Load())
+	if used == 0 {
 		return
 	}
 
@@ -35,7 +35,7 @@ func (m *RawLogger) flushArena(a *Arena) {
 }
 
 // flushOnShutdown flushes both arenas best-effort.
-func (m *RawLogger) flushOnShutdown(ctx context.Context, flusher func(a *Arena, used int64)) {
+func (m *RawLogger) flushOnShutdown(ctx context.Context, flusher flusher) {
 	// First rotation: seal whatever is currently active (call it A).
 	firstSealed := m.rotate()
 

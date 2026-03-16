@@ -17,17 +17,17 @@ type Arena struct { //nolint:govet
 
 	// cursor is the current write position (in bytes) inside buf.
 	// Producers use atomic fetch-add on this to reserve regions.
-	cursor atomic.Int64
+	cursor atomic.Int32
 	_      [56]byte // pad to 64 bytes (typical cache line size)
 
 	// numberWriters tracks the number of producers currently writing into this arena.
 	// The consumer waits for this to reach zero before flushing.
-	numberWriters atomic.Int64
+	numberWriters atomic.Int32
 	_             [56]byte // pad to 64 bytes
 
 	// rollbackCounter counts failed reservations near the end of the arena.
 	// Used by the consumer as a signal that the arena is under pressure.
-	rollbackCounter atomic.Int64
+	rollbackCounter atomic.Int32
 	_               [56]byte // pad to 64 bytes
 
 	// buf is the underlying byte storage for this arena.
@@ -49,10 +49,10 @@ type Arena struct { //nolint:govet
 // The consumer will reset the arena when rotating.
 //
 // Returns the offset at which the producer is entitled to write.
-func (a *Arena) Reserve(n int64) int64 {
+func (a *Arena) Reserve(n uint32) uint32 {
 	// Atomically reserve space by bumping the cursor.
 	// offset = old cursor value
-	return a.cursor.Add(n) - n
+	return uint32(a.cursor.Add(int32(n))) - n
 }
 
 // Enter increments the writers-in-flight counter.

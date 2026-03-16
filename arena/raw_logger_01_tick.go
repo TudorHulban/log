@@ -1,11 +1,13 @@
 package arena
 
+type flusher func(a *Arena, used int32)
+
 // tick performs one consumer iteration:
 // - checks if active arena should be sealed
 // - rotates if needed
 // - drains writers
 // - flushes sealed arena
-func (m *RawLogger) tick(flusher func(a *Arena, used int64)) {
+func (m *RawLogger) tick(flusher flusher) {
 	activeArena := m.active.Load()
 	if activeArena == nil {
 		return

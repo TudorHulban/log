@@ -1,6 +1,6 @@
 package arena
 
-type flusher func(a *Arena, used int32)
+type flusher func(a *arena, used int32)
 
 // tick performs one consumer iteration:
 // - checks if active arena should be sealed

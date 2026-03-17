@@ -12,7 +12,7 @@ import (
 // double-buffered, lock-free producer/consumer setup.
 //
 // Methods are defined elsewhere; this file only defines the data layout.
-type Arena struct { //nolint:govet
+type arena struct { //nolint:govet
 	// Hot atomics (each on its own cache line).
 
 	// cursor is the current write position (in bytes) inside buf.
@@ -49,7 +49,7 @@ type Arena struct { //nolint:govet
 // The consumer will reset the arena when rotating.
 //
 // Returns the offset at which the producer is entitled to write.
-func (a *Arena) Reserve(n uint32) uint32 {
+func (a *arena) Reserve(n uint32) uint32 {
 	// Atomically reserve space by bumping the cursor.
 	// offset = old cursor value
 	return uint32(a.cursor.Add(int32(n))) - n
@@ -57,18 +57,18 @@ func (a *Arena) Reserve(n uint32) uint32 {
 
 // Enter increments the writers-in-flight counter.
 // Producers must call this before attempting a reservation.
-func (a *Arena) Enter() {
+func (a *arena) Enter() {
 	a.numberWriters.Add(1)
 }
 
 // Leave decrements the writers-in-flight counter.
 // Producers must call this after finishing their write.
-func (a *Arena) Leave() {
+func (a *arena) Leave() {
 	a.numberWriters.Add(-1)
 }
 
 // AddRollback increments the rollback counter.
 // Producers call this when a reservation overflows the arena.
-func (a *Arena) AddRollback() {
+func (a *arena) AddRollback() {
 	a.rollbackCounter.Add(1)
 }

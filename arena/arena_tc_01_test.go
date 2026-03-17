@@ -21,7 +21,7 @@ import (
 func TestConcurrentWritesWithRotation(t *testing.T) {
 	var out bytes.Buffer
 
-	rawLogger := NewRawLogger(1024, &out)
+	rawLogger := NewRawLogger(_Size1K, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -34,7 +34,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 			rawLogger.consumerLoop(
 				ctx,
 
-				func(a *Arena, used int32) {
+				func(a *arena, used int32) {
 					rawLogger.waitForWriters(a)
 					rawLogger.flushArena(a)
 					rawLogger.resetArena(a)
@@ -63,7 +63,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 					j,
 				)
 
-				canWrite := rawLogger.Write(
+				canWrite := rawLogger.write(
 					uint32(len(payload)),
 
 					func(dst []byte) {

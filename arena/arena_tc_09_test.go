@@ -17,11 +17,11 @@ func TestExactAndOversizedWrites(t *testing.T) {
 	rawLogger := NewRawLogger(sizeArena, &bytes.Buffer{})
 
 	// Case 1: Write exactly arena size
-	region, canWrite := rawLogger.BeginWrite(sizeArena)
+	region, canWrite := rawLogger.beginWrite(sizeArena)
 	require.True(t, canWrite)
 	require.Zero(t, region.offset)
 
-	rawLogger.EndWrite(region)
+	rawLogger.endWrite(region)
 
 	require.EqualValues(t,
 		sizeArena,
@@ -32,7 +32,7 @@ func TestExactAndOversizedWrites(t *testing.T) {
 	rawLogger.rotate()
 
 	// Case 2: Write larger than arena (flooding)
-	region, canWrite = rawLogger.BeginWrite(sizeArena + 1)
+	region, canWrite = rawLogger.beginWrite(sizeArena + 1)
 	require.False(t, canWrite)
 	require.Zero(t, region)
 

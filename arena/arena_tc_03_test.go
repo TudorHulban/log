@@ -16,7 +16,7 @@ import (
 func TestSealDuringActiveWrites(t *testing.T) {
 	var out bytes.Buffer
 
-	rawLogger := NewRawLogger(1024, &out)
+	rawLogger := NewRawLogger(_Size1K, &out)
 
 	var wgProducers sync.WaitGroup
 
@@ -31,7 +31,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 			defer wgProducers.Done()
 
 			// Slow write that takes time
-			region, couldWrite := rawLogger.BeginWrite(100)
+			region, couldWrite := rawLogger.beginWrite(100)
 			if !couldWrite {
 				return
 			}
@@ -44,7 +44,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 			// Write data
 			copy(region.Buf(), bytes.Repeat([]byte("x"), 100))
 
-			rawLogger.EndWrite(region)
+			rawLogger.endWrite(region)
 		}()
 	}
 
@@ -61,7 +61,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	require.Zero(t, sealedArena.rollbackCounter.Load())
 
 	// Try to write to active arena (should be new one)
-	region, couldWrite := rawLogger.BeginWrite(10)
+	region, couldWrite := rawLogger.beginWrite(10)
 	require.True(t, couldWrite)
 
 	// Should be other arena
@@ -69,7 +69,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 		rawLogger.arenaSecond,
 		region.arena,
 	)
-	rawLogger.EndWrite(region)
+	rawLogger.endWrite(region)
 
 	// Wait for all slow writes to complete
 	wgProducers.Wait()

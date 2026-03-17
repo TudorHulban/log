@@ -3,7 +3,6 @@ package arena
 import (
 	"context"
 	"io"
-	"runtime"
 	"sync/atomic"
 	"time"
 )
@@ -15,15 +14,15 @@ type RawLogger struct {
 
 	// Pointer to the currently active arena.
 	// Producers read this atomically to know where to write.
-	active atomic.Pointer[Arena]
+	active atomic.Pointer[arena]
 
 	// The two arenas used in double-buffer rotation.
-	arenaFirst  *Arena
-	arenaSecond *Arena
+	arenaFirst  *arena
+	arenaSecond *arena
 
 	// The arena currently sealed and waiting to be flushed.
 	// This is informational; consumer logic will use it.
-	sealed atomic.Pointer[Arena]
+	sealed atomic.Pointer[arena]
 
 	// Size of each arena (capacity of Arena.Buf).
 	arenaSize uint32
@@ -33,13 +32,13 @@ type RawLogger struct {
 // the Manager with a0 as the active arena and a1 as the standby arena.
 func NewRawLogger(arenaSize uint32, w io.Writer) *RawLogger {
 	// Allocate arena buffers.
-	a0 := &Arena{
+	a0 := &arena{
 		buf: make([]byte, arenaSize),
 	}
 
 	result := RawLogger{
 		arenaFirst: a0,
-		arenaSecond: &Arena{
+		arenaSecond: &arena{
 			buf: make([]byte, arenaSize),
 		},
 
@@ -68,7 +67,7 @@ func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
 		m.consumerLoop(
 			ctx,
 
-			func(a *Arena, used int32) {
+			func(a *arena, used int32) {
 				m.flushArena(a)
 			},
 		)
@@ -102,52 +101,8 @@ func (m *RawLogger) consumerLoop(ctx context.Context, flusher flusher) {
 
 // resetArena clears the arena state so it can be reused after flushing.
 // This does NOT reallocate the buffer.
-func (m *RawLogger) resetArena(a *Arena) {
+func (m *RawLogger) resetArena(a *arena) {
 	a.cursor.Store(0)
 	a.numberWriters.Store(0)
 	a.rollbackCounter.Store(0)
-}
-
-// waitForWriters blocks until writers-in-flight reaches zero.
-// should be used in tick.
-func (m *RawLogger) waitForWriters(a *Arena) {
-	writers := &a.numberWriters
-
-	spin := 0
-
-	for writers.Load() != 0 {
-		spin++
-
-		if spin < 64 {
-			continue
-		}
-
-		spin = 0
-		runtime.Gosched()
-	}
-}
-
-func (m *RawLogger) waitForWritersCtx(ctx context.Context, a *Arena) bool {
-	spin := 0
-
-	for {
-		if a.numberWriters.Load() == 0 {
-			return true
-		}
-
-		spin++
-
-		if spin < 50 {
-			runtime.Gosched()
-			continue
-		}
-
-		select {
-		case <-ctx.Done():
-			return false
-		default:
-		}
-
-		time.Sleep(time.Microsecond)
-	}
 }

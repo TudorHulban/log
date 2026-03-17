@@ -24,7 +24,7 @@ func TestManagerSingleWrite(t *testing.T) {
 	payload := "hi!"
 
 	require.True(t,
-		m.Write(
+		m.write(
 			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, []byte(payload))
@@ -57,7 +57,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 			i,
 		)
 
-		manager.Write(
+		manager.write(
 			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, []byte(payload))
@@ -68,7 +68,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 	_ = sink.N.Load() // force sink to stay live
 }
 
-// BenchmarkArenaWrite-16    	78782551	        14.73 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenaWrite-16    	67048297	        18.09 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkArenaWrite(b *testing.B) {
 	b.ReportAllocs()
 
@@ -80,7 +80,7 @@ func BenchmarkArenaWrite(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		manager.Write(
+		manager.write(
 			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, payload)

@@ -1,0 +1,133 @@
+package arena
+
+import "runtime"
+
+// tryWrite attempts BeginWrite once. If it fails, it reloads the active
+// arena and tries exactly one more time.
+//
+// This is a convenience helper for callers who want a simple
+// "try once, rotate may have happened, try again" pattern.
+//
+// It does NOT loop indefinitely and does NOT block.
+func (m *RawLogger) tryWrite(n uint32) (WriteRegion, bool) {
+	// First attempt.
+	region, canWrite := m.beginWrite(n)
+	if canWrite {
+		return region, true
+	}
+
+	// Reload active arena — rotation may have occurred.
+	// Second attempt.
+	return m.beginWrite(n)
+}
+
+// beginWrite attempts to reserve n bytes in the current active arena.
+//
+// On success:
+//   - writers-in-flight is incremented
+//   - a region is returned
+//   - caller MUST call EndWrite
+//
+// On failure:
+//   - writers-in-flight is decremented
+//   - reservation if reversed
+//   - rollback counter is incremented
+//   - ok == false
+func (m *RawLogger) beginWrite(n uint32) (WriteRegion, bool) {
+	arena := m.active.Load()
+	if arena == nil {
+		return WriteRegion{}, false
+	}
+
+	// Enter BEFORE reserving, but we must validate we are still on the
+	// active arena. A rotation could have happened between Load and Enter (TOCTOU).
+	arena.Enter()
+
+	// Re-check: if the active arena changed after we entered, this arena
+	// is now sealed. Leave immediately — the cursor may be reset under us.
+	if m.active.Load() != arena {
+		arena.Leave()
+
+		return WriteRegion{}, false
+	}
+
+	// Reserve space.
+	offset := arena.Reserve(n)
+
+	// Check for overflow.
+	if offset+n > m.arenaSize {
+		// undo reservation
+		arena.cursor.Add(int32(-n))
+
+		arena.AddRollback()
+		arena.Leave()
+
+		return WriteRegion{}, false
+	}
+
+	return WriteRegion{
+			arena:  arena,
+			offset: offset,
+			size:   n,
+		},
+		true
+}
+
+// write attempts to write n bytes into the active arena.
+// The caller provides a function that writes into the reserved buffer.
+//
+// The write function receives a byte slice of length n and must fill it.
+func (m *RawLogger) write(n uint32, fn func(dst []byte)) bool {
+	// Try to region space (with one retry).
+	region, canWrite := m.tryWrite(n)
+	if !canWrite {
+		return false
+	}
+
+	// Mark write complete.
+	defer m.endWrite(region)
+
+	// Write into the reserved region.
+	fn(region.Buf())
+
+	return true
+}
+
+func (l *RawLogger) Write(payload []byte) (int, error) {
+	if len(payload) == 0 {
+		return 0, nil
+	}
+
+	// Fast path: try once
+	if l.write(
+		uint32(len(payload)),
+		func(dst []byte) {
+			copy(dst, payload)
+		},
+	) {
+		return len(payload), nil
+	}
+
+	// Backpressure policy
+	switch l.onFull {
+	case drop:
+		// silently drop (common for high-perf logging)
+		return 0, nil
+
+	case block:
+		// retry loop (bounded or unbounded depending on your design)
+		for {
+			if l.write(uint32(len(payload)), func(dst []byte) {
+				copy(dst, payload)
+			}) {
+				return len(payload), nil
+			}
+			runtime.Gosched()
+		}
+
+	case errorOnFull:
+		return 0, ErrBufferFull
+	}
+
+	return 0, nil
+}

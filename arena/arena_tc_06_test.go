@@ -12,7 +12,7 @@ import (
 // Test: Producer reserves space exactly as consumer seals
 // Verifies: No writes to arena after it is sealed
 func TestReserveVsSealRace(t *testing.T) {
-	rawLogger := NewRawLogger(1024, &bytes.Buffer{})
+	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
 
 	// Channel to coordinate race
 	chReady := make(chan struct{})
@@ -23,7 +23,7 @@ func TestReserveVsSealRace(t *testing.T) {
 		<-chReady // Wait for signal
 
 		// Attempt to reserve
-		region, canWrite := rawLogger.BeginWrite(100)
+		region, canWrite := rawLogger.beginWrite(100)
 		if canWrite {
 			// If we got a region, it must be in active arena
 			if region.arena != rawLogger.active.Load() {
@@ -32,7 +32,7 @@ func TestReserveVsSealRace(t *testing.T) {
 				return
 			}
 
-			rawLogger.EndWrite(region)
+			rawLogger.endWrite(region)
 		}
 
 		chDone <- true

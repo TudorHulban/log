@@ -7,7 +7,7 @@ package arena
 //   - rollback pressure (many failed reservations)
 //
 // The exact thresholds can be tuned later.
-func (m *RawLogger) shouldSeal(a *Arena) bool {
+func (m *RawLogger) shouldSeal(a *arena) bool {
 	used := uint32(a.cursor.Load())
 
 	// Hard threshold: near capacity.

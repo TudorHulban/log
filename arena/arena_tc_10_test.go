@@ -12,13 +12,13 @@ import (
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic
 func TestProducerPanic(t *testing.T) {
-	rawLogger := NewRawLogger(1024, &bytes.Buffer{})
+	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
 
 	// Use defer/recover to simulate panic in producer
 	func() {
 		defer func() { recover() }()
 
-		region, canWrite := rawLogger.BeginWrite(100)
+		region, canWrite := rawLogger.beginWrite(100)
 		require.True(t, canWrite)
 		require.NotZero(t, region)
 
@@ -35,4 +35,36 @@ func TestProducerPanic(t *testing.T) {
 
 	// This would hang consumer forever - need timeout mechanism
 	// Real implementation should handle this case
+
+	require.Zero(t,
+		activeArena.numberWriters.Load(),
+		"blocked writer should be handled",
+	)
+}
+
+func TestProducerInWritePanic(t *testing.T) {
+	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
+
+	// Use defer/recover to simulate panic in producer
+	func() {
+		defer func() { recover() }()
+
+		payload := t.Name()
+
+		rawLogger.write(
+			uint32(len(payload)),
+
+			func(dst []byte) {
+				// Panic before EndWrite
+				panic("simulated crash")
+			},
+		)
+	}()
+
+	// writers should be zero as the write finishes with an endwrite.
+	activeArena := rawLogger.active.Load()
+	require.Zero(t,
+		activeArena.numberWriters.Load(),
+		"blocked writer should be handled",
+	)
 }

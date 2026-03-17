@@ -21,7 +21,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	arena.cursor.Store(90)
 
 	// Producer 1: Reserve 10 bytes (should fit exactly)
-	region10, couldReserve10 := rawLogger.BeginWrite(10)
+	region10, couldReserve10 := rawLogger.beginWrite(10)
 	require.True(t, couldReserve10)
 	require.EqualValues(t,
 		90,
@@ -29,7 +29,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	)
 
 	// Producer 2: Reserve 1 byte (should fail - overflow)
-	regionZero, couldReserveMore := rawLogger.BeginWrite(1)
+	regionZero, couldReserveMore := rawLogger.beginWrite(1)
 	require.False(t, couldReserveMore)
 	require.Zero(t, regionZero)
 	require.EqualValues(t,
@@ -38,7 +38,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	)
 
 	// Complete first write
-	rawLogger.EndWrite(region10)
+	rawLogger.endWrite(region10)
 
 	// Verify: Final cursor at 100
 	require.EqualValues(t,

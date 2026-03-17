@@ -15,7 +15,7 @@ import (
 // Test: Many producers simultaneously attempt writes near arena end.
 // Verifies: Rollback counter correctly tracks failures, no deadlocks.
 func TestRollbackStorm(t *testing.T) {
-	rawLogger := NewRawLogger(1000, &bytes.Buffer{})
+	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
 	arena := rawLogger.active.Load()
 
 	// Fill arena near capacity
@@ -39,10 +39,10 @@ func TestRollbackStorm(t *testing.T) {
 				// Random size between 10-100 bytes
 				size := uint32(10 + rand.Intn(90))
 
-				region, couldWrite := rawLogger.BeginWrite(size)
+				region, couldWrite := rawLogger.beginWrite(size)
 				if couldWrite {
 					successes.Add(1)
-					rawLogger.EndWrite(region)
+					rawLogger.endWrite(region)
 				} else {
 					rollbacks.Add(1)
 				}

@@ -15,7 +15,7 @@ import "context"
 //   - handle errors
 //
 // Those responsibilities belong to the consumer loop.
-func (m *RawLogger) flushArena(a *Arena) {
+func (m *RawLogger) flushArena(a *arena) {
 	if a == nil {
 		return
 	}

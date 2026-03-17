@@ -14,10 +14,10 @@ import (
 // Test: Consumer context cancelled while waiting for writers.
 // Verifies: Shutdown happens promptly, no hangs.
 func TestContextCancelDuringWait(t *testing.T) {
-	rawLogger := NewRawLogger(1024, &bytes.Buffer{})
+	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
 
 	// Start a write that never completes
-	region, couldWrite := rawLogger.BeginWrite(100)
+	region, couldWrite := rawLogger.beginWrite(100)
 	require.True(t, couldWrite)
 
 	// Don't call EndWrite() - simulate stuck producer
@@ -36,7 +36,7 @@ func TestContextCancelDuringWait(t *testing.T) {
 		rawLogger.consumerLoop(
 			ctx,
 
-			func(a *Arena, used int32) {
+			func(a *arena, used int32) {
 				rawLogger.flushArena(a)
 			},
 		)
@@ -54,5 +54,5 @@ func TestContextCancelDuringWait(t *testing.T) {
 	}
 
 	// Clean up stuck producer
-	rawLogger.EndWrite(region)
+	rawLogger.endWrite(region)
 }

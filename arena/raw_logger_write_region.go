@@ -14,6 +14,6 @@ func (r WriteRegion) Buf() []byte {
 }
 
 // endWrite decrements writers-in-flight.
-func (m *RawLogger) endWrite(r WriteRegion) {
+func (*RawLogger) endWrite(r WriteRegion) {
 	r.arena.Leave()
 }

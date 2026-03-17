@@ -12,6 +12,8 @@ import (
 type RawLogger struct {
 	writer io.Writer
 
+	chFlush chan struct{}
+
 	// Pointer to the currently active arena.
 	// Producers read this atomically to know where to write.
 	active atomic.Pointer[arena]
@@ -44,6 +46,8 @@ func NewRawLogger(arenaSize uint32, w io.Writer) *RawLogger {
 
 		arenaSize: arenaSize,
 		writer:    w,
+
+		chFlush: make(chan struct{}, 1),
 	}
 
 	// Set active arena to a0.
@@ -95,14 +99,26 @@ func (m *RawLogger) consumerLoop(ctx context.Context, flusher flusher) {
 
 		case <-ticker.C:
 			m.tick(flusher)
+
+			// consumerLoop gets a third case:
+		case <-m.chFlush:
+			m.tick(flusher) // same seal/wait/flush/reset as ticker path
 		}
+
 	}
 }
 
 // resetArena clears the arena state so it can be reused after flushing.
 // This does NOT reallocate the buffer.
-func (m *RawLogger) resetArena(a *arena) {
+func (*RawLogger) resetArena(a *arena) {
 	a.cursor.Store(0)
-	a.numberWriters.Store(0)
+
+	// numberWriters is intentionally NOT reset here.
+	// waitForWriters guarantees it reaches zero before this arena
+	// is reused. Resetting it here would race with in-flight writers
+	// still holding Enter(), corrupting the count to -1 and hanging
+	// the next waitForWriters call permanently.
+	// a.numberWriters.Store(0)
+
 	a.rollbackCounter.Store(0)
 }

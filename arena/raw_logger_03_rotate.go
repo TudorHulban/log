@@ -6,25 +6,24 @@ package arena
 // This function does NOT wait for writers to drain and does NOT flush.
 // Waiting for writers and flushing are handled by the consumer logic.
 func (m *RawLogger) rotate() *arena {
-	// Load current active arena.
-	current := m.active.Load()
-	if current == nil {
+	activeArena := m.active.Load()
+	if activeArena == nil {
 		return nil
 	}
 
 	// Determine the next arena.
 	var next *arena
-	if current == m.arenaFirst {
+	if activeArena == m.arenaFirst {
 		next = m.arenaSecond
 	} else {
 		next = m.arenaFirst
 	}
 
 	// Mark current as sealed.
-	m.sealed.Store(current)
+	m.sealed.Store(activeArena)
 
 	// Switch active to the next arena.
 	m.active.Store(next)
 
-	return current
+	return activeArena
 }

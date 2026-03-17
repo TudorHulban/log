@@ -1,6 +1,7 @@
 package log
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"testing"
@@ -65,6 +66,34 @@ func BenchmarkArenaNilTimestamp(b *testing.B) {
 
 	// Wait for consumer shutdown flush.
 	<-chIngestionEnd
+}
+
+func BenchmarkLogger_Print(b *testing.B) {
+	var sink bytes.Buffer
+
+	writer := arena.NewRawLogger(arena.Size100K, &sink)
+	ctx, cancel := context.WithCancel(context.Background())
+	chEnd := writer.StartIngestion(ctx)
+
+	defer func() {
+		cancel()
+		<-chEnd
+	}()
+
+	logger := NewLogger(
+		&ParamsNewLogger{
+			LoggerWriter:  writer,
+			LoggerLevel:   LevelINFO,
+			WithTimestamp: timestamp.TimestampNil,
+		},
+	)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for b.Loop() {
+		logger.Print("hi", 123, "world")
+	}
 }
 
 // BenchmarkLogger-16    	 8522778	       145.4 ns/op	       8 B/op	       0 allocs/op

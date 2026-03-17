@@ -26,8 +26,9 @@ func TestManagerSingleWrite(t *testing.T) {
 	require.NoError(t,
 		rawLogger.write(
 			uint32(len(payload)),
-			func(dst []byte) {
-				copy(dst, []byte(payload))
+
+			func(destination []byte) {
+				copy(destination, []byte(payload))
 			},
 		),
 	)
@@ -65,7 +66,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 		)
 	}
 
-	_ = sink.N.Load() // force sink to stay live
+	_ = sink.TotalBytesWritten.Load() // force sink to stay live
 }
 
 // BenchmarkArenaWrite-16    	67048297	        18.09 ns/op	       0 B/op	       0 allocs/op
@@ -88,5 +89,5 @@ func BenchmarkArenaWrite(b *testing.B) {
 		)
 	}
 
-	_ = sink.N.Load()
+	_ = sink.TotalBytesWritten.Load()
 }

@@ -57,7 +57,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	sealedArena := rawLogger.rotate()
 	require.NotNil(t, sealedArena)
 
-	// no rollbacks should have occured
+	// no rollbacks should have occurred
 	require.Zero(t, sealedArena.rollbackCounter.Load())
 
 	// Try to write to active arena (should be new one)

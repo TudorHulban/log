@@ -8,7 +8,7 @@ import (
 
 // waitForWriters blocks until writers-in-flight reaches zero.
 // should be used in tick.
-func (m *RawLogger) waitForWriters(a *arena) {
+func (*RawLogger) waitForWriters(a *arena) {
 	writers := &a.numberWriters
 
 	spin := 0
@@ -21,11 +21,12 @@ func (m *RawLogger) waitForWriters(a *arena) {
 		}
 
 		spin = 0
+
 		runtime.Gosched()
 	}
 }
 
-func (m *RawLogger) waitForWritersCtx(ctx context.Context, a *arena) bool {
+func (*RawLogger) waitForWritersCtx(ctx context.Context, a *arena) bool {
 	spin := 0
 
 	for {
@@ -37,6 +38,7 @@ func (m *RawLogger) waitForWritersCtx(ctx context.Context, a *arena) bool {
 
 		if spin < 50 {
 			runtime.Gosched()
+
 			continue
 		}
 

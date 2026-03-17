@@ -52,7 +52,7 @@ type arena struct { //nolint:govet
 func (a *arena) Reserve(n uint32) uint32 {
 	// Atomically reserve space by bumping the cursor.
 	// offset = old cursor value
-	return uint32(a.cursor.Add(int32(n))) - n
+	return uint32(a.cursor.Add(int32(n))) - n //nolint:gosec
 }
 
 // Enter increments the writers-in-flight counter.

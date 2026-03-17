@@ -20,7 +20,7 @@ func (m *RawLogger) flushArena(a *arena) {
 		return
 	}
 
-	used := uint32(a.cursor.Load())
+	used := uint32(a.cursor.Load()) //nolint:gosec
 	if used == 0 {
 		return
 	}
@@ -65,5 +65,13 @@ func (m *RawLogger) flushOnShutdown(ctx context.Context, flusher flusher) {
 		if used > 0 {
 			flusher(firstSealed, used)
 		}
+	}
+}
+
+func (m *RawLogger) signalFlush() {
+	select {
+	case m.chFlush <- struct{}{}:
+
+	default: // signal already pending, consumer will handle it
 	}
 }

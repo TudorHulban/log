@@ -57,10 +57,12 @@ func (m *RawLogger) beginWrite(n uint32) (WriteRegion, error) {
 	// Check for overflow.
 	if offset+n > m.arenaSize {
 		// undo reservation
-		arena.cursor.Add(int32(-n))
+		arena.cursor.Add(int32(-n)) //nolint:gosec
 
 		arena.AddRollback()
 		arena.Leave()
+
+		m.signalFlush()
 
 		return WriteRegion{},
 			ErrWriteMessageTooLarge
@@ -94,14 +96,14 @@ func (m *RawLogger) write(n uint32, fn func(dst []byte)) error {
 	return nil
 }
 
-func (l *RawLogger) Write(payload []byte) (int, error) {
+func (m *RawLogger) Write(payload []byte) (int, error) {
 	if len(payload) == 0 {
 		return 0, nil
 	}
 
 	// Fast path: try once
-	errWrite := l.write(
-		uint32(len(payload)),
+	errWrite := m.write(
+		uint32(len(payload)), //nolint:gosec
 		func(dst []byte) {
 			copy(dst, payload)
 		},

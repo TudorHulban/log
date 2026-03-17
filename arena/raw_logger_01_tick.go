@@ -1,7 +1,5 @@
 package arena
 
-type flusher func(a *arena, used int32)
-
 // tick performs one consumer iteration:
 // - checks if active arena should be sealed
 // - rotates if needed
@@ -29,8 +27,6 @@ func (m *RawLogger) tick(flusher flusher) {
 		flusher(sealedArena, used)
 	}
 
-	// Do NOT call resetArena here.
-	// The flush callback owns the full lifecycle:
-	// waitForWriters + flush + reset.
+	m.resetArena(sealedArena)
 	m.sealed.Store(nil)
 }

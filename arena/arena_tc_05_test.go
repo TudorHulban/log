@@ -17,8 +17,8 @@ func TestContextCancelDuringWait(t *testing.T) {
 	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
 
 	// Start a write that never completes
-	region, couldWrite := rawLogger.beginWrite(100)
-	require.True(t, couldWrite)
+	region, errWrite := rawLogger.beginWrite(100)
+	require.NoError(t, errWrite)
 
 	// Don't call EndWrite() - simulate stuck producer
 

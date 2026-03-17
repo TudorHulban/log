@@ -46,8 +46,6 @@ func (l *Logger) Printw(msg string, args ...any) {
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	l.buf = l.buf[:0] // reset without allocating
-
 	if l.withJSON {
 		l.buf = l.appendJSON(l.buf, l.fnTimestamp(l.buf), l.labelInfo(), format, args...)
 

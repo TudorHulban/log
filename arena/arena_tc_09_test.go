@@ -17,8 +17,8 @@ func TestExactAndOversizedWrites(t *testing.T) {
 	rawLogger := NewRawLogger(sizeArena, &bytes.Buffer{})
 
 	// Case 1: Write exactly arena size
-	region, canWrite := rawLogger.beginWrite(sizeArena)
-	require.True(t, canWrite)
+	region, errWrite := rawLogger.beginWrite(sizeArena)
+	require.NoError(t, errWrite)
 	require.Zero(t, region.offset)
 
 	rawLogger.endWrite(region)
@@ -32,8 +32,8 @@ func TestExactAndOversizedWrites(t *testing.T) {
 	rawLogger.rotate()
 
 	// Case 2: Write larger than arena (flooding)
-	region, canWrite = rawLogger.beginWrite(sizeArena + 1)
-	require.False(t, canWrite)
+	region, errWrite = rawLogger.beginWrite(sizeArena + 1)
+	require.ErrorIs(t, errWrite, ErrWriteMessageTooLarge)
 	require.Zero(t, region)
 
 	// Rollback should increment

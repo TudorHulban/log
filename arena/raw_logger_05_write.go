@@ -1,7 +1,5 @@
 package arena
 
-import "runtime"
-
 // tryWrite attempts BeginWrite once. If it fails, it reloads the active
 // arena and tries exactly one more time.
 //
@@ -9,11 +7,11 @@ import "runtime"
 // "try once, rotate may have happened, try again" pattern.
 //
 // It does NOT loop indefinitely and does NOT block.
-func (m *RawLogger) tryWrite(n uint32) (WriteRegion, bool) {
+func (m *RawLogger) tryWrite(n uint32) (WriteRegion, error) {
 	// First attempt.
 	region, canWrite := m.beginWrite(n)
-	if canWrite {
-		return region, true
+	if canWrite == nil {
+		return region, nil
 	}
 
 	// Reload active arena — rotation may have occurred.
@@ -33,10 +31,11 @@ func (m *RawLogger) tryWrite(n uint32) (WriteRegion, bool) {
 //   - reservation if reversed
 //   - rollback counter is incremented
 //   - ok == false
-func (m *RawLogger) beginWrite(n uint32) (WriteRegion, bool) {
+func (m *RawLogger) beginWrite(n uint32) (WriteRegion, error) {
 	arena := m.active.Load()
 	if arena == nil {
-		return WriteRegion{}, false
+		return WriteRegion{},
+			ErrWriteNoActiveArena
 	}
 
 	// Enter BEFORE reserving, but we must validate we are still on the
@@ -48,7 +47,8 @@ func (m *RawLogger) beginWrite(n uint32) (WriteRegion, bool) {
 	if m.active.Load() != arena {
 		arena.Leave()
 
-		return WriteRegion{}, false
+		return WriteRegion{},
+			ErrWriteActiveArenaMismatch
 	}
 
 	// Reserve space.
@@ -62,7 +62,8 @@ func (m *RawLogger) beginWrite(n uint32) (WriteRegion, bool) {
 		arena.AddRollback()
 		arena.Leave()
 
-		return WriteRegion{}, false
+		return WriteRegion{},
+			ErrWriteMessageTooLarge
 	}
 
 	return WriteRegion{
@@ -70,18 +71,18 @@ func (m *RawLogger) beginWrite(n uint32) (WriteRegion, bool) {
 			offset: offset,
 			size:   n,
 		},
-		true
+		nil
 }
 
 // write attempts to write n bytes into the active arena.
 // The caller provides a function that writes into the reserved buffer.
 //
 // The write function receives a byte slice of length n and must fill it.
-func (m *RawLogger) write(n uint32, fn func(dst []byte)) bool {
+func (m *RawLogger) write(n uint32, fn func(dst []byte)) error {
 	// Try to region space (with one retry).
 	region, canWrite := m.tryWrite(n)
-	if !canWrite {
-		return false
+	if canWrite != nil {
+		return canWrite
 	}
 
 	// Mark write complete.
@@ -90,7 +91,7 @@ func (m *RawLogger) write(n uint32, fn func(dst []byte)) bool {
 	// Write into the reserved region.
 	fn(region.Buf())
 
-	return true
+	return nil
 }
 
 func (l *RawLogger) Write(payload []byte) (int, error) {
@@ -99,35 +100,15 @@ func (l *RawLogger) Write(payload []byte) (int, error) {
 	}
 
 	// Fast path: try once
-	if l.write(
+	errWrite := l.write(
 		uint32(len(payload)),
 		func(dst []byte) {
 			copy(dst, payload)
 		},
-	) {
-		return len(payload), nil
+	)
+	if errWrite != nil {
+		return 0, errWrite
 	}
 
-	// Backpressure policy
-	switch l.onFull {
-	case drop:
-		// silently drop (common for high-perf logging)
-		return 0, nil
-
-	case block:
-		// retry loop (bounded or unbounded depending on your design)
-		for {
-			if l.write(uint32(len(payload)), func(dst []byte) {
-				copy(dst, payload)
-			}) {
-				return len(payload), nil
-			}
-			runtime.Gosched()
-		}
-
-	case errorOnFull:
-		return 0, ErrBufferFull
-	}
-
-	return 0, nil
+	return len(payload), nil
 }

@@ -63,15 +63,13 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 					j,
 				)
 
-				canWrite := rawLogger.write(
+				if errWrite := rawLogger.write(
 					uint32(len(payload)),
 
 					func(dst []byte) {
 						copy(dst, []byte(payload))
 					},
-				)
-
-				if canWrite {
+				); errWrite == nil {
 					successCount.Add(1)
 				}
 

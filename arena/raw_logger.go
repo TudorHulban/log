@@ -59,10 +59,10 @@ func NewRawLogger(arenaSize uint32, w io.Writer) *RawLogger {
 // The caller provides the flush function, which receives the
 // raw bytes of each sealed arena.
 func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
-	chSignalStarted := make(chan struct{})
+	chIngestionEnd := make(chan struct{})
 
 	go func() {
-		defer close(chSignalStarted)
+		defer close(chIngestionEnd)
 
 		m.consumerLoop(
 			ctx,
@@ -73,7 +73,7 @@ func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
 		)
 	}()
 
-	return chSignalStarted
+	return chIngestionEnd
 }
 
 // consumerLoop is the main consumer goroutine.

@@ -23,8 +23,8 @@ func TestReserveVsSealRace(t *testing.T) {
 		<-chReady // Wait for signal
 
 		// Attempt to reserve
-		region, canWrite := rawLogger.beginWrite(100)
-		if canWrite {
+		region, errWrite := rawLogger.beginWrite(100)
+		if errWrite == nil {
 			// If we got a region, it must be in active arena
 			if region.arena != rawLogger.active.Load() {
 				chDone <- false

@@ -1,6 +1,7 @@
 package arena
 
-// Test Case 14: Writer stops indefinetly after n writes.
+// Test Case 14: Backpressure policy
 
-// Test: Write n writes.
-// Verifies logger enters full mode with drops with error blocked.
+// Test: Writer stops indefinetly after n writes.
+// Verifies logger enters full mode
+// with silently drop (common for high-perf logging).

@@ -13,9 +13,6 @@ type Logger struct {
 	localWriter io.Writer
 	fnTimestamp timestamp.Timestamp
 
-	// scratch buffer reused on every log call
-	buf []byte
-
 	logLevel int8
 
 	withCaller bool // for shorter form in case do not need caller file.
@@ -44,8 +41,6 @@ func NewLogger(params *ParamsNewLogger) *Logger {
 		withJSON:    params.WithJSON,
 
 		localWriter: params.LoggerWriter,
-
-		buf: make([]byte, 0, 256),
 	}
 
 	if params.LoggerWriter == nil {

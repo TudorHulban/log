@@ -14,17 +14,17 @@ import (
 func TestManagerSingleWrite(t *testing.T) {
 	var out bytes.Buffer
 
-	m := NewRawLogger(1024, &out)
+	rawLogger := NewRawLogger(1024, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
 
-	done := m.StartIngestion(ctx)
+	chIngestionEnd := rawLogger.StartIngestion(ctx)
 
 	payload := "hi!"
 
-	require.True(t,
-		m.write(
+	require.NoError(t,
+		rawLogger.write(
 			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, []byte(payload))
@@ -33,7 +33,7 @@ func TestManagerSingleWrite(t *testing.T) {
 	)
 
 	// Wait for consumer shutdown flush.
-	<-done
+	<-chIngestionEnd
 
 	require.Equal(t,
 		payload,

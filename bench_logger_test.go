@@ -1,8 +1,11 @@
 package log
 
 import (
+	"context"
+	"io"
 	"testing"
 
+	"github.com/tudorhulban/log/arena"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -30,6 +33,38 @@ func BenchmarkNilTimestamp(b *testing.B) {
 	}
 
 	_ = sink.n.Load() // force sink to stay live
+}
+
+func BenchmarkArenaNilTimestamp(b *testing.B) {
+	b.ReportAllocs()
+
+	writer := arena.NewRawLogger(arena.Size100K, io.Discard)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	chIngestionEnd := writer.StartIngestion(ctx)
+
+	logger := NewLogger(
+		&ParamsNewLogger{
+			LoggerWriter:  writer,
+			LoggerLevel:   LevelINFO,
+			WithTimestamp: timestamp.TimestampNil,
+		},
+	)
+
+	b.ResetTimer()
+
+	for i := 0; b.Loop(); i++ {
+		logger.Printf(
+			`{"level":"info","msg":"user login","user_id":%d}`,
+			i,
+		)
+	}
+
+	cancel()
+
+	// Wait for consumer shutdown flush.
+	<-chIngestionEnd
 }
 
 // BenchmarkLogger-16    	 8522778	       145.4 ns/op	       8 B/op	       0 allocs/op

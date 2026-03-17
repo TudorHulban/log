@@ -31,8 +31,8 @@ func TestSealDuringActiveWrites(t *testing.T) {
 			defer wgProducers.Done()
 
 			// Slow write that takes time
-			region, couldWrite := rawLogger.beginWrite(100)
-			if !couldWrite {
+			region, errWrite := rawLogger.beginWrite(100)
+			if errWrite != nil {
 				return
 			}
 
@@ -61,8 +61,8 @@ func TestSealDuringActiveWrites(t *testing.T) {
 	require.Zero(t, sealedArena.rollbackCounter.Load())
 
 	// Try to write to active arena (should be new one)
-	region, couldWrite := rawLogger.beginWrite(10)
-	require.True(t, couldWrite)
+	region, errWrite := rawLogger.beginWrite(10)
+	require.NoError(t, errWrite)
 
 	// Should be other arena
 	require.Equal(t,

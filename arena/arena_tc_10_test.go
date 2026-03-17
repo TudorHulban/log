@@ -11,35 +11,22 @@ import (
 
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic
-func TestProducerPanic(t *testing.T) {
+func TestWritePanicDoesNotLeak(t *testing.T) {
 	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
 
-	// Use defer/recover to simulate panic in producer
 	func() {
-		defer func() { recover() }()
+		defer func() { _ = recover() }()
 
-		region, canWrite := rawLogger.beginWrite(100)
-		require.True(t, canWrite)
-		require.NotZero(t, region)
-
-		// Panic before EndWrite
-		panic("simulated crash")
+		rawLogger.write(
+			100,
+			func(dst []byte) {
+				panic("some panic")
+			},
+		)
 	}()
 
-	// writers should still be 1 (leaked!)
-	activeArena := rawLogger.active.Load()
-	require.EqualValues(t,
-		1,
-		activeArena.numberWriters.Load(),
-	)
-
-	// This would hang consumer forever - need timeout mechanism
-	// Real implementation should handle this case
-
-	require.Zero(t,
-		activeArena.numberWriters.Load(),
-		"blocked writer should be handled",
-	)
+	active := rawLogger.active.Load()
+	require.Zero(t, active.numberWriters.Load())
 }
 
 func TestProducerInWritePanic(t *testing.T) {

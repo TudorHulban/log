@@ -3,6 +3,7 @@ package arena_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"sync/atomic"
 	"testing"
 
@@ -104,4 +105,38 @@ func BenchmarkRawLogger_WriteParallel(b *testing.B) {
 		writer.TotalBytesWritten.Load(),
 		written.Load()*int64(len(payload)),
 	)
+}
+
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkRawLogger_MultipleSizes/size_16-16         	95403202	        11.65 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkRawLogger_MultipleSizes/size_64-16         	91622713	        13.21 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkRawLogger_MultipleSizes/size_256-16        	67990924	        17.30 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkRawLogger_MultipleSizes/size_1024-16       	55336317	        21.57 ns/op	       0 B/op	       0 allocs/op
+func BenchmarkRawLogger_MultipleSizes(b *testing.B) {
+	sizes := []int{16, 64, 256, 1024}
+
+	for _, size := range sizes {
+		b.Run(
+			fmt.Sprintf("size_%d", size),
+			func(b *testing.B) {
+				writer := helpers.CountWriter{}
+				rawLogger := arena.NewRawLogger(arena.Size1M, &writer)
+
+				ctx, cancel := context.WithCancel(context.Background())
+				ch := rawLogger.StartIngestion(ctx)
+
+				payload := bytes.Repeat([]byte("x"), size)
+
+				b.ReportAllocs()
+				b.ResetTimer()
+
+				for b.Loop() {
+					_, _ = rawLogger.Write(payload)
+				}
+
+				cancel()
+				<-ch
+			},
+		)
+	}
 }

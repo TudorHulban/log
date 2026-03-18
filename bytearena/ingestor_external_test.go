@@ -1,4 +1,4 @@
-package arena_test
+package bytearena_test
 
 import (
 	"bytes"
@@ -8,14 +8,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tudorhulban/log/arena"
+	"github.com/tudorhulban/log/bytearena"
 	"github.com/tudorhulban/log/helpers"
 )
 
 func TestHowToUse(t *testing.T) {
 	var sink bytes.Buffer
 
-	rawLogger := arena.NewRawLogger(arena.Size100K, &sink)
+	rawLogger := bytearena.NewIngestor(bytearena.Size100K, &sink)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := rawLogger.StartIngestion(ctx)
@@ -38,7 +38,7 @@ func TestHowToUse(t *testing.T) {
 func BenchmarkRawLogger_Write(b *testing.B) {
 	writer := helpers.CountWriter{}
 
-	rawLogger := arena.NewRawLogger(arena.Size1M, &writer)
+	rawLogger := bytearena.NewIngestor(bytearena.Size1M, &writer)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := rawLogger.StartIngestion(ctx)
@@ -73,7 +73,7 @@ func BenchmarkRawLogger_Write(b *testing.B) {
 func BenchmarkRawLogger_WriteParallel(b *testing.B) {
 	writer := helpers.CountWriter{}
 
-	rawLogger := arena.NewRawLogger(arena.Size100K, &writer)
+	rawLogger := bytearena.NewIngestor(bytearena.Size100K, &writer)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := rawLogger.StartIngestion(ctx)
@@ -120,7 +120,7 @@ func BenchmarkRawLogger_MultipleSizes(b *testing.B) {
 			fmt.Sprintf("size_%d", size),
 			func(b *testing.B) {
 				writer := helpers.CountWriter{}
-				rawLogger := arena.NewRawLogger(arena.Size1M, &writer)
+				rawLogger := bytearena.NewIngestor(bytearena.Size1M, &writer)
 
 				ctx, cancel := context.WithCancel(context.Background())
 				ch := rawLogger.StartIngestion(ctx)

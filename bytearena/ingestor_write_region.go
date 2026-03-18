@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // WriteRegion describes a reserved region inside an arena.
 type WriteRegion struct {
@@ -14,6 +14,6 @@ func (r WriteRegion) Buf() []byte {
 }
 
 // endWrite decrements writers-in-flight.
-func (*RawLogger) endWrite(r WriteRegion) {
+func (*Ingestor) endWrite(r WriteRegion) {
 	r.arena.Leave()
 }

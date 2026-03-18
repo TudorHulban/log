@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // tryWrite attempts BeginWrite once. If it fails, it reloads the active
 // arena and tries exactly one more time.
@@ -7,7 +7,7 @@ package arena
 // "try once, rotate may have happened, try again" pattern.
 //
 // It does NOT loop indefinitely and does NOT block.
-func (m *RawLogger) tryWrite(n uint32) (WriteRegion, error) {
+func (m *Ingestor) tryWrite(n uint32) (WriteRegion, error) {
 	// First attempt.
 	region, canWrite := m.beginWrite(n)
 	if canWrite == nil {
@@ -31,7 +31,7 @@ func (m *RawLogger) tryWrite(n uint32) (WriteRegion, error) {
 //   - reservation if reversed
 //   - rollback counter is incremented
 //   - ok == false
-func (m *RawLogger) beginWrite(n uint32) (WriteRegion, error) {
+func (m *Ingestor) beginWrite(n uint32) (WriteRegion, error) {
 	arena := m.active.Load()
 	if arena == nil {
 		return WriteRegion{},
@@ -54,9 +54,8 @@ func (m *RawLogger) beginWrite(n uint32) (WriteRegion, error) {
 	// Reserve space.
 	offset := arena.Reserve(n)
 
-	// Check for overflow.
+	// Check for overflow. Undo reservation if overflow.
 	if offset+n > m.arenaSize {
-		// undo reservation
 		arena.cursor.Add(int32(-n)) //nolint:gosec
 
 		arena.AddRollback()
@@ -80,7 +79,7 @@ func (m *RawLogger) beginWrite(n uint32) (WriteRegion, error) {
 // The caller provides a function that writes into the reserved buffer.
 //
 // The write function receives a byte slice of length n and must fill it.
-func (m *RawLogger) write(n uint32, fn func(dst []byte)) error {
+func (m *Ingestor) write(n uint32, fn func(destination []byte)) error {
 	// Try to region space (with one retry).
 	region, canWrite := m.tryWrite(n)
 	if canWrite != nil {
@@ -96,19 +95,19 @@ func (m *RawLogger) write(n uint32, fn func(dst []byte)) error {
 	return nil
 }
 
-func (m *RawLogger) Write(payload []byte) (int, error) {
+func (m *Ingestor) Write(payload []byte) (int, error) {
 	if len(payload) == 0 {
 		return 0, nil
 	}
 
 	// Fast path: try once
-	errWrite := m.write(
+	if errWrite := m.write(
 		uint32(len(payload)), //nolint:gosec
-		func(dst []byte) {
-			copy(dst, payload)
+
+		func(destination []byte) {
+			copy(destination, payload)
 		},
-	)
-	if errWrite != nil {
+	); errWrite != nil {
 		return 0, errWrite
 	}
 

@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 func TestConcurrentWritesWithRotation(t *testing.T) {
 	var out bytes.Buffer
 
-	rawLogger := NewRawLogger(_Size1K, &out)
+	rawLogger := NewIngestor(_Size1K, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -37,7 +37,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 				func(a *arena, used int32) {
 					rawLogger.waitForWriters(a)
 					rawLogger.flushArena(a)
-					rawLogger.resetArena(a)
+					a.reset()
 				},
 			)
 		},

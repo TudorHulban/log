@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/tudorhulban/log/arena"
+	"github.com/tudorhulban/log/bytearena"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -39,7 +39,7 @@ func BenchmarkNilTimestamp(b *testing.B) {
 func BenchmarkArenaNilTimestamp(b *testing.B) {
 	b.ReportAllocs()
 
-	writer := arena.NewRawLogger(arena.Size100K, io.Discard)
+	writer := bytearena.NewIngestor(bytearena.Size100K, io.Discard)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -71,7 +71,7 @@ func BenchmarkArenaNilTimestamp(b *testing.B) {
 func BenchmarkLogger_Print(b *testing.B) {
 	var sink bytes.Buffer
 
-	writer := arena.NewRawLogger(arena.Size100K, &sink)
+	writer := bytearena.NewIngestor(bytearena.Size100K, &sink)
 	ctx, cancel := context.WithCancel(context.Background())
 	chEnd := writer.StartIngestion(ctx)
 

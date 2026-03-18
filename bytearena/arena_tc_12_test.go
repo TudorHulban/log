@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // Test Case 12: Context cancel during heavy write
 

@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import "context"
 
@@ -15,7 +15,7 @@ import "context"
 //   - handle errors
 //
 // Those responsibilities belong to the consumer loop.
-func (m *RawLogger) flushArena(a *arena) {
+func (m *Ingestor) flushArena(a *arena) {
 	if a == nil {
 		return
 	}
@@ -35,7 +35,7 @@ func (m *RawLogger) flushArena(a *arena) {
 }
 
 // flushOnShutdown flushes both arenas best-effort.
-func (m *RawLogger) flushOnShutdown(ctx context.Context, flusher flusher) {
+func (m *Ingestor) flushOnShutdown(ctx context.Context, flusher flusher) {
 	// First rotation: seal whatever is currently active (call it A).
 	firstSealed := m.rotate()
 
@@ -68,7 +68,7 @@ func (m *RawLogger) flushOnShutdown(ctx context.Context, flusher flusher) {
 	}
 }
 
-func (m *RawLogger) signalFlush() {
+func (m *Ingestor) signalFlush() {
 	select {
 	case m.chFlush <- struct{}{}:
 

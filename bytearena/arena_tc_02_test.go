@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 // - bounds checking works, no off-by-one errors
 // - rollback counter incremented
 func TestReservationAtBoundary(t *testing.T) {
-	rawLogger := NewRawLogger(100, &bytes.Buffer{})
+	rawLogger := NewIngestor(100, &bytes.Buffer{})
 	arena := rawLogger.active.Load()
 
 	// Fill arena to 90 bytes

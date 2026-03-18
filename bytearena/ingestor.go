@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// RawLogger owns the two arenas and coordinates which one is active.
+// Ingestor owns the two arenas and coordinates which one is active.
 // It also handles the rotation and flush on context cancellation.
-type RawLogger struct {
+type Ingestor struct {
 	writer io.Writer
 
 	chFlush chan struct{}
@@ -27,25 +27,26 @@ type RawLogger struct {
 	sealed atomic.Pointer[arena]
 
 	// Size of each arena (capacity of Arena.Buf).
-	arenaSize uint32
+	arenaSize           uint32
+	arenaSealPercentage uint32
 }
 
-// NewRawLogger allocates two arenas of the given size and initializes
+// NewIngestor allocates two arenas of the given size and initializes
 // the Manager with a0 as the active arena and a1 as the standby arena.
-func NewRawLogger(arenaSize uint32, w io.Writer) *RawLogger {
-	// Allocate arena buffers.
+func NewIngestor(arenaSize uint32, w io.Writer) *Ingestor {
 	a0 := &arena{
 		buf: make([]byte, arenaSize),
 	}
 
-	result := RawLogger{
+	result := Ingestor{
 		arenaFirst: a0,
 		arenaSecond: &arena{
 			buf: make([]byte, arenaSize),
 		},
 
-		arenaSize: arenaSize,
-		writer:    w,
+		arenaSize:           arenaSize,
+		arenaSealPercentage: 90,
+		writer:              w,
 
 		chFlush: make(chan struct{}, 1),
 	}
@@ -62,7 +63,7 @@ func NewRawLogger(arenaSize uint32, w io.Writer) *RawLogger {
 // StartIngestion launches the consumer loop in a goroutine.
 // The caller provides the flush function, which receives the
 // raw bytes of each sealed arena.
-func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
+func (m *Ingestor) StartIngestion(ctx context.Context) <-chan struct{} {
 	chIngestionEnd := make(chan struct{})
 
 	go func() {
@@ -85,7 +86,7 @@ func (m *RawLogger) StartIngestion(ctx context.Context) <-chan struct{} {
 // flushes it, and resets it.
 //
 // This is only the skeleton — flushing and thresholds are implemented elsewhere.
-func (m *RawLogger) consumerLoop(ctx context.Context, flusher flusher) {
+func (m *Ingestor) consumerLoop(ctx context.Context, flusher flusher) {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -104,21 +105,5 @@ func (m *RawLogger) consumerLoop(ctx context.Context, flusher flusher) {
 		case <-m.chFlush:
 			m.tick(flusher) // same seal/wait/flush/reset as ticker path
 		}
-
 	}
-}
-
-// resetArena clears the arena state so it can be reused after flushing.
-// This does NOT reallocate the buffer.
-func (*RawLogger) resetArena(a *arena) {
-	a.cursor.Store(0)
-
-	// numberWriters is intentionally NOT reset here.
-	// waitForWriters guarantees it reaches zero before this arena
-	// is reused. Resetting it here would race with in-flight writers
-	// still holding Enter(), corrupting the count to -1 and hanging
-	// the next waitForWriters call permanently.
-	// a.numberWriters.Store(0)
-
-	a.rollbackCounter.Store(0)
 }

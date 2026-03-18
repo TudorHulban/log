@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 const (
 	Size1M   = 1 << 20   // 1 MiB

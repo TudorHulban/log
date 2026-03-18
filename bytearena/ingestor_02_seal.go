@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // shouldSeal determines whether the active arena should be sealed.
 //
@@ -7,7 +7,7 @@ package arena
 //   - rollback pressure (many failed reservations)
 //
 // The exact thresholds can be tuned later.
-func (m *RawLogger) shouldSeal(a *arena) bool {
+func (m *Ingestor) shouldSeal(a *arena) bool {
 	used := uint32(a.cursor.Load()) //nolint:gosec
 
 	// Hard threshold: near capacity.
@@ -15,9 +15,7 @@ func (m *RawLogger) shouldSeal(a *arena) bool {
 		return true
 	}
 
-	// Soft threshold: "almost full".
-	// Example: seal when 90% full.
-	if used >= (m.arenaSize*9)/10 {
+	if used >= (m.arenaSize*m.arenaSealPercentage)/100 {
 		return true
 	}
 

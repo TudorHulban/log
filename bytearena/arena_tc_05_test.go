@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 // Test: Consumer context cancelled while waiting for writers.
 // Verifies: Shutdown happens promptly, no hangs.
 func TestContextCancelDuringWait(t *testing.T) {
-	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
+	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	// Start a write that never completes
 	region, errWrite := rawLogger.beginWrite(100)

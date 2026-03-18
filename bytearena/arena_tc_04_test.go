@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 // Test: Many producers simultaneously attempt writes near arena end.
 // Verifies: Rollback counter correctly tracks failures, no deadlocks.
 func TestRollbackStorm(t *testing.T) {
-	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
+	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
 	arena := rawLogger.active.Load()
 
 	// Fill arena near capacity

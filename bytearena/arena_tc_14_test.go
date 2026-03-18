@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // Test Case 14: Backpressure policy
 

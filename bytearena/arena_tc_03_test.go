@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ import (
 func TestSealDuringActiveWrites(t *testing.T) {
 	var out bytes.Buffer
 
-	rawLogger := NewRawLogger(_Size1K, &out)
+	rawLogger := NewIngestor(_Size1K, &out)
 
 	var wgProducers sync.WaitGroup
 
@@ -93,7 +93,7 @@ func TestSealDuringActiveWrites(t *testing.T) {
 		out.Len(),
 	)
 
-	rawLogger.resetArena(sealedArena)
+	sealedArena.reset()
 
 	// Verify: All 5 writes were flushed
 	require.Equal(t, 5*100, len(out.String()))

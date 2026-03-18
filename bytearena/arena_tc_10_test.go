@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic
 func TestWritePanicDoesNotLeak(t *testing.T) {
-	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
+	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	func() {
 		defer func() { _ = recover() }()
@@ -30,7 +30,7 @@ func TestWritePanicDoesNotLeak(t *testing.T) {
 }
 
 func TestProducerInWritePanic(t *testing.T) {
-	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
+	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	// Use defer/recover to simulate panic in producer
 	func() {

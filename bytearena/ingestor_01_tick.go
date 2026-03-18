@@ -1,11 +1,11 @@
-package arena
+package bytearena
 
 // tick performs one consumer iteration:
 // - checks if active arena should be sealed
 // - rotates if needed
 // - drains writers
 // - flushes sealed arena
-func (m *RawLogger) tick(flusher flusher) {
+func (m *Ingestor) tick(flusher flusher) {
 	activeArena := m.active.Load()
 	if activeArena == nil {
 		return
@@ -27,6 +27,6 @@ func (m *RawLogger) tick(flusher flusher) {
 		flusher(sealedArena, used)
 	}
 
-	m.resetArena(sealedArena)
+	sealedArena.reset()
 	m.sealed.Store(nil)
 }

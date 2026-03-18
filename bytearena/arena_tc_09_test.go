@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 func TestExactAndOversizedWrites(t *testing.T) {
 	var sizeArena uint32 = 100
 
-	rawLogger := NewRawLogger(sizeArena, &bytes.Buffer{})
+	rawLogger := NewIngestor(sizeArena, &bytes.Buffer{})
 
 	// Case 1: Write exactly arena size
 	region, errWrite := rawLogger.beginWrite(sizeArena)

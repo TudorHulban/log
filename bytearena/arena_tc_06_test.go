@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 // Test: Producer reserves space exactly as consumer seals
 // Verifies: No writes to arena after it is sealed
 func TestReserveVsSealRace(t *testing.T) {
-	rawLogger := NewRawLogger(_Size1K, &bytes.Buffer{})
+	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	// Channel to coordinate race
 	chReady := make(chan struct{})

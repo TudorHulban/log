@@ -1,13 +1,13 @@
 # Arena‑Based Logging Architecture
 
-The document describes the high‑performance, lock‑free, double‑buffered logging system based on arenas, atomic region reservation, and writers‑in‑flight tracking.  
-It is designed for high throughput with predictable memory usage and bounded behavior under load.
+The document describes the high‑performance, lock‑free, double‑buffered byte arena system based on atomic region reservation, and writers‑in‑flight tracking.  
+It is designed for high throughput ingestion with predictable memory usage and bounded behavior under load.
 
 ## 1. Overview
 
 The system consists of:
 
-- Many producers (goroutines generating log entries).
+- Many producers (goroutines generating byte entries).
 - One consumer (goroutine flushing arenas).
 - Two fixed‑size arenas used in a double‑buffer rotation: Arena A, Arena B.
 
@@ -37,27 +37,24 @@ Arenas never grow, shrink, or reallocate.
 ## 3. Producer API
 
 Producers never know about arenas directly.  
+Producers do not need to be reconfigured during rotation.
 They only interact with a stable API:
 
-1. enter() — signal start of a write
-2. reserve(N) — atomically reserve N bytes
-3. leave() — signal end of a write
-
-These functions are closures bound to the current active arena.
-
-Producers do not need to be reconfigured during rotation.
+1. Write — signal start of a write
+2. try write(N) — atomically reserve N bytes
+3. deffered end write — signals end of a write by decrementing the number of writers
 
 ## 4. Producer Write Algorithm
 
 For each log entry:
 
-1. Load current arena context  (this gives the correct enter/leave closures)
+1. load current arena context  (this gives the correct enter/leave closures)
 2. enter()
 3. increments writers‑in‑flight for that arena
 4. reserve(N)
 5. atomic fetch‑add on the arena’s cursor
 6. returns a unique region [offset, offset+N)
-7. Write bytes directly into the arena buffer
+7. write bytes directly into the arena buffer
 8. leave()
 9. decrement writers‑in‑flight
 
@@ -171,6 +168,8 @@ This architecture provides:
 - Explicit backpressure
 - Clean shutdown via context cancellation
 
+Memory ordering is missing as the code relies on Go atomic sequentially consistency for correctness.
+
 ### Hot atomics separation
 
 The arena struct should separate hot atomics to avoid cache line contention.  
@@ -196,4 +195,4 @@ This ensures each atomic occupies its own line relative to the struct layout.
 ### NUMA topology
 
 On multi-socket machines, if producers on socket 1 are writing to an arena whose memory is allocated on socket 0, you pay a significant cross-NUMA penalty on every memcopy.  
-Erena memory allocated on the socket where producers run, with the consumer following the data. numactl or explicit mmap with NUMA policy at arena allocation time is the fix.
+Arena memory allocated on the socket where producers run, with the consumer following the data. numactl or explicit mmap with NUMA policy at arena allocation time is the fix but at current is planned for future releases.

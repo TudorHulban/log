@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bufio"
@@ -17,7 +17,7 @@ import (
 // Verifies: Each log entry remains intact and contiguous.
 // Enhanced version with write validation.
 func TestNoMemoryCorruption_Enhanced(t *testing.T) {
-	rawLogger := NewRawLogger(64*_Size1K, &bytes.Buffer{})
+	rawLogger := NewIngestor(64*_Size1K, &bytes.Buffer{})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
@@ -57,7 +57,7 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 				}
 
 				rawLogger.flushArena(a)
-				rawLogger.resetArena(a)
+				a.reset()
 			},
 		)
 	}()

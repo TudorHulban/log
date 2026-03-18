@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 // waitForWriters blocks until writers-in-flight reaches zero.
 // should be used in tick.
-func (*RawLogger) waitForWriters(a *arena) {
+func (*Ingestor) waitForWriters(a *arena) {
 	writers := &a.numberWriters
 
 	spin := 0
@@ -26,7 +26,7 @@ func (*RawLogger) waitForWriters(a *arena) {
 	}
 }
 
-func (*RawLogger) waitForWritersCtx(ctx context.Context, a *arena) bool {
+func (*Ingestor) waitForWritersCtx(ctx context.Context, a *arena) bool {
 	spin := 0
 
 	for {

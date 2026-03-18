@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // Test Case 13: Hammer arena with huge messages
 

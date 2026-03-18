@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 // arena.go
 
@@ -71,4 +71,18 @@ func (a *arena) Leave() {
 // Producers call this when a reservation overflows the arena.
 func (a *arena) AddRollback() {
 	a.rollbackCounter.Add(1)
+}
+
+// reset clears the arena state so it can be reused after flushing.
+// This does NOT reallocate the buffer.
+func (a *arena) reset() {
+	a.cursor.Store(0)
+
+	// numberWriters is intentionally NOT reset here.
+	// waitForWriters guarantees it reaches zero before this arena
+	// is reused. Resetting it here would race with in-flight writers
+	// still holding Enter(), corrupting the count to -1 and hanging
+	// the next waitForWriters call permanently.
+
+	a.rollbackCounter.Store(0)
 }

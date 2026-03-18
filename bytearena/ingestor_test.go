@@ -1,4 +1,4 @@
-package arena
+package bytearena
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 func TestManagerSingleWrite(t *testing.T) {
 	var out bytes.Buffer
 
-	rawLogger := NewRawLogger(1024, &out)
+	rawLogger := NewIngestor(1024, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
@@ -43,12 +43,11 @@ func TestManagerSingleWrite(t *testing.T) {
 }
 
 // BenchmarkStandardLogger-16    	 9623833	       125.0 ns/op	      72 B/op	       2 allocs/op
-func BenchmarkStandardLogger(b *testing.B) {
+func BenchmarkArena_FormattedPayload(b *testing.B) {
 	b.ReportAllocs()
 
 	sink := helpers.CountWriter{}
-
-	manager := NewRawLogger(1024, &sink)
+	ingestor := NewIngestor(1024, &sink)
 
 	b.ResetTimer()
 
@@ -58,10 +57,10 @@ func BenchmarkStandardLogger(b *testing.B) {
 			i,
 		)
 
-		manager.write(
+		ingestor.write(
 			uint32(len(payload)),
-			func(dst []byte) {
-				copy(dst, []byte(payload))
+			func(destination []byte) {
+				copy(destination, []byte(payload))
 			},
 		)
 	}
@@ -70,21 +69,22 @@ func BenchmarkStandardLogger(b *testing.B) {
 }
 
 // BenchmarkArenaWrite-16    	67048297	        18.09 ns/op	       0 B/op	       0 allocs/op
-func BenchmarkArenaWrite(b *testing.B) {
+func BenchmarkArena_ConstantPayload(b *testing.B) {
 	b.ReportAllocs()
 
 	sink := helpers.CountWriter{}
-	manager := NewRawLogger(1024*1024, &sink)
+	ingestor := NewIngestor(1024*1024, &sink)
 
 	payload := []byte(`{"level":"info","msg":"user login","user_id":123}`)
 
 	b.ResetTimer()
 
-	for i := 0; i < b.N; i++ {
-		manager.write(
+	for b.Loop() {
+		ingestor.write(
 			uint32(len(payload)),
-			func(dst []byte) {
-				copy(dst, payload)
+
+			func(destination []byte) {
+				copy(destination, payload)
 			},
 		)
 	}

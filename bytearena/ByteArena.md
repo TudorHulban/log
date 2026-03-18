@@ -167,6 +167,7 @@ This architecture provides:
 - Bounded memory usage
 - Explicit backpressure
 - Clean shutdown via context cancellation
+- Arenas with zero successful writes are never flushed
 
 Memory ordering is missing as the code relies on Go atomic sequentially consistency for correctness.
 

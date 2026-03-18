@@ -15,8 +15,8 @@ func TestFalseSharingResistance(t *testing.T) {
 		t.Skip("Skipping performance test in short mode")
 	}
 
-	rawLogger := NewIngestor(Size1M, &bytes.Buffer{})
-	arena := rawLogger.active.Load()
+	ingestor := NewIngestor(Size1M, &bytes.Buffer{})
+	arena := ingestor.active.Load()
 
 	numberExecutions := 1000000
 

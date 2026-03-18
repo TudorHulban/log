@@ -72,7 +72,7 @@ func (m *Ingestor) StartIngestion(ctx context.Context) <-chan struct{} {
 		m.consumerLoop(
 			ctx,
 
-			func(a *arena, used int32) {
+			func(a *arena, _ uint32) {
 				m.flushArena(a)
 			},
 		)

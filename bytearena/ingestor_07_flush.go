@@ -20,15 +20,15 @@ func (m *Ingestor) flushArena(a *arena) {
 		return
 	}
 
-	used := uint32(a.cursor.Load()) //nolint:gosec
-	if used == 0 {
+	used := a.cursor.Load()
+	if used <= 0 {
 		return
 	}
 
 	// Cursor can exceed arenaSize because Reserve() does an unconditional
 	// fetch-add before overflow is detected. Clamp to actual buffer length.
-	if used > m.arenaSize {
-		used = m.arenaSize
+	if used > int32(m.arenaSize) {
+		used = int32(m.arenaSize)
 	}
 
 	_, _ = m.writer.Write(a.buf[:used])
@@ -50,9 +50,8 @@ func (m *Ingestor) flushOnShutdown(ctx context.Context, flusher flusher) {
 		m.waitForWritersCtx(ctx, secondSealed)
 
 		used := secondSealed.cursor.Load()
-
 		if used > 0 {
-			flusher(secondSealed, used)
+			flusher(secondSealed, uint32(used))
 		}
 	}
 
@@ -61,9 +60,8 @@ func (m *Ingestor) flushOnShutdown(ctx context.Context, flusher flusher) {
 		m.waitForWritersCtx(ctx, firstSealed)
 
 		used := firstSealed.cursor.Load()
-
 		if used > 0 {
-			flusher(firstSealed, used)
+			flusher(firstSealed, uint32(used))
 		}
 	}
 }

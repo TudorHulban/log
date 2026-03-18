@@ -12,12 +12,12 @@ import (
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic
 func TestWritePanicDoesNotLeak(t *testing.T) {
-	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	func() {
 		defer func() { _ = recover() }()
 
-		rawLogger.write(
+		ingestor.write(
 			100,
 			func(dst []byte) {
 				panic("some panic")
@@ -25,7 +25,7 @@ func TestWritePanicDoesNotLeak(t *testing.T) {
 		)
 	}()
 
-	active := rawLogger.active.Load()
+	active := ingestor.active.Load()
 	require.Zero(t, active.numberWriters.Load())
 }
 
@@ -41,9 +41,8 @@ func TestProducerInWritePanic(t *testing.T) {
 		rawLogger.write(
 			uint32(len(payload)),
 
-			func(dst []byte) {
-				// Panic before EndWrite
-				panic("simulated crash")
+			func(_ []byte) {
+				panic("simulated crash before end write")
 			},
 		)
 	}()

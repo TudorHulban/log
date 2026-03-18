@@ -14,14 +14,14 @@ import (
 // - bounds checking works, no off-by-one errors
 // - rollback counter incremented
 func TestReservationAtBoundary(t *testing.T) {
-	rawLogger := NewIngestor(100, &bytes.Buffer{})
-	arena := rawLogger.active.Load()
+	ingestor := NewIngestor(100, &bytes.Buffer{})
+	arena := ingestor.active.Load()
 
 	// Fill arena to 90 bytes
 	arena.cursor.Store(90)
 
 	// Producer 1: Reserve 10 bytes (should fit exactly)
-	region10, errReserve10 := rawLogger.beginWrite(10)
+	region10, errReserve10 := ingestor.beginWrite(10)
 	require.NoError(t, errReserve10)
 	require.EqualValues(t,
 		90,
@@ -29,7 +29,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	)
 
 	// Producer 2: Reserve 1 byte (should fail - overflow)
-	regionZero, errReserveMore := rawLogger.beginWrite(1)
+	regionZero, errReserveMore := ingestor.beginWrite(1)
 	require.Error(t, errReserveMore)
 	require.Zero(t, regionZero)
 	require.EqualValues(t,
@@ -38,7 +38,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	)
 
 	// Complete first write
-	rawLogger.endWrite(region10)
+	ingestor.endWrite(region10)
 
 	// Verify: Final cursor at 100
 	require.EqualValues(t,

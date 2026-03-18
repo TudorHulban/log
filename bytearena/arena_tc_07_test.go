@@ -17,7 +17,7 @@ import (
 // Verifies: Each log entry remains intact and contiguous.
 // Enhanced version with write validation.
 func TestNoMemoryCorruption_Enhanced(t *testing.T) {
-	rawLogger := NewIngestor(64*_Size1K, &bytes.Buffer{})
+	ingestor := NewIngestor(64*_Size1K, &bytes.Buffer{})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
@@ -40,10 +40,10 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 	go func() {
 		defer wgConsumer.Done()
 
-		rawLogger.consumerLoop(
+		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used int32) {
+			func(a *arena, used uint32) {
 				// Capture output for validation
 				data := a.buf[:used]
 
@@ -56,7 +56,7 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 					}
 				}
 
-				rawLogger.flushArena(a)
+				ingestor.flushArena(a)
 				a.reset()
 			},
 		)
@@ -77,7 +77,7 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 				payload := fmt.Sprintf("P%d-%d-%s", producerID, j,
 					strings.Repeat("x", 50))
 
-				rawLogger.write(
+				ingestor.write(
 					uint32(len(payload)),
 
 					func(dst []byte) {

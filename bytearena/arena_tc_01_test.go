@@ -21,7 +21,7 @@ import (
 func TestConcurrentWritesWithRotation(t *testing.T) {
 	var out bytes.Buffer
 
-	rawLogger := NewIngestor(_Size1K, &out)
+	ingestor := NewIngestor(_Size1K, &out)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -31,12 +31,12 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 	// Start consumer with aggressive rotation
 	wgConsumer.Go(
 		func() {
-			rawLogger.consumerLoop(
+			ingestor.consumerLoop(
 				ctx,
 
-				func(a *arena, used int32) {
-					rawLogger.waitForWriters(a)
-					rawLogger.flushArena(a)
+				func(a *arena, used uint32) {
+					ingestor.waitForWriters(a)
+					ingestor.flushArena(a)
 					a.reset()
 				},
 			)
@@ -63,7 +63,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 					j,
 				)
 
-				if errWrite := rawLogger.write(
+				if errWrite := ingestor.write(
 					uint32(len(payload)),
 
 					func(dst []byte) {

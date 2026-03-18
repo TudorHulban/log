@@ -14,17 +14,17 @@ import (
 // Test: Consumer context cancelled while waiting for writers.
 // Verifies: Shutdown happens promptly, no hangs.
 func TestContextCancelDuringWait(t *testing.T) {
-	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	// Start a write that never completes
-	region, errWrite := rawLogger.beginWrite(100)
+	region, errWrite := ingestor.beginWrite(100)
 	require.NoError(t, errWrite)
 
 	// Don't call EndWrite() - simulate stuck producer
 
 	// Rotate arena
-	sealed := rawLogger.rotate()
-	require.Equal(t, rawLogger.arenaFirst, sealed)
+	sealed := ingestor.rotate()
+	require.Equal(t, ingestor.arenaFirst, sealed)
 
 	// Start consumer with short-lived context
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
@@ -33,11 +33,11 @@ func TestContextCancelDuringWait(t *testing.T) {
 	chConsumerExit := make(chan struct{})
 
 	go func() {
-		rawLogger.consumerLoop(
+		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used int32) {
-				rawLogger.flushArena(a)
+			func(a *arena, _ uint32) {
+				ingestor.flushArena(a)
 			},
 		)
 
@@ -54,5 +54,5 @@ func TestContextCancelDuringWait(t *testing.T) {
 	}
 
 	// Clean up stuck producer
-	rawLogger.endWrite(region)
+	ingestor.endWrite(region)
 }

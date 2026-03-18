@@ -12,7 +12,7 @@ import (
 // Test: Producer reserves space exactly as consumer seals
 // Verifies: No writes to arena after it is sealed
 func TestReserveVsSealRace(t *testing.T) {
-	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor := NewIngestor(_Size1K, &bytes.Buffer{})
 
 	// Channel to coordinate race
 	chReady := make(chan struct{})
@@ -23,16 +23,16 @@ func TestReserveVsSealRace(t *testing.T) {
 		<-chReady // Wait for signal
 
 		// Attempt to reserve
-		region, errWrite := rawLogger.beginWrite(100)
+		region, errWrite := ingestor.beginWrite(100)
 		if errWrite == nil {
 			// If we got a region, it must be in active arena
-			if region.arena != rawLogger.active.Load() {
+			if region.arena != ingestor.active.Load() {
 				chDone <- false
 
 				return
 			}
 
-			rawLogger.endWrite(region)
+			ingestor.endWrite(region)
 		}
 
 		chDone <- true
@@ -43,7 +43,7 @@ func TestReserveVsSealRace(t *testing.T) {
 		<-chReady // Wait for same signal
 
 		// Rotate arenas
-		sealed := rawLogger.rotate()
+		sealed := ingestor.rotate()
 		_ = sealed
 	}()
 
@@ -54,11 +54,11 @@ func TestReserveVsSealRace(t *testing.T) {
 	require.True(t, <-chDone)
 
 	// Verify invariant: No writes to sealed arena
-	sealed := rawLogger.sealed.Load()
+	sealed := ingestor.sealed.Load()
 
 	if sealed != nil {
 		require.True(t,
-			sealed.numberWriters.Load() == 0 || rawLogger.active.Load() == sealed,
+			sealed.numberWriters.Load() == 0 || ingestor.active.Load() == sealed,
 		)
 	}
 }

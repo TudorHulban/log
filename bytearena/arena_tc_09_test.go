@@ -14,30 +14,30 @@ import (
 func TestExactAndOversizedWrites(t *testing.T) {
 	var sizeArena uint32 = 100
 
-	rawLogger := NewIngestor(sizeArena, &bytes.Buffer{})
+	ingestor := NewIngestor(sizeArena, &bytes.Buffer{})
 
 	// Case 1: Write exactly arena size
-	region, errWrite := rawLogger.beginWrite(sizeArena)
+	region, errWrite := ingestor.beginWrite(sizeArena)
 	require.NoError(t, errWrite)
 	require.Zero(t, region.offset)
 
-	rawLogger.endWrite(region)
+	ingestor.endWrite(region)
 
 	require.EqualValues(t,
 		sizeArena,
-		rawLogger.active.Load().cursor.Load(),
+		ingestor.active.Load().cursor.Load(),
 	)
 
 	// Reset
-	rawLogger.rotate()
+	ingestor.rotate()
 
 	// Case 2: Write larger than arena (flooding)
-	region, errWrite = rawLogger.beginWrite(sizeArena + 1)
+	region, errWrite = ingestor.beginWrite(sizeArena + 1)
 	require.ErrorIs(t, errWrite, ErrWriteMessageTooLarge)
 	require.Zero(t, region)
 
 	// Rollback should increment
-	arenaActive := rawLogger.active.Load()
+	arenaActive := ingestor.active.Load()
 	require.EqualValues(t,
 		1,
 		arenaActive.rollbackCounter.Load(),

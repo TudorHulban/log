@@ -18,15 +18,19 @@ import (
 // Test: Multiple rotates. Say 1000.
 // Verifies:
 // 1. No messages are lost.
-// 2. Cursor works correctly.
+// 2. Cursor works correctly. Ensures cursor is reset to 0 after each rotation.
+// 3. Validates each output line has correct format.
+// 4. Validates no duplicate messages appear in output.
 func TestManyRotations(t *testing.T) {
 	var out bytes.Buffer
 
 	// Use a small arena size to force frequent rotations
-	const arenaSize = 512 // bytes
-	const numRotations = 1000
-	const numProducers = 8
-	const writesPerProducer = 250 // Total writes: 8 * 250 = 2000 writes
+	const (
+		arenaSize         = 512 // bytes
+		numRotations      = 1000
+		numProducers      = 8
+		writesPerProducer = 250 // Total writes: 8 * 250 = 2000 writes
+	)
 
 	ingestor := NewIngestor(arenaSize, &out)
 
@@ -92,8 +96,10 @@ func TestManyRotations(t *testing.T) {
 	wgProducers.Add(numProducers)
 
 	// Track successful writes
-	var successfulWrites atomic.Int64
-	var failedWrites atomic.Int64
+	var (
+		successfulWrites atomic.Int64
+		failedWrites     atomic.Int64
+	)
 
 	// Channel to signal all producers are chDone
 	chDone := make(chan struct{})
@@ -129,8 +135,10 @@ func TestManyRotations(t *testing.T) {
 					switch errWrite {
 					case ErrWriteMessageTooLarge:
 						// Expected sometimes with random sizes
+
 					case ErrWriteArenaFull:
 						// Expected during high pressure
+
 					default:
 						t.Logf("Unexpected error: %v", errWrite)
 					}
@@ -205,6 +213,7 @@ func TestManyRotations(t *testing.T) {
 		if lineMap[lineStr] {
 			t.Errorf("duplicate line found: %q", lineStr)
 		}
+
 		lineMap[lineStr] = true
 	}
 
@@ -243,8 +252,10 @@ func TestManyRotations(t *testing.T) {
 func TestManyRotations_CursorIntegrity(t *testing.T) {
 	var out bytes.Buffer
 
-	const arenaSize = 256
-	const numRotations = 500
+	const (
+		arenaSize    = 256
+		numRotations = 500
+	)
 
 	rawLogger := NewIngestor(arenaSize, &out)
 
@@ -252,11 +263,13 @@ func TestManyRotations_CursorIntegrity(t *testing.T) {
 	defer cancel()
 
 	var rotationCount atomic.Int32
+
 	var wgConsumer sync.WaitGroup
 	wgConsumer.Add(1)
 
 	// Track cursor values across rotations
 	var cursorHistory []int32
+
 	var cursorMutex sync.Mutex
 
 	go func() {
@@ -268,6 +281,7 @@ func TestManyRotations_CursorIntegrity(t *testing.T) {
 				rotationCount.Add(1)
 
 				cursorMutex.Lock()
+
 				cursorHistory = append(cursorHistory, a.cursor.Load())
 				cursorMutex.Unlock()
 

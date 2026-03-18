@@ -38,12 +38,9 @@ func (m *Ingestor) beginWrite(n uint32) (WriteRegion, error) {
 			ErrWriteNoActiveArena
 	}
 
-	// Enter BEFORE reserving, but we must validate we are still on the
-	// active arena. A rotation could have happened between Load and Enter (TOCTOU).
+	// Enter BEFORE reserving, but validate we are still on the active arena.
 	arena.Enter()
 
-	// Re-check: if the active arena changed after we entered, this arena
-	// is now sealed. Leave immediately — the cursor may be reset under us.
 	if m.active.Load() != arena {
 		arena.Leave()
 
@@ -51,28 +48,40 @@ func (m *Ingestor) beginWrite(n uint32) (WriteRegion, error) {
 			ErrWriteActiveArenaMismatch
 	}
 
-	// Reserve space.
-	offset := arena.Reserve(n)
+	// === CAS-based overflow-safe reservation ===
+	var offset uint32
 
-	// Check for overflow. Undo reservation if overflow.
-	if offset+n > m.arenaSize {
-		arena.cursor.Add(int32(-n)) //nolint:gosec
+	for {
+		cur := arena.cursor.Load()
 
-		arena.AddRollback()
-		arena.Leave()
+		// Overflow-safe check: avoid computing cur + n directly.
+		limit := int32(m.arenaSize) - int32(n) //nolint:gosec
+		if cur > limit {
+			arena.AddRollback()
+			arena.Leave()
+			m.signalFlush()
 
-		m.signalFlush()
+			return WriteRegion{}, ErrWriteMessageTooLarge
+		}
 
-		return WriteRegion{},
-			ErrWriteMessageTooLarge
+		next := cur + int32(n) //nolint:gosec
+
+		// Attempt to reserve [cur, next)
+		if arena.cursor.CompareAndSwap(cur, next) {
+			offset = uint32(cur) //nolint:gosec
+
+			break
+		}
+
+		// CAS failed: retry
 	}
 
+	// Success
 	return WriteRegion{
-			arena:  arena,
-			offset: offset,
-			size:   n,
-		},
-		nil
+		arena:  arena,
+		offset: offset,
+		size:   n,
+	}, nil
 }
 
 // write attempts to write n bytes into the active arena.

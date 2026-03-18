@@ -22,7 +22,7 @@ func (m *Ingestor) tick(flusher flusher) {
 
 	m.waitForWriters(sealedArena)
 
-	used := min(sealedArena.cursor.Load(), int32(m.arenaSize))
+	used := min(sealedArena.cursor.Load(), int32(m.arenaSize)) //nolint:gosec
 	if used > 0 {
 		flusher(sealedArena, uint32(used))
 	}

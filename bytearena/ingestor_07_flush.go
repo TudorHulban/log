@@ -27,8 +27,8 @@ func (m *Ingestor) flushArena(a *arena) {
 
 	// Cursor can exceed arenaSize because Reserve() does an unconditional
 	// fetch-add before overflow is detected. Clamp to actual buffer length.
-	if used > int32(m.arenaSize) {
-		used = int32(m.arenaSize)
+	if used > int32(m.arenaSize) { //nolint:gosec
+		used = int32(m.arenaSize) //nolint:gosec
 	}
 
 	_, _ = m.writer.Write(a.buf[:used])

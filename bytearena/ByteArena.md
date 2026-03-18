@@ -168,6 +168,7 @@ This architecture provides:
 - Explicit backpressure
 - Clean shutdown via context cancellation
 - Arenas with zero successful writes are never flushed
+- Partial writes on the downward io.Writer are handled
 
 Memory ordering is missing as the code relies on Go atomic sequentially consistency for correctness.
 

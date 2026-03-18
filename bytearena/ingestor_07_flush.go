@@ -25,13 +25,22 @@ func (m *Ingestor) flushArena(a *arena) {
 		return
 	}
 
-	// Cursor can exceed arenaSize because Reserve() does an unconditional
-	// fetch-add before overflow is detected. Clamp to actual buffer length.
 	if used > int32(m.arenaSize) { //nolint:gosec
 		used = int32(m.arenaSize) //nolint:gosec
 	}
 
-	_, _ = m.writer.Write(a.buf[:used])
+	buf := a.buf[:used]
+
+	for len(buf) > 0 {
+		bytesWritten, errWrite := m.writer.Write(buf)
+		if errWrite != nil {
+			// Partial writes are allowed even when err != nil.
+			// We stop because the caller cannot recover meaningfully.
+			return
+		}
+
+		buf = buf[bytesWritten:]
+	}
 }
 
 // flushOnShutdown flushes both arenas best-effort.

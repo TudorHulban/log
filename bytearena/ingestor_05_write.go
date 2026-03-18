@@ -9,8 +9,8 @@ package bytearena
 // It does NOT loop indefinitely and does NOT block.
 func (m *Ingestor) tryWrite(n uint32) (WriteRegion, error) {
 	// First attempt.
-	region, canWrite := m.beginWrite(n)
-	if canWrite == nil {
+	region, errWrite := m.beginWrite(n)
+	if errWrite == nil {
 		return region, nil
 	}
 

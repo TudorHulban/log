@@ -52,7 +52,7 @@ func TestManyRotations(t *testing.T) {
 
 				require.LessOrEqual(t,
 					used,
-					int32(arenaSize),
+					uint32(arenaSize),
 					"used bytes should not exceed arena size",
 				)
 
@@ -111,7 +111,7 @@ func TestManyRotations(t *testing.T) {
 					"p%d-%d-%s\n",
 					producerID,
 					j,
-					randomString(size-10), // Adjust for prefix length
+					randomString(size-9), // Adjust for prefix length
 				)
 
 				errWrite := ingestor.write(
@@ -177,10 +177,6 @@ func TestManyRotations(t *testing.T) {
 
 	// Count actual lines in output
 	outputLines := len(lines)
-	if len(output) > 0 && output[len(output)-1] == '\n' {
-		// Last line is empty due to trailing newline
-		outputLines--
-	}
 
 	// Verify no messages lost - all successful writes should appear in output
 	require.Equal(t,
@@ -240,19 +236,6 @@ func TestManyRotations(t *testing.T) {
 		require.GreaterOrEqual(t, a.numberWriters.Load(), int32(0), "arena %d writers negative", i)
 		require.GreaterOrEqual(t, a.rollbackCounter.Load(), int32(0), "arena %d rollbacks negative", i)
 	}
-}
-
-// Helper function to generate random string
-func randomString(n int) string {
-	const letters = "abcdefghijklmnopqrstuvwxyz"
-
-	b := make([]byte, n)
-
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-
-	return string(b)
 }
 
 // TestManyRotations_CursorIntegrity specifically tests cursor behavior

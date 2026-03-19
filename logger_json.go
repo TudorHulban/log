@@ -53,3 +53,27 @@ func jsonWCaller(params *paramsJSONWCaller) []byte {
 
 	return writer.Bytes()
 }
+
+func (*Logger) appendJSON(buf, ts []byte, level, format string, args ...any) []byte {
+	buf = append(buf, '{')
+
+	if ts != nil {
+		buf = append(buf, `"ts":"`...)
+		buf = append(buf, ts...)
+		buf = append(buf, `",`...)
+	}
+
+	buf = append(buf, `"level":"`...)
+	buf = append(buf, level...)
+	buf = append(buf, `","msg":"`...)
+	buf = fmt.Appendf(buf, format, args...)
+	buf = append(buf, "\"}\n"...)
+
+	return buf
+}
+
+// Formats
+// {"ts":"2026-03-18T14:27:09.123Z","level":"info","msg":"user login"}
+// {"ts":"2026-03-18T14:27:09.123Z","level":"info","msg":"user login","user_id":3847291,"ip":"10.44.12.189","device":"mobile","session_id":"sess_abc123xyz"}
+// {"ts":"…","level":"warn","msg":"slow database query","duration_ms":342,"query":"SELECT …","rows":124}
+// {"ts":"…","level":"error","msg":"payment failed","error":"card_declined","code":"AUTH_402","attempt":3}

@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/log/bytearena"
-	"github.com/tudorhulban/log/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -75,7 +74,7 @@ func TestNoTimestampPrint(t *testing.T) {
 }
 
 func TestNanoPrint(t *testing.T) {
-	writer := helpers.CountWriter{}
+	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
 		bytearena.Size100K,
@@ -91,6 +90,9 @@ func TestNanoPrint(t *testing.T) {
 	)
 	require.NoError(t, errCrLogger)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
 	go l.PrintMessage("xxx1")
 	go l.PrintMessage("xxx2")
 	go l.PrintMessage("xxx3")
@@ -104,11 +106,18 @@ func TestNanoPrint(t *testing.T) {
 		"x3",
 	)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Millisecond)
+
+	cancel()
+	<-chIngestionEnd
+
+	fmt.Println(
+		writer.String(),
+	)
 }
 
 func TestYYYYPrint(t *testing.T) {
-	writer := helpers.CountWriter{}
+	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
 		bytearena.Size100K,
@@ -124,6 +133,9 @@ func TestYYYYPrint(t *testing.T) {
 	)
 	require.NoError(t, errCrLogger)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
 	go l.PrintMessage("xxx1")
 	go l.PrintMessage("xxx2")
 	go l.PrintMessage("xxx3")
@@ -137,5 +149,83 @@ func TestYYYYPrint(t *testing.T) {
 		"x3",
 	)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Millisecond)
+
+	cancel()
+	<-chIngestionEnd
+
+	fmt.Println(
+		writer.String(),
+	)
+}
+
+func TestJSONPrint_With_Timestamp(t *testing.T) {
+	writer := bytes.Buffer{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&writer,
+	)
+
+	l, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:      ingestor,
+			LoggerLevel:   LevelDEBUG,
+			WithTimestamp: timestamp.TimestampNano,
+
+			WithJSON: true,
+		},
+	)
+	require.NoError(t, errCrLogger)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	payload := "xxx"
+
+	l.Printf("%s", payload)
+
+	cancel()
+	<-chIngestionEnd
+
+	require.Contains(t, writer.String(), payload)
+
+	fmt.Println(
+		writer.String(),
+	)
+}
+
+func TestJSONPrint_No_Timestamp(t *testing.T) {
+	writer := bytes.Buffer{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&writer,
+	)
+
+	l, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+
+			WithJSON: true,
+		},
+	)
+	require.NoError(t, errCrLogger)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	payload := "xxx"
+
+	l.Printf("%s", payload)
+
+	cancel()
+	<-chIngestionEnd
+
+	require.Contains(t, writer.String(), payload)
+
+	fmt.Println(
+		writer.String(),
+	)
 }

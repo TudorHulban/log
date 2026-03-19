@@ -2,7 +2,6 @@ package log
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/tudorhulban/log/bytearena"
 	"github.com/tudorhulban/log/timestamp"
@@ -56,18 +55,6 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 
 	return &result,
 		nil
-}
-
-func (*Logger) appendJSON(buf, ts []byte, level, format string, args ...any) []byte {
-	buf = append(buf, `{"timestamp":"`...)
-	buf = append(buf, ts...)
-	buf = append(buf, `","level":"`...)
-	buf = append(buf, level...)
-	buf = append(buf, `","message":"`...)
-	buf = fmt.Appendf(buf, format, args...)
-	buf = append(buf, "\"}\n"...)
-
-	return buf
 }
 
 func (l Logger) labelInfo() string {

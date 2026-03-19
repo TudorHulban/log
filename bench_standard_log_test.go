@@ -4,13 +4,15 @@ import (
 	"testing"
 
 	"log"
+
+	"github.com/tudorhulban/log/helpers"
 )
 
 // BenchmarkStandardLogger-16    	 6128383	       196.9 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkStandardLogger(b *testing.B) {
 	b.ReportAllocs()
 
-	sink := countWriter{}
+	sink := helpers.CountWriter{}
 
 	log.SetOutput(&sink)
 	log.SetFlags(log.LstdFlags)
@@ -24,7 +26,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 		)
 	}
 
-	_ = sink.n.Load() // force sink to stay live
+	_ = sink.NumberWrites.Load() // force sink to stay live
 }
 
 // and parallel — stdlib log has a global mutex, this exposes it
@@ -32,7 +34,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 func BenchmarkStandardLoggerParallel(b *testing.B) {
 	b.ReportAllocs()
 
-	sink := countWriter{}
+	sink := helpers.CountWriter{}
 
 	log.SetOutput(&sink)
 	log.SetFlags(log.LstdFlags)

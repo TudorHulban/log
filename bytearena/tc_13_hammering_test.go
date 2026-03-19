@@ -269,7 +269,7 @@ func TestHammerWithHugeMessages(t *testing.T) {
 	)
 
 	// Each oversized write creates a considered rollback only
-	// if there are also succesful writes.
+	// if there are also successful writes.
 	require.GreaterOrEqual(t,
 		finalHuge+finalValid-finalSuccessful,
 		int64(0),
@@ -463,7 +463,7 @@ func TestHammerWithHugeMessages_Detailed(t *testing.T) {
 	)
 
 	// Each oversized write creates a considered rollback only
-	// if there are also succesful writes.
+	// if there are also successful writes.
 	require.GreaterOrEqual(t,
 		writeAttempts.Load()-writeSuccess.Load(),
 		int64(0),

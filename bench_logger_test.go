@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/tudorhulban/log/bytearena"
+	"github.com/tudorhulban/log/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -14,7 +15,7 @@ import (
 func BenchmarkNilTimestamp(b *testing.B) {
 	b.ReportAllocs()
 
-	sink := countWriter{}
+	sink := helpers.CountWriter{}
 
 	logger := NewLogger(
 		&ParamsNewLogger{
@@ -33,7 +34,7 @@ func BenchmarkNilTimestamp(b *testing.B) {
 		)
 	}
 
-	_ = sink.n.Load() // force sink to stay live
+	_ = sink.NumberWrites.Load() // force sink to stay live
 }
 
 func BenchmarkArenaNilTimestamp(b *testing.B) {
@@ -100,7 +101,7 @@ func BenchmarkLogger_Print(b *testing.B) {
 func BenchmarkNanoTimestamp(b *testing.B) {
 	b.ReportAllocs()
 
-	sink := countWriter{}
+	sink := helpers.CountWriter{}
 
 	logger := NewLogger(
 		&ParamsNewLogger{
@@ -119,14 +120,14 @@ func BenchmarkNanoTimestamp(b *testing.B) {
 		)
 	}
 
-	_ = sink.n.Load() // force sink to stay live
+	_ = sink.NumberWrites.Load() // force sink to stay live
 }
 
 // BenchmarkStandardTimestamp-16    	 9234607	       130.2 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkStandardTimestamp(b *testing.B) {
 	b.ReportAllocs()
 
-	sink := countWriter{}
+	sink := helpers.CountWriter{}
 
 	logger := NewLogger(
 		&ParamsNewLogger{
@@ -145,14 +146,14 @@ func BenchmarkStandardTimestamp(b *testing.B) {
 		)
 	}
 
-	_ = sink.n.Load() // force sink to stay live
+	_ = sink.NumberWrites.Load() // force sink to stay live
 }
 
 // BenchmarkYYYYTimestamp-16    	 9197252	       131.7 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkYYYYTimestamp(b *testing.B) {
 	b.ReportAllocs()
 
-	sink := countWriter{}
+	sink := helpers.CountWriter{}
 
 	logger := NewLogger(
 		&ParamsNewLogger{
@@ -171,5 +172,5 @@ func BenchmarkYYYYTimestamp(b *testing.B) {
 		)
 	}
 
-	_ = sink.n.Load() // force sink to stay live
+	_ = sink.NumberWrites.Load() // force sink to stay live
 }

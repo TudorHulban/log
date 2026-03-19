@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test Case 10: Producer Panic Safety
+// Test Case 02: Producer Panic Safety
 
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic

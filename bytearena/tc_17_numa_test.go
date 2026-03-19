@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Test Case 8: NUMA-Style False Sharing Detection
+// Test Case 17: NUMA-Style False Sharing Detection
 
 // Test: Multiple cores hammer different atomics.
 // Verifies: Cache line padding works (performance, not correctness).

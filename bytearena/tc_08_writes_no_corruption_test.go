@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// Test Case 7: Memory Corruption Check
+// Test Case 08: Memory Corruption Check
 
 // Test: Concurrent writes do not corrupt each other's data
 // Verifies: Each log entry remains intact and contiguous.

@@ -34,12 +34,10 @@ type Ingestor struct {
 // NewIngestor allocates two arenas of the given size and initializes
 // the Manager with a0 as the active arena and a1 as the standby arena.
 func NewIngestor(arenaSize uint32, w io.Writer) *Ingestor {
-	a0 := &arena{
-		buf: make([]byte, arenaSize),
-	}
-
 	result := Ingestor{
-		arenaFirst: a0,
+		arenaFirst: &arena{
+			buf: make([]byte, arenaSize),
+		},
 		arenaSecond: &arena{
 			buf: make([]byte, arenaSize),
 		},
@@ -52,7 +50,7 @@ func NewIngestor(arenaSize uint32, w io.Writer) *Ingestor {
 	}
 
 	// Set active arena to a0.
-	result.active.Store(a0)
+	result.active.Store(result.arenaFirst)
 
 	// No sealed arena yet.
 	result.sealed.Store(nil)

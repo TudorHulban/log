@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test Case 11: Many rotations during high write rate
+// Test Case 04: Many rotations during high write rate
 //
 // Test: Multiple rotates. Say 1000.
 // Verifies:

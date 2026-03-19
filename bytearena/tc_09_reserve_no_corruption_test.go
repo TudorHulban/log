@@ -1,6 +1,6 @@
 package bytearena
 
-// Test Case 15: Data corruption risk in Reserve rollback
+// Test Case 09: Data corruption risk in Reserve rollback
 
 // Test:
 // Arena size is 1000.

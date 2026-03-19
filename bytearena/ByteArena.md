@@ -198,3 +198,7 @@ This ensures each atomic occupies its own line relative to the struct layout.
 
 On multi-socket machines, if producers on socket 1 are writing to an arena whose memory is allocated on socket 0, you pay a significant cross-NUMA penalty on every memcopy.  
 Arena memory allocated on the socket where producers run, with the consumer following the data. numactl or explicit mmap with NUMA policy at arena allocation time is the fix but at current is planned for future releases.
+
+## 11. Benchmarks
+
+Benchmark results provide ingestion only time with no I/O timings.

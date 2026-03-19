@@ -2,6 +2,8 @@ package bytearena
 
 import "context"
 
+type flusher func(a *arena, used uint32)
+
 // Flush sealed arena contents using the provided writer function.
 //
 // The writer receives:

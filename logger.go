@@ -1,16 +1,17 @@
 package log
 
 import (
+	"errors"
 	"fmt"
-	"io"
 
+	"github.com/tudorhulban/log/bytearena"
 	"github.com/tudorhulban/log/timestamp"
 )
 
 type Level int8
 
 type Logger struct {
-	localWriter io.Writer
+	ingestor    *bytearena.Ingestor
 	fnTimestamp timestamp.Timestamp
 
 	logLevel int8
@@ -21,7 +22,7 @@ type Logger struct {
 }
 
 type ParamsNewLogger struct {
-	LoggerWriter  io.Writer
+	Ingestor      *bytearena.Ingestor
 	WithTimestamp timestamp.Timestamp
 
 	LoggerLevel Level
@@ -31,7 +32,12 @@ type ParamsNewLogger struct {
 	WithJSON   bool
 }
 
-func NewLogger(params *ParamsNewLogger) *Logger {
+func NewLogger(params *ParamsNewLogger) (*Logger, error) {
+	if params.Ingestor == nil {
+		return nil,
+			errors.New("nil ingestor")
+	}
+
 	result := Logger{
 		logLevel: convertLevel(params.LoggerLevel),
 
@@ -40,11 +46,7 @@ func NewLogger(params *ParamsNewLogger) *Logger {
 		withColor:   params.WithColor,
 		withJSON:    params.WithJSON,
 
-		localWriter: params.LoggerWriter,
-	}
-
-	if params.LoggerWriter == nil {
-		result.localWriter = io.Discard
+		ingestor: params.Ingestor,
 	}
 
 	if params.WithTimestamp == nil {
@@ -56,7 +58,7 @@ func NewLogger(params *ParamsNewLogger) *Logger {
 		logLevels[params.LoggerLevel],
 	)
 
-	return &result
+	return &result, nil
 }
 
 func (*Logger) appendJSON(buf, ts []byte, level, format string, args ...any) []byte {

@@ -14,7 +14,7 @@ func (l *Logger) PrintMessage(msg string) {
 	buf = append(buf, []byte(msg)...)
 	buf = append(buf, '\n')
 
-	_, _ = l.localWriter.Write(buf)
+	_, _ = l.ingestor.Write(buf)
 }
 
 func (l *Logger) Print(args ...any) {
@@ -27,7 +27,7 @@ func (l *Logger) Print(args ...any) {
 	buf = append(buf, fmt.Sprint(args...)...)
 	buf = append(buf, '\n')
 
-	_, _ = l.localWriter.Write(buf)
+	_, _ = l.ingestor.Write(buf)
 }
 
 func (l *Logger) Printw(msg string, args ...any) {
@@ -42,7 +42,7 @@ func (l *Logger) Printw(msg string, args ...any) {
 	buf = append(buf, fmt.Sprint(args...)...)
 	buf = append(buf, '\n')
 
-	_, _ = l.localWriter.Write(buf)
+	_, _ = l.ingestor.Write(buf)
 }
 
 func (l *Logger) Printf(format string, args ...any) {
@@ -53,13 +53,13 @@ func (l *Logger) Printf(format string, args ...any) {
 	if l.withJSON {
 		buf = l.appendJSON(buf, l.fnTimestamp(buf), l.labelInfo(), format, args...)
 
-		_, _ = l.localWriter.Write(buf)
+		_, _ = l.ingestor.Write(buf)
 	} else {
 		buf = append(buf, l.fnTimestamp(buf)...)
 		buf = append(buf, ' ')
 		buf = fmt.Appendf(buf, format, args...)
 		buf = append(buf, '\n')
 
-		_, _ = l.localWriter.Write(buf)
+		_, _ = l.ingestor.Write(buf)
 	}
 }

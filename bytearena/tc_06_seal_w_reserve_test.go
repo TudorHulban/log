@@ -32,7 +32,7 @@ func TestReserveVsSealRace(t *testing.T) {
 				return
 			}
 
-			ingestor.endWrite(region)
+			ingestor.EndWrite(region)
 		}
 
 		chDone <- true

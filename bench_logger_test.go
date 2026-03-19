@@ -6,6 +6,7 @@ import (
 	"io"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/log/bytearena"
 	"github.com/tudorhulban/log/helpers"
 	"github.com/tudorhulban/log/timestamp"
@@ -17,13 +18,19 @@ func BenchmarkNilTimestamp(b *testing.B) {
 
 	sink := helpers.CountWriter{}
 
-	logger := NewLogger(
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&sink,
+	)
+
+	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			LoggerWriter:  &sink,
+			Ingestor:      ingestor,
 			LoggerLevel:   LevelINFO,
 			WithTimestamp: timestamp.TimestampNil,
 		},
 	)
+	require.NoError(b, errCrLogger)
 
 	b.ResetTimer()
 
@@ -46,13 +53,14 @@ func BenchmarkArenaNilTimestamp(b *testing.B) {
 
 	chIngestionEnd := writer.StartIngestion(ctx)
 
-	logger := NewLogger(
+	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			LoggerWriter:  writer,
+			Ingestor:      writer,
 			LoggerLevel:   LevelINFO,
 			WithTimestamp: timestamp.TimestampNil,
 		},
 	)
+	require.NoError(b, errCrLogger)
 
 	b.ResetTimer()
 
@@ -81,13 +89,14 @@ func BenchmarkLogger_Print(b *testing.B) {
 		<-chEnd
 	}()
 
-	logger := NewLogger(
+	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			LoggerWriter:  writer,
+			Ingestor:      writer,
 			LoggerLevel:   LevelINFO,
 			WithTimestamp: timestamp.TimestampNil,
 		},
 	)
+	require.NoError(b, errCrLogger)
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -103,13 +112,19 @@ func BenchmarkNanoTimestamp(b *testing.B) {
 
 	sink := helpers.CountWriter{}
 
-	logger := NewLogger(
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&sink,
+	)
+
+	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			LoggerWriter:  &sink,
+			Ingestor:      ingestor,
 			LoggerLevel:   LevelINFO,
 			WithTimestamp: timestamp.TimestampNano,
 		},
 	)
+	require.NoError(b, errCrLogger)
 
 	b.ResetTimer()
 
@@ -129,13 +144,19 @@ func BenchmarkStandardTimestamp(b *testing.B) {
 
 	sink := helpers.CountWriter{}
 
-	logger := NewLogger(
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&sink,
+	)
+
+	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			LoggerWriter:  &sink,
+			Ingestor:      ingestor,
 			LoggerLevel:   LevelINFO,
 			WithTimestamp: timestamp.TimestampStandard,
 		},
 	)
+	require.NoError(b, errCrLogger)
 
 	b.ResetTimer()
 
@@ -155,13 +176,19 @@ func BenchmarkYYYYTimestamp(b *testing.B) {
 
 	sink := helpers.CountWriter{}
 
-	logger := NewLogger(
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&sink,
+	)
+
+	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			LoggerWriter:  &sink,
+			Ingestor:      ingestor,
 			LoggerLevel:   LevelINFO,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
 		},
 	)
+	require.NoError(b, errCrLogger)
 
 	b.ResetTimer()
 

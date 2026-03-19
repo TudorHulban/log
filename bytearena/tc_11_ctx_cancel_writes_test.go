@@ -337,7 +337,7 @@ func TestContextCancel_DuringRotation(t *testing.T) {
 	}
 
 	// Complete the stuck write
-	ingestor.endWrite(region)
+	ingestor.EndWrite(region)
 
 	// Verify final state
 	require.True(t,
@@ -474,7 +474,7 @@ func TestContextCancel_WithPendingWrites(t *testing.T) {
 
 	// Complete all pending writes
 	for _, region := range regions {
-		ingestor.endWrite(region)
+		ingestor.EndWrite(region)
 	}
 
 	// Verify final state

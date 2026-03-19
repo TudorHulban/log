@@ -13,7 +13,7 @@ func (r WriteRegion) Buf() []byte {
 	return r.arena.buf[r.offset : r.offset+r.size]
 }
 
-// endWrite decrements writers-in-flight.
-func (*Ingestor) endWrite(r WriteRegion) {
+// EndWrite decrements writers-in-flight.
+func (*Ingestor) EndWrite(r WriteRegion) {
 	r.arena.Leave()
 }

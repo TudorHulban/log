@@ -1,21 +1,31 @@
 package log
 
 import (
-	"os"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+	"github.com/tudorhulban/log/bytearena"
+	"github.com/tudorhulban/log/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestNanoPrint(t *testing.T) {
-	l := NewLogger(
+	sink := helpers.CountWriter{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&sink,
+	)
+
+	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
+			Ingestor:      ingestor,
 			LoggerLevel:   LevelDEBUG,
-			LoggerWriter:  os.Stdout,
 			WithTimestamp: timestamp.TimestampNano,
 		},
 	)
+	require.NoError(t, errCrLogger)
 
 	go l.PrintMessage("xxx1")
 	go l.PrintMessage("xxx2")
@@ -34,13 +44,21 @@ func TestNanoPrint(t *testing.T) {
 }
 
 func TestYYYYPrint(t *testing.T) {
-	l := NewLogger(
+	sink := helpers.CountWriter{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&sink,
+	)
+
+	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
+			Ingestor:      ingestor,
 			LoggerLevel:   LevelDEBUG,
-			LoggerWriter:  os.Stdout,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
 		},
 	)
+	require.NoError(t, errCrLogger)
 
 	go l.PrintMessage("xxx1")
 	go l.PrintMessage("xxx2")

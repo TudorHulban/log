@@ -38,7 +38,7 @@ func TestReservationAtBoundary(t *testing.T) {
 	)
 
 	// Complete first write
-	ingestor.endWrite(region10)
+	ingestor.EndWrite(region10)
 
 	// Verify: Final cursor at 100
 	require.EqualValues(t,

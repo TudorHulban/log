@@ -9,10 +9,13 @@ import (
 	"github.com/tudorhulban/log/bytearena"
 )
 
-func TestHowToUse(t *testing.T) {
-	var sink bytes.Buffer
+func TestHowToUse_As_ioWriter(t *testing.T) {
+	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &sink)
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&writer,
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
@@ -26,5 +29,38 @@ func TestHowToUse(t *testing.T) {
 	cancel()
 	<-chIngestionEnd
 
-	require.Contains(t, sink.String(), payload)
+	require.Contains(t, writer.String(), payload)
+}
+
+func TestHowToUse_Directly(t *testing.T) {
+	writer := bytes.Buffer{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&writer,
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	payload := "xxx"
+
+	var arr [256]byte
+	buf := arr[:0]
+
+	buf = append(buf, []byte(payload)...)
+
+	// if errors, arena full or no active arena — fall back or drop.
+	region, errWrite := ingestor.TryWrite(uint32(len(buf)))
+	require.NoError(t, errWrite)
+	require.NotZero(t, region)
+
+	defer ingestor.EndWrite(region)
+
+	copy(region.Buf(), buf)
+
+	cancel()
+	<-chIngestionEnd
+
+	require.Contains(t, writer.String(), payload)
 }

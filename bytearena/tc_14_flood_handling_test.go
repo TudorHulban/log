@@ -21,7 +21,7 @@ func TestExactAndOversizedWrites(t *testing.T) {
 	require.NoError(t, errWrite)
 	require.Zero(t, region.offset)
 
-	ingestor.endWrite(region)
+	ingestor.EndWrite(region)
 
 	require.EqualValues(t,
 		sizeArena,

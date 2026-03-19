@@ -1,13 +1,13 @@
 package bytearena
 
-// tryWrite attempts BeginWrite once. If it fails, it reloads the active
+// TryWrite attempts BeginWrite once. If it fails, it reloads the active
 // arena and tries exactly one more time.
 //
 // This is a convenience helper for callers who want a simple
 // "try once, rotate may have happened, try again" pattern.
 //
 // It does NOT loop indefinitely and does NOT block.
-func (m *Ingestor) tryWrite(n uint32) (WriteRegion, error) {
+func (m *Ingestor) TryWrite(n uint32) (WriteRegion, error) {
 	// First attempt.
 	region, errWrite := m.beginWrite(n)
 	if errWrite == nil {
@@ -90,13 +90,13 @@ func (m *Ingestor) beginWrite(n uint32) (WriteRegion, error) {
 // The write function receives a byte slice of length n and must fill it.
 func (m *Ingestor) write(n uint32, fn func(destination []byte)) error {
 	// Try to region space (with one retry).
-	region, canWrite := m.tryWrite(n)
+	region, canWrite := m.TryWrite(n)
 	if canWrite != nil {
 		return canWrite
 	}
 
 	// Mark write complete.
-	defer m.endWrite(region)
+	defer m.EndWrite(region)
 
 	// Write into the reserved region.
 	fn(region.Buf())

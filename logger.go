@@ -49,16 +49,13 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		ingestor: params.Ingestor,
 	}
 
-	if params.WithTimestamp == nil {
-		result.fnTimestamp = timestamp.TimestampNil
-	}
-
 	result.Printf(
 		"created logger, level %v",
 		logLevels[params.LoggerLevel],
 	)
 
-	return &result, nil
+	return &result,
+		nil
 }
 
 func (*Logger) appendJSON(buf, ts []byte, level, format string, args ...any) []byte {

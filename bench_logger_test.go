@@ -25,9 +25,8 @@ func BenchmarkNilTimestamp(b *testing.B) {
 
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelINFO,
-			WithTimestamp: timestamp.TimestampNil,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelINFO,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -55,9 +54,8 @@ func BenchmarkArenaNilTimestamp(b *testing.B) {
 
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      writer,
-			LoggerLevel:   LevelINFO,
-			WithTimestamp: timestamp.TimestampNil,
+			Ingestor:    writer,
+			LoggerLevel: LevelINFO,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -77,6 +75,7 @@ func BenchmarkArenaNilTimestamp(b *testing.B) {
 	<-chIngestionEnd
 }
 
+// BenchmarkLogger_Print-16    	16389417	        68.32 ns/op	     282 B/op	       1 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -91,18 +90,80 @@ func BenchmarkLogger_Print(b *testing.B) {
 
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      writer,
-			LoggerLevel:   LevelINFO,
-			WithTimestamp: timestamp.TimestampNil,
+			Ingestor:    writer,
+			LoggerLevel: LevelINFO,
 		},
 	)
 	require.NoError(b, errCrLogger)
+	require.NotNil(b, logger)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
 		logger.Print("hi", 123, "world")
+	}
+}
+
+// BenchmarkLogger_PrintWithNoTimestamp-16    	33209036	        35.24 ns/op	      26 B/op	       0 allocs/op
+func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
+	var sink bytes.Buffer
+
+	writer := bytearena.NewIngestor(bytearena.Size100K, &sink)
+	ctx, cancel := context.WithCancel(context.Background())
+	chEnd := writer.StartIngestion(ctx)
+
+	defer func() {
+		cancel()
+		<-chEnd
+	}()
+
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    writer,
+			LoggerLevel: LevelINFO,
+		},
+	)
+	require.NoError(b, errCrLogger)
+	require.NotNil(b, logger)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for b.Loop() {
+		logger.PrintWithNoTimestamp("hi", 123, "world")
+	}
+}
+
+// BenchmarkLogger_PrintFast-16    	86922866	        13.38 ns/op	      20 B/op	       0 allocs/op
+func BenchmarkLogger_PrintFast(b *testing.B) {
+	var sink bytes.Buffer
+
+	writer := bytearena.NewIngestor(bytearena.Size100K, &sink)
+	ctx, cancel := context.WithCancel(context.Background())
+	chEnd := writer.StartIngestion(ctx)
+
+	defer func() {
+		cancel()
+		<-chEnd
+	}()
+
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    writer,
+			LoggerLevel: LevelINFO,
+		},
+	)
+	require.NoError(b, errCrLogger)
+	require.NotNil(b, logger)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for b.Loop() {
+		logger.PrintFast(
+			[]byte("xxxxxxxxxxxxxxxxxxx"),
+		)
 	}
 }
 

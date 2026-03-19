@@ -1,6 +1,9 @@
 package log
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -10,12 +13,73 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-func TestNanoPrint(t *testing.T) {
-	sink := helpers.CountWriter{}
+func TestPrint(t *testing.T) {
+	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
 		bytearena.Size100K,
-		&sink,
+		&writer,
+	)
+
+	l, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:      ingestor,
+			LoggerLevel:   LevelDEBUG,
+			WithTimestamp: timestamp.TimestampNano,
+		},
+	)
+	require.NoError(t, errCrLogger)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	payload := "xxx"
+
+	l.Print(payload)
+
+	cancel()
+	<-chIngestionEnd
+
+	require.Contains(t, writer.String(), payload)
+}
+
+func TestNoTimestampPrint(t *testing.T) {
+	writer := bytes.Buffer{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&writer,
+	)
+
+	l, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+		},
+	)
+	require.NoError(t, errCrLogger)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	l.PrintWithNoTimestamp("hi", 123, "world")
+
+	cancel()
+	<-chIngestionEnd
+
+	require.Contains(t, writer.String(), "hi 123 world")
+
+	fmt.Println(
+		writer.String(),
+	)
+}
+
+func TestNanoPrint(t *testing.T) {
+	writer := helpers.CountWriter{}
+
+	ingestor := bytearena.NewIngestor(
+		bytearena.Size100K,
+		&writer,
 	)
 
 	l, errCrLogger := NewLogger(
@@ -44,11 +108,11 @@ func TestNanoPrint(t *testing.T) {
 }
 
 func TestYYYYPrint(t *testing.T) {
-	sink := helpers.CountWriter{}
+	writer := helpers.CountWriter{}
 
 	ingestor := bytearena.NewIngestor(
 		bytearena.Size100K,
-		&sink,
+		&writer,
 	)
 
 	l, errCrLogger := NewLogger(

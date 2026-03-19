@@ -5,11 +5,8 @@ import (
 	"time"
 )
 
+// For no timestamp do not add a timestamp function.
 type Timestamp func(buf []byte) []byte
-
-var TimestampNil = func(buf []byte) []byte {
-	return nil
-}
 
 // TimestampNano provides true nanosecond‑accurate timestamps.
 // On Linux time.Now() costs ~40–70 ns by itself.

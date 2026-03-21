@@ -65,10 +65,9 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 }
 
 func (l Logger) labelInfo() string {
-	return ternary(
-		l.withColor,
-
-		colorInfo(logLevels[LevelINFO]),
-		logLevels[LevelINFO],
-	)
+	if l.withColor {
+		return colorInfo(logLevels[LevelINFO])
+	} else {
+		return logLevels[LevelINFO]
+	}
 }

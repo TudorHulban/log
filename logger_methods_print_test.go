@@ -171,7 +171,7 @@ func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
 			LoggerLevel:   LevelDEBUG,
-			WithTimestamp: timestamp.TimestampNano,
+			WithTimestamp: timestamp.TimestampYYYYMonth,
 
 			WithJSON:  true,
 			WithColor: true,

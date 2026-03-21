@@ -6,37 +6,43 @@ import (
 )
 
 // For no timestamp do not add a timestamp function.
-type Timestamp func() []byte
+type Timestamp func(appendTo []byte) []byte
 
 // TimestampNano provides true nanosecond‑accurate timestamps.
 // On Linux time.Now() costs ~40–70 ns by itself.
 // UnixNano() + AppendInt adds ~10–15 ns.
 //
 // Due to above, cost is around 150 ns.
-func TimestampNano() []byte {
-	return strconv.AppendInt(nil, time.Now().UnixNano(), 10)
+func TimestampNano(appendTo []byte) []byte {
+	return strconv.AppendInt(appendTo, time.Now().UnixNano(), 10)
 }
 
-func TimestampStandard() []byte {
+func TimestampStandard(appendTo []byte) []byte {
 	updateStandardTimeCache()
 
 	buf := timeCacheStandard.active.Load()
 
-	return append([]byte(nil), buf.output[:buf.length]...)
+	return append(appendTo, buf.output[:buf.length]...)
 }
 
-func TimestampYYYYMonth() []byte {
+func TimestampYYYYMonth(appendTo []byte) []byte {
 	updateYYYYMonthTimeCache()
 
 	buf := timeCacheYYYYMonth.active.Load()
 
-	return append([]byte(nil), buf.output[:buf.length]...)
+	return append(appendTo, buf.output[:buf.length]...)
 }
 
-func TimestampRFC3339() []byte {
-	return []byte(time.Now().UTC().Format(time.RFC3339))
+func TimestampRFC3339(appendTo []byte) []byte {
+	return append(
+		appendTo,
+		[]byte(time.Now().UTC().Format(time.RFC3339))...,
+	)
 }
 
-func TimestampRFC3339Nano() []byte {
-	return []byte(time.Now().UTC().Format(time.RFC3339Nano))
+func TimestampRFC3339Nano(appendTo []byte) []byte {
+	return append(
+		appendTo,
+		[]byte(time.Now().UTC().Format(time.RFC3339Nano))...,
+	)
 }

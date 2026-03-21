@@ -40,6 +40,36 @@ func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	}
 }
 
+// BenchmarkLogger_NilTimestamp_Safe-16    	 8634794	       138.4 ns/op	     173 B/op	       1 allocs/op
+func BenchmarkLogger_NilTimestamp_Safe(b *testing.B) {
+	var sink bytes.Buffer
+
+	ingestor := bytearena.NewIngestor(bytearena.Size100K, &sink)
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	defer func() {
+		cancel()
+		<-chIngestionEnd
+	}()
+
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    ingestor,
+			LoggerLevel: Level(LevelINFO),
+		},
+	)
+	require.NoError(b, errCrLogger)
+	require.NotNil(b, logger)
+
+	for i := 0; b.Loop(); i++ {
+		logger.PrintfSafe(
+			`{"level":"info","msg":"user login","user_id":%d}`,
+			i,
+		)
+	}
+}
+
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem -race
 // BenchmarkLogger_Print-16    	66342212	        17.05 ns/op	      52 B/op	       0 allocs/op
@@ -134,7 +164,7 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp-16    	29493921	        42.23 ns/op	      69 B/op	       1 allocs/op
+// BenchmarkLogger_NanoTimestamp-16    	29470323	        39.59 ns/op	      67 B/op	       0 allocs/op
 func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -168,7 +198,7 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp_JSON-16    	21451356	        68.75 ns/op	      96 B/op	       1 allocs/op
+// BenchmarkLogger_NanoTimestamp_JSON-16    	29838009	        41.18 ns/op	      66 B/op	       0 allocs/op
 func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -203,7 +233,7 @@ func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_StandardTimestamp-16    	24842967	        53.28 ns/op	      88 B/op	       1 allocs/op
+// BenchmarkLogger_StandardTimestamp-16    	27820491	        48.12 ns/op	      77 B/op	       1 allocs/op
 func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -237,7 +267,7 @@ func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_YYYYTimestamp-16    	23694838	        46.77 ns/op	      89 B/op	       1 allocs/op
+// BenchmarkLogger_YYYYTimestamp-16    	26702970	        39.50 ns/op	      73 B/op	       1 allocs/op
 func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -268,5 +298,70 @@ func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 			`{"level":"info","msg":"user login","user_id":%d}`,
 			i,
 		)
+	}
+}
+
+// BenchmarkLogger_Printf_TimestampNano-16    	29792701	        42.18 ns/op	      66 B/op	       0 allocs/op
+func BenchmarkLogger_Printf_TimestampNano(b *testing.B) {
+	var sink bytes.Buffer
+
+	ingestor := bytearena.NewIngestor(bytearena.Size100K, &sink)
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	defer func() {
+		cancel()
+		<-chIngestionEnd
+	}()
+
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:      ingestor,
+			LoggerLevel:   Level(LevelINFO),
+			WithTimestamp: timestamp.TimestampNano,
+		},
+	)
+	require.NoError(b, errCrLogger)
+	require.NotNil(b, logger)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; b.Loop(); i++ {
+		logger.Printf(
+			`{"level":"info","msg":"user login","user_id":%d}`,
+			i,
+		)
+	}
+}
+
+// BenchmarkLogger_Print_TimestampNano-16    	58096893	        20.44 ns/op	      60 B/op	       0 allocs/op
+func BenchmarkLogger_Print_TimestampNano(b *testing.B) {
+	var sink bytes.Buffer
+
+	ingestor := bytearena.NewIngestor(bytearena.Size100K, &sink)
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	defer func() {
+		cancel()
+		<-chIngestionEnd
+	}()
+
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:      ingestor,
+			LoggerLevel:   Level(LevelINFO),
+			WithTimestamp: timestamp.TimestampNano,
+		},
+	)
+	require.NoError(b, errCrLogger)
+	require.NotNil(b, logger)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for b.Loop() {
+		logger.Print("hi", 123, "world")
 	}
 }

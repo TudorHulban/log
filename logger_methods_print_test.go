@@ -24,7 +24,7 @@ func TestLogger_Print(t *testing.T) {
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
 			LoggerLevel:   Level(LevelDEBUG),
-			WithTimestamp: timestamp.TimestampNano,
+			WithTimestamp: timestamp.TimestampRFC3339,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -40,6 +40,10 @@ func TestLogger_Print(t *testing.T) {
 	<-chIngestionEnd
 
 	require.Contains(t, writer.String(), payload)
+
+	fmt.Println(
+		writer.String(),
+	)
 }
 
 func TestLogger_NoTimestampPrint(t *testing.T) {
@@ -171,7 +175,7 @@ func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
 			LoggerLevel:   Level(LevelDEBUG),
-			WithTimestamp: timestamp.TimestampYYYYMonth,
+			WithTimestamp: timestamp.TimestampNano,
 
 			WithJSON:  true,
 			WithColor: true,

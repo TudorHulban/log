@@ -26,7 +26,7 @@ func (l *Logger) PrintMessage(msg string) {
 		buf := region.Buf()[:0]
 
 		if l.fnTimestamp != nil {
-			buf = append(buf, l.fnTimestamp()...)
+			buf = l.fnTimestamp(buf)
 			buf = append(buf, ' ')
 		}
 
@@ -43,7 +43,7 @@ func (l *Logger) PrintMessageSafe(msg string) {
 	var buf []byte
 
 	if l.fnTimestamp != nil {
-		buf = append(buf, l.fnTimestamp()...)
+		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
@@ -64,7 +64,7 @@ func (l *Logger) Print(args ...any) {
 		buf := region.Buf()[:0]
 
 		if l.fnTimestamp != nil {
-			buf = append(buf, l.fnTimestamp()...)
+			buf = l.fnTimestamp(buf)
 			buf = append(buf, ' ')
 		}
 
@@ -81,7 +81,7 @@ func (l *Logger) PrintSafe(args ...any) {
 	var buf []byte
 
 	if l.fnTimestamp != nil {
-		buf = append(buf, l.fnTimestamp()...)
+		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
@@ -130,7 +130,7 @@ func (l *Logger) Printw(msg string, args ...any) {
 		buf := region.Buf()[:0]
 
 		if l.fnTimestamp != nil {
-			buf = append(buf, l.fnTimestamp()...)
+			buf = l.fnTimestamp(buf)
 			buf = append(buf, ' ')
 		}
 
@@ -149,7 +149,7 @@ func (l *Logger) PrintwSafe(msg string, args ...any) {
 	var buf []byte
 
 	if l.fnTimestamp != nil {
-		buf = append(buf, l.fnTimestamp()...)
+		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
@@ -172,28 +172,18 @@ func (l *Logger) Printf(format string, args ...any) {
 		buf := region.Buf()[:0]
 
 		if l.withJSON {
-			if l.fnTimestamp != nil {
-				buf = l.appendJSON(
-					buf,
-					l.fnTimestamp(),
-					l.labelInfo(),
-					format, args...,
-				)
-			} else {
-				buf = l.appendJSON(
-					buf,
-					nil,
-					l.labelInfo(),
-					format, args...,
-				)
-			}
+			buf = l.appendJSON(
+				buf,
+				l.labelInfo(),
+				format, args...,
+			)
 
 			copy(region.Buf(), buf)
 
 			l.ingestor.EndWrite(region)
 		} else {
 			if l.fnTimestamp != nil {
-				buf = append(buf, l.fnTimestamp()...)
+				buf = l.fnTimestamp(buf)
 				buf = append(buf, ' ')
 			}
 
@@ -212,13 +202,13 @@ func (l *Logger) PrintfSafe(format string, args ...any) {
 
 	if l.withJSON {
 		if l.fnTimestamp != nil {
-			buf = l.appendJSON(buf, l.fnTimestamp(), l.labelInfo(), format, args...)
+			buf = l.appendJSON(buf, l.labelInfo(), format, args...)
 		} else {
-			buf = l.appendJSON(buf, nil, l.labelInfo(), format, args...)
+			buf = l.appendJSON(buf, l.labelInfo(), format, args...)
 		}
 	} else {
 		if l.fnTimestamp != nil {
-			buf = append(buf, l.fnTimestamp()...)
+			buf = l.fnTimestamp(buf)
 			buf = append(buf, ' ')
 		}
 

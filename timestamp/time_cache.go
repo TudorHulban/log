@@ -37,6 +37,11 @@ func updateStandardTimeCache() {
 	now := time.Now()
 	nowMillisecond := now.UnixNano() / 1e6
 
+	current := gateYYYYMonth.Load()
+	if current == nowMillisecond {
+		return // still fresh, skip entirely
+	}
+
 	// update timestamp every millisecond. TTL = 1 millisecond.
 	if !gateStandard.CompareAndSwap(gateStandard.Load(), nowMillisecond) {
 		return
@@ -131,17 +136,22 @@ func updateStandardTimeCache() {
 
 func updateYYYYMonthTimeCache() {
 	now := time.Now()
-	nowMs := now.UnixNano() / 1e6
+	nowMillisecond := now.UnixNano() / 1e6
+
+	current := gateYYYYMonth.Load()
+	if current == nowMillisecond {
+		return // still fresh, skip entirely
+	}
 
 	// update timestamp every millisecond. TTL = 1 millisecond.
-	if !gateYYYYMonth.CompareAndSwap(gateYYYYMonth.Load(), nowMs) {
+	if !gateYYYYMonth.CompareAndSwap(gateYYYYMonth.Load(), nowMillisecond) {
 		return
 	}
 
 	previous := timeCacheYYYYMonth.active.Load()
 
 	next := new(timeBuf)
-	next.valueMillisecond = nowMs
+	next.valueMillisecond = nowMillisecond
 
 	if previous != nil {
 		*next = *previous

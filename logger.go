@@ -67,7 +67,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 func (l *Logger) labelInfo() string {
 	if l.withColor {
 		return colorInfo(logLevels[LevelINFO])
-	} else {
+	} else { //nolint:revive
 		return logLevels[LevelINFO]
 	}
 }

@@ -54,12 +54,12 @@ func jsonWCaller(params *paramsJSONWCaller) []byte {
 	return writer.Bytes()
 }
 
-func (*Logger) appendJSON(buf, ts []byte, level, format string, args ...any) []byte {
+func (l *Logger) appendJSON(buf []byte, level, format string, args ...any) []byte {
 	buf = append(buf, '{')
 
-	if ts != nil {
+	if l.fnTimestamp != nil {
 		buf = append(buf, `"ts":"`...)
-		buf = append(buf, ts...)
+		buf = l.fnTimestamp(buf)
 		buf = append(buf, `",`...)
 	}
 

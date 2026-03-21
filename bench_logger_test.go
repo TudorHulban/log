@@ -26,7 +26,7 @@ func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: LevelINFO,
+			LoggerLevel: Level(LevelINFO),
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -58,7 +58,7 @@ func BenchmarkLogger_Print(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    writer,
-			LoggerLevel: LevelINFO,
+			LoggerLevel: Level(LevelINFO),
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -88,7 +88,7 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    writer,
-			LoggerLevel: LevelINFO,
+			LoggerLevel: Level(LevelINFO),
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -118,7 +118,7 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: LevelINFO,
+			LoggerLevel: Level(LevelINFO),
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -150,7 +150,7 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelINFO,
+			LoggerLevel:   Level(LevelINFO),
 			WithTimestamp: timestamp.TimestampNano,
 		},
 	)
@@ -184,7 +184,7 @@ func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelINFO,
+			LoggerLevel:   Level(LevelINFO),
 			WithTimestamp: timestamp.TimestampNano,
 			WithJSON:      true,
 		},
@@ -219,7 +219,7 @@ func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelINFO,
+			LoggerLevel:   Level(LevelINFO),
 			WithTimestamp: timestamp.TimestampStandard,
 		},
 	)
@@ -253,7 +253,7 @@ func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelINFO,
+			LoggerLevel:   Level(LevelINFO),
 			WithTimestamp: timestamp.TimestampYYYYMonth,
 		},
 	)

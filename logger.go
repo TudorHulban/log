@@ -7,14 +7,14 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-type Level int8
+type Level uint8
 
 type Logger struct {
 	ingestor    *bytearena.Ingestor
 	fnTimestamp timestamp.Timestamp
 
 	estimatedMessageSize uint32
-	logLevel             int8
+	logLevel             uint8
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool
@@ -64,7 +64,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		nil
 }
 
-func (l Logger) labelInfo() string {
+func (l *Logger) labelInfo() string {
 	if l.withColor {
 		return colorInfo(logLevels[LevelINFO])
 	} else {

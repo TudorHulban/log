@@ -13,7 +13,8 @@ type Logger struct {
 	ingestor    *bytearena.Ingestor
 	fnTimestamp timestamp.Timestamp
 
-	logLevel int8
+	estimatedMessageSize uint32
+	logLevel             int8
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool
@@ -24,7 +25,8 @@ type ParamsNewLogger struct {
 	Ingestor      *bytearena.Ingestor
 	WithTimestamp timestamp.Timestamp
 
-	LoggerLevel Level
+	EstimatedMessageSize uint32
+	LoggerLevel          Level
 
 	WithCaller bool
 	WithColor  bool
@@ -45,7 +47,12 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		withColor:   params.WithColor,
 		withJSON:    params.WithJSON,
 
-		ingestor: params.Ingestor,
+		ingestor:             params.Ingestor,
+		estimatedMessageSize: params.EstimatedMessageSize,
+	}
+
+	if result.estimatedMessageSize == 0 {
+		result.estimatedMessageSize = MessageMediumSize
 	}
 
 	result.Printf(

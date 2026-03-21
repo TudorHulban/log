@@ -10,7 +10,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkArenaNilTimestamp-16    	10375689	       110.8 ns/op	      92 B/op	       0 allocs/op
+// BenchmarkLogger_NilTimestamp-16    	35355093	        40.22 ns/op	     106 B/op	       0 allocs/op
 func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -40,7 +40,9 @@ func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_Print-16    	35267358	        33.05 ns/op	      24 B/op	       0 allocs/op
+// go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
+// go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem -race
+// BenchmarkLogger_Print-16    	66342212	        17.05 ns/op	      52 B/op	       0 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -70,7 +72,7 @@ func BenchmarkLogger_Print(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_PrintWithNoTimestamp-16    	34212000	        34.30 ns/op	      25 B/op	       0 allocs/op
+// BenchmarkLogger_PrintWithNoTimestamp-16    	69018649	        16.96 ns/op	      50 B/op	       0 allocs/op
 func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -132,7 +134,7 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 	}
 }
 
-// BenchmarkNanoTimestamp-16    	 5805175	       204.6 ns/op	     182 B/op	       1 allocs/op
+// BenchmarkLogger_NanoTimestamp-16    	29493921	        42.23 ns/op	      69 B/op	       1 allocs/op
 func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -166,7 +168,7 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp_JSON-16    	 3617188	       335.4 ns/op	     305 B/op	       3 allocs/op
+// BenchmarkLogger_NanoTimestamp_JSON-16    	22477536	        66.49 ns/op	      92 B/op	       1 allocs/op
 func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -201,7 +203,7 @@ func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	}
 }
 
-// BenchmarkStandardTimestamp-16    	 6339567	       184.8 ns/op	     169 B/op	       1 allocs/op
+// BenchmarkLogger_StandardTimestamp-16    	29345433	        42.11 ns/op	      69 B/op	       1 allocs/op
 func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -235,7 +237,7 @@ func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkYYYYTimestamp-16    	 6268123	       185.1 ns/op	     171 B/op	       1 allocs/op
+// BenchmarkLogger_YYYYTimestamp-16    	30000571	        43.96 ns/op	      68 B/op	       1 allocs/op
 func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 

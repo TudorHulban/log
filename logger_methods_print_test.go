@@ -12,7 +12,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-func TestPrint(t *testing.T) {
+func TestLogger_Print(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
@@ -42,7 +42,7 @@ func TestPrint(t *testing.T) {
 	require.Contains(t, writer.String(), payload)
 }
 
-func TestNoTimestampPrint(t *testing.T) {
+func TestLogger_NoTimestampPrint(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
@@ -73,7 +73,7 @@ func TestNoTimestampPrint(t *testing.T) {
 	)
 }
 
-func TestNanoPrint(t *testing.T) {
+func TestLogger_NanoPrint(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
@@ -116,7 +116,7 @@ func TestNanoPrint(t *testing.T) {
 	)
 }
 
-func TestYYYYPrint(t *testing.T) {
+func TestLogger_YYYYPrint(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
@@ -159,7 +159,7 @@ func TestYYYYPrint(t *testing.T) {
 	)
 }
 
-func TestJSONPrint_With_Timestamp(t *testing.T) {
+func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
@@ -173,7 +173,8 @@ func TestJSONPrint_With_Timestamp(t *testing.T) {
 			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampNano,
 
-			WithJSON: true,
+			WithJSON:  true,
+			WithColor: true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -195,7 +196,7 @@ func TestJSONPrint_With_Timestamp(t *testing.T) {
 	)
 }
 
-func TestJSONPrint_No_Timestamp(t *testing.T) {
+func TestLogger_JSON_Print_No_Timestamp(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor := bytearena.NewIngestor(
@@ -208,7 +209,8 @@ func TestJSONPrint_No_Timestamp(t *testing.T) {
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
 
-			WithJSON: true,
+			WithJSON:  true,
+			WithColor: true,
 		},
 	)
 	require.NoError(t, errCrLogger)

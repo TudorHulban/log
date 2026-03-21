@@ -36,7 +36,7 @@ func BenchmarkArena_ConstantPayload(b *testing.B) {
 	_ = sink.TotalBytesWritten.Load()
 }
 
-// BenchmarkStandardLogger-16    	 9623833	       125.0 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkArena_FormattedPayload-16    	10564129	       115.2 ns/op	      64 B/op	       1 allocs/op
 func BenchmarkArena_FormattedPayload(b *testing.B) {
 	b.ReportAllocs()
 
@@ -46,7 +46,7 @@ func BenchmarkArena_FormattedPayload(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; b.Loop(); i++ {
-		payload := fmt.Sprintf(
+		payload := helpers.SprintfInt(
 			`{"level":"info","msg":"user login","user_id":%d}`,
 			i,
 		)
@@ -138,38 +138,55 @@ func BenchmarkIngestor_WriteParallel(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkIngestor_MultipleSizes/size_16-16         	95403202	        11.65 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkIngestor_MultipleSizes/size_64-16         	91622713	        13.21 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkIngestor_MultipleSizes/size_256-16        	67990924	        17.30 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkIngestor_MultipleSizes/size_1024-16       	55336317	        21.57 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg16_arena102400-16         	100000000	        11.76 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg64_arena102400-16         	93691624	        12.98 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg256_arena102400-16        	77943147	        15.41 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg1024_arena102400-16       	67931802	        17.33 ns/op	       0 B/op	       0 allocs/op
+
+// BenchmarkIngestor_MultipleSizes/size_msg16_arena512000-16         	100000000	        11.77 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg64_arena512000-16         	93074583	        13.06 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg256_arena512000-16        	78160538	        15.28 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg1024_arena512000-16       	68533010	        17.50 ns/op	       0 B/op	       0 allocs/op
+
+// BenchmarkIngestor_MultipleSizes/size_msg16_arena1048576-16        	100000000	        11.95 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg64_arena1048576-16        	93492704	        13.12 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg256_arena1048576-16       	79064127	        15.30 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkIngestor_MultipleSizes/size_msg1024_arena1048576-16      	62103726	        17.42 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkIngestor_MultipleSizes(b *testing.B) {
-	sizes := []int{16, 64, 256, 1024}
+	sizesMessage := []int{16, 64, 256, 1024}
+	sizesArena := []int{Size100K, Size500K, Size1M}
 
-	for _, size := range sizes {
-		b.Run(
-			fmt.Sprintf("size_%d", size),
+	for _, sizeArena := range sizesArena {
+		for _, sizeMessage := range sizesMessage {
+			b.Run(
+				fmt.Sprintf(
+					"size_msg%d_arena%d",
+					sizeMessage,
+					sizeArena,
+				),
 
-			func(b *testing.B) {
-				ingestor := NewIngestor(
-					Size1M,
-					&helpers.CountWriter{},
-				)
+				func(b *testing.B) {
+					ingestor := NewIngestor(
+						Size1M,
+						&helpers.CountWriter{},
+					)
 
-				ctx, cancel := context.WithCancel(context.Background())
-				chIngestionEnd := ingestor.StartIngestion(ctx)
+					ctx, cancel := context.WithCancel(context.Background())
+					chIngestionEnd := ingestor.StartIngestion(ctx)
 
-				payload := bytes.Repeat([]byte("x"), size)
+					payload := bytes.Repeat([]byte("x"), sizeMessage)
 
-				b.ReportAllocs()
-				b.ResetTimer()
+					b.ReportAllocs()
+					b.ResetTimer()
 
-				for b.Loop() {
-					_, _ = ingestor.Write(payload)
-				}
+					for b.Loop() {
+						_, _ = ingestor.Write(payload)
+					}
 
-				cancel()
-				<-chIngestionEnd
-			},
-		)
+					cancel()
+					<-chIngestionEnd
+				},
+			)
+		}
 	}
 }

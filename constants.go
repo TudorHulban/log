@@ -15,3 +15,8 @@ var logLevels = [5]string{
 	"DEBUG",
 	"ERROR",
 }
+
+const (
+	MessageMediumSize uint32 = 256
+	MessageLargeSize  uint32 = 512
+)

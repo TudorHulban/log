@@ -7,20 +7,18 @@ import (
 )
 
 func (l *Logger) PrintMessage(msg string) {
-	var arr [256]byte
-
-	buf := arr[:0] // stack-allocated, no heap alloc
-
-	if l.fnTimestamp != nil {
-		buf = append(buf, l.fnTimestamp()...)
-		buf = append(buf, ' ')
-	}
-
-	buf = append(buf, []byte(msg)...)
-	buf = append(buf, '\n')
-
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
 	if errWrite == nil {
+		buf := region.Buf()[:0]
+
+		if l.fnTimestamp != nil {
+			buf = append(buf, l.fnTimestamp()...)
+			buf = append(buf, ' ')
+		}
+
+		buf = append(buf, []byte(msg)...)
+		buf = append(buf, '\n')
+
 		copy(region.Buf(), buf)
 
 		l.ingestor.EndWrite(region)
@@ -28,20 +26,18 @@ func (l *Logger) PrintMessage(msg string) {
 }
 
 func (l *Logger) Print(args ...any) {
-	var arr [256]byte
-
-	buf := arr[:0] // stack-allocated, no heap alloc
-
-	if l.fnTimestamp != nil {
-		buf = append(buf, l.fnTimestamp()...)
-		buf = append(buf, ' ')
-	}
-
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
 	if errWrite == nil {
+		buf := region.Buf()[:0]
+
+		if l.fnTimestamp != nil {
+			buf = append(buf, l.fnTimestamp()...)
+			buf = append(buf, ' ')
+		}
+
+		buf = helpers.AppendArgs(buf, args)
+		buf = append(buf, '\n')
+
 		copy(region.Buf(), buf)
 
 		l.ingestor.EndWrite(region)
@@ -49,15 +45,13 @@ func (l *Logger) Print(args ...any) {
 }
 
 func (l *Logger) PrintWithNoTimestamp(args ...any) {
-	var arr [256]byte
-
-	buf := arr[:0] // stack-allocated, no heap alloc
-
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
 	if errWrite == nil {
+		buf := region.Buf()[:0]
+
+		buf = helpers.AppendArgs(buf, args)
+		buf = append(buf, '\n')
+
 		copy(region.Buf(), buf)
 
 		l.ingestor.EndWrite(region)
@@ -65,22 +59,20 @@ func (l *Logger) PrintWithNoTimestamp(args ...any) {
 }
 
 func (l *Logger) Printw(msg string, args ...any) {
-	var arr [256]byte
-
-	buf := arr[:0] // stack-allocated, no heap alloc
-
-	if l.fnTimestamp != nil {
-		buf = append(buf, l.fnTimestamp()...)
-		buf = append(buf, ' ')
-	}
-
-	buf = append(buf, []byte(msg)...)
-	buf = append(buf, '\n')
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
 	if errWrite == nil {
+		buf := region.Buf()[:0]
+
+		if l.fnTimestamp != nil {
+			buf = append(buf, l.fnTimestamp()...)
+			buf = append(buf, ' ')
+		}
+
+		buf = append(buf, []byte(msg)...)
+		buf = append(buf, '\n')
+		buf = helpers.AppendArgs(buf, args)
+		buf = append(buf, '\n')
+
 		copy(region.Buf(), buf)
 
 		l.ingestor.EndWrite(region)
@@ -88,44 +80,39 @@ func (l *Logger) Printw(msg string, args ...any) {
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	var arr [256]byte
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
+	if errWrite == nil {
+		buf := region.Buf()[:0]
 
-	buf := arr[:0] // stack-allocated, no heap alloc
+		if l.withJSON {
+			if l.fnTimestamp != nil {
+				buf = l.appendJSON(
+					buf,
+					l.fnTimestamp(),
+					l.labelInfo(),
+					format, args...,
+				)
+			} else {
+				buf = l.appendJSON(
+					buf,
+					nil,
+					l.labelInfo(),
+					format, args...,
+				)
+			}
 
-	if l.withJSON {
-		if l.fnTimestamp != nil {
-			buf = l.appendJSON(
-				buf,
-				l.fnTimestamp(),
-				l.labelInfo(),
-				format, args...,
-			)
-		} else {
-			buf = l.appendJSON(
-				buf,
-				nil,
-				l.labelInfo(),
-				format, args...,
-			)
-		}
-
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
-		if errWrite == nil {
 			copy(region.Buf(), buf)
 
 			l.ingestor.EndWrite(region)
-		}
-	} else {
-		if l.fnTimestamp != nil {
-			buf = append(buf, l.fnTimestamp()...)
-			buf = append(buf, ' ')
-		}
+		} else {
+			if l.fnTimestamp != nil {
+				buf = append(buf, l.fnTimestamp()...)
+				buf = append(buf, ' ')
+			}
 
-		buf = fmt.Appendf(buf, format, args...)
-		buf = append(buf, '\n')
+			buf = fmt.Appendf(buf, format, args...)
+			buf = append(buf, '\n')
 
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
-		if errWrite == nil {
 			copy(region.Buf(), buf)
 
 			l.ingestor.EndWrite(region)
@@ -134,7 +121,7 @@ func (l *Logger) Printf(format string, args ...any) {
 }
 
 func (l *Logger) PrintRaw(msg []byte) {
-	region, errWrite := l.ingestor.TryWrite(uint32(len(msg)))
+	region, errWrite := l.ingestor.TryWrite(uint32(len(msg))) //nolint:gosec
 	if errWrite == nil {
 		copy(region.Buf(), msg)
 

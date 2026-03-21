@@ -46,6 +46,7 @@ func TestHowToUse_Directly(t *testing.T) {
 	payload := "xxx"
 
 	var arr [256]byte
+
 	buf := arr[:0]
 
 	buf = append(buf, []byte(payload)...)

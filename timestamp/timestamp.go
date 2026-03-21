@@ -19,11 +19,13 @@ func TimestampNano() []byte {
 
 func TimestampStandard() []byte {
 	updateTimeCache()
+
 	return append([]byte(nil), tc.stdBuf[:tc.stdLen]...)
 }
 
 func TimestampYYYYMonth() []byte {
 	updateTimeCache()
+
 	return append([]byte(nil), tc.customBuf[:tc.customLen]...)
 }
 

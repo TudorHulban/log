@@ -10,7 +10,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkLogger_NilTimestamp-16    	35355093	        40.22 ns/op	     106 B/op	       0 allocs/op
+// BenchmarkLogger_NilTimestamp-16    	31137730	        44.72 ns/op	     120 B/op	       0 allocs/op
 func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -168,7 +168,7 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp_JSON-16    	22477536	        66.49 ns/op	      92 B/op	       1 allocs/op
+// BenchmarkLogger_NanoTimestamp_JSON-16    	21451356	        68.75 ns/op	      96 B/op	       1 allocs/op
 func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -203,7 +203,7 @@ func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_StandardTimestamp-16    	29345433	        42.11 ns/op	      69 B/op	       1 allocs/op
+// BenchmarkLogger_StandardTimestamp-16    	24842967	        53.28 ns/op	      88 B/op	       1 allocs/op
 func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -237,7 +237,7 @@ func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_YYYYTimestamp-16    	30000571	        43.96 ns/op	      68 B/op	       1 allocs/op
+// BenchmarkLogger_YYYYTimestamp-16    	23694838	        46.77 ns/op	      89 B/op	       1 allocs/op
 func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 

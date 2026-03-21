@@ -20,19 +20,17 @@ func TimestampNano() []byte {
 func TimestampStandard() []byte {
 	updateStandardTimeCache()
 
-	return append(
-		[]byte(nil),
-		timeCacheStandard.buf[:timeCacheStandard.length]...,
-	)
+	buf := timeCacheStandard.active.Load()
+
+	return append([]byte(nil), buf.output[:buf.length]...)
 }
 
 func TimestampYYYYMonth() []byte {
 	updateYYYYMonthTimeCache()
 
-	return append(
-		[]byte(nil),
-		timeCacheYYYYMonth.buf[:timeCacheYYYYMonth.length]...,
-	)
+	buf := timeCacheYYYYMonth.active.Load()
+
+	return append([]byte(nil), buf.output[:buf.length]...)
 }
 
 func TimestampRFC3339() []byte {

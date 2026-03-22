@@ -35,7 +35,9 @@ func TestHammerWithHugeMessages(t *testing.T) {
 		expectedValidWrites = totalWritesExpected * (100 - hugeRatio) / 100
 	)
 
-	ingestor := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -66,7 +68,7 @@ func TestHammerWithHugeMessages(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				rotationCount.Add(1)
 
 				cursorMutex.Lock()
@@ -93,7 +95,7 @@ func TestHammerWithHugeMessages(t *testing.T) {
 						"Rotation %d: cursor=%d, used=%d, rollbacks=%d",
 						rotationCount.Load(),
 						cursor,
-						used,
+						a.cursor.Load(),
 						rollbacks,
 					)
 				}
@@ -289,7 +291,9 @@ func TestHammerWithHugeMessages_Detailed(t *testing.T) {
 		writesPerProducer = 200
 	)
 
-	ingestor := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -318,7 +322,7 @@ func TestHammerWithHugeMessages_Detailed(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				rotationIndex++
 
 				metricsMutex.Lock()
@@ -326,7 +330,7 @@ func TestHammerWithHugeMessages_Detailed(t *testing.T) {
 				metrics = append(metrics, rotationMetrics{
 					index:     rotationIndex,
 					cursor:    a.cursor.Load(),
-					used:      used,
+					used:      uint32(a.cursor.Load()),
 					rollbacks: a.rollbackCounter.Load(),
 					writers:   a.numberWriters.Load(),
 				})

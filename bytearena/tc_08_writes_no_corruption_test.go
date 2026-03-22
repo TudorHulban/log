@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 // Test Case 08: Memory Corruption Check
@@ -17,7 +19,9 @@ import (
 // Verifies: Each log entry remains intact and contiguous.
 // Enhanced version with write validation.
 func TestNoMemoryCorruption_Enhanced(t *testing.T) {
-	ingestor := NewIngestor(64*_Size1K, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(64*_Size1K, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
@@ -43,9 +47,9 @@ func TestNoMemoryCorruption_Enhanced(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				// Capture output for validation
-				data := a.buf[:used]
+				data := a.buf[:a.cursor.Load()]
 
 				scanner := bufio.NewScanner(bytes.NewReader(data))
 				for scanner.Scan() {

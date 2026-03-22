@@ -18,7 +18,9 @@ import (
 func TestError_NoIngestionStart(t *testing.T) {
 	var sink bytes.Buffer
 
-	ingestor := NewIngestor(Size100K, &sink)
+	ingestor, errCrIngestor := NewIngestor(Size100K, &sink)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	_, cancel := context.WithCancel(context.Background())
 
@@ -36,7 +38,9 @@ func TestError_NoIngestionStart(t *testing.T) {
 func TestIngestor_SingleWrite(t *testing.T) {
 	var out bytes.Buffer
 
-	ingestor := NewIngestor(1024, &out)
+	ingestor, errCrIngestor := NewIngestor(1024, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()

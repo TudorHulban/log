@@ -32,7 +32,9 @@ func TestManyRotations(t *testing.T) {
 		writesPerProducer = 250 // Total writes: 8 * 250 = 2000 writes
 	)
 
-	ingestor := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -50,15 +52,9 @@ func TestManyRotations(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				// Count this rotation
 				rotationCount.Add(1)
-
-				require.LessOrEqual(t,
-					used,
-					uint32(arenaSize),
-					"used bytes should not exceed arena size",
-				)
 
 				// Validate cursor is within bounds
 				cursor := a.cursor.Load()
@@ -257,7 +253,9 @@ func TestManyRotations_CursorIntegrity(t *testing.T) {
 		numRotations = 500
 	)
 
-	rawLogger := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -275,9 +273,9 @@ func TestManyRotations_CursorIntegrity(t *testing.T) {
 	go func() {
 		defer wgConsumer.Done()
 
-		rawLogger.consumerLoop(
+		ingestor.consumerLoop(
 			ctx,
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				rotationCount.Add(1)
 
 				cursorMutex.Lock()
@@ -290,7 +288,7 @@ func TestManyRotations_CursorIntegrity(t *testing.T) {
 				require.LessOrEqual(t, cursor, int32(arenaSize),
 					"cursor %d exceeds arena size %d", cursor, arenaSize)
 
-				rawLogger.flushArena(a)
+				ingestor.flushArena(a)
 				a.reset()
 
 				// After reset, cursor must be 0
@@ -305,7 +303,7 @@ func TestManyRotations_CursorIntegrity(t *testing.T) {
 		payload := fmt.Sprintf("msg-%d-", i)
 		payload = payload + randomString(20) // Ensure we fill arena quickly
 
-		_ = rawLogger.write(
+		_ = ingestor.write(
 			uint32(len(payload)),
 			func(dst []byte) {
 				copy(dst, []byte(payload))

@@ -15,10 +15,12 @@ import (
 func TestLogger_Print(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
@@ -49,10 +51,12 @@ func TestLogger_Print(t *testing.T) {
 func TestLogger_NoTimestampPrint(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
@@ -80,10 +84,12 @@ func TestLogger_NoTimestampPrint(t *testing.T) {
 func TestLogger_NanoPrint(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
@@ -123,10 +129,12 @@ func TestLogger_NanoPrint(t *testing.T) {
 func TestLogger_YYYYPrint(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
@@ -166,10 +174,12 @@ func TestLogger_YYYYPrint(t *testing.T) {
 func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
@@ -203,10 +213,12 @@ func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 func TestLogger_JSON_Print_No_Timestamp(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{

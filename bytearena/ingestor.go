@@ -33,7 +33,7 @@ type Ingestor struct {
 
 // NewIngestor allocates two arenas of the given size and initializes
 // the Manager with a0 as the active arena and a1 as the standby arena.
-func NewIngestor(arenaSize uint32, w io.Writer, options ...Options) *Ingestor {
+func NewIngestor(arenaSize uint32, w io.Writer, options ...Options) (*Ingestor, error) {
 	result := Ingestor{
 		arenaFirst: &arena{
 			buf: make([]byte, arenaSize),
@@ -50,7 +50,10 @@ func NewIngestor(arenaSize uint32, w io.Writer, options ...Options) *Ingestor {
 	}
 
 	for _, option := range options {
-		option(&result)
+		if errOption := option(&result); errOption != nil {
+			return nil,
+				errOption
+		}
 	}
 
 	// Set active arena to a0.
@@ -59,7 +62,8 @@ func NewIngestor(arenaSize uint32, w io.Writer, options ...Options) *Ingestor {
 	// No sealed arena yet.
 	result.sealed.Store(nil)
 
-	return &result
+	return &result,
+		nil
 }
 
 // StartIngestion launches the consumer loop in a goroutine.
@@ -74,7 +78,7 @@ func (m *Ingestor) StartIngestion(ctx context.Context) <-chan struct{} {
 		m.consumerLoop(
 			ctx,
 
-			func(a *arena, _ uint32) {
+			func(a *arena) {
 				m.flushArena(a)
 			},
 		)

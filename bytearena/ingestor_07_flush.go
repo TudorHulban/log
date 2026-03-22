@@ -2,7 +2,7 @@ package bytearena
 
 import "context"
 
-type flusher func(a *arena, used uint32)
+type flusher func(a *arena)
 
 // Flush sealed arena contents using the provided writer function.
 //
@@ -62,7 +62,7 @@ func (m *Ingestor) flushOnShutdown(ctx context.Context, flusher flusher) {
 
 		used := secondSealed.cursor.Load()
 		if used > 0 {
-			flusher(secondSealed, uint32(used))
+			flusher(secondSealed)
 		}
 	}
 
@@ -72,7 +72,7 @@ func (m *Ingestor) flushOnShutdown(ctx context.Context, flusher flusher) {
 
 		used := firstSealed.cursor.Load()
 		if used > 0 {
-			flusher(firstSealed, uint32(used))
+			flusher(firstSealed)
 		}
 	}
 }

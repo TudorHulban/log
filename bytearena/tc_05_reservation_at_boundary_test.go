@@ -14,7 +14,10 @@ import (
 // - bounds checking works, no off-by-one errors
 // - rollback counter incremented
 func TestReservationAtBoundary(t *testing.T) {
-	ingestor := NewIngestor(100, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(100, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
+
 	arena := ingestor.active.Load()
 
 	// Fill arena to 90 bytes

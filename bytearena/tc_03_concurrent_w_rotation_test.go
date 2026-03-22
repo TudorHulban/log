@@ -21,7 +21,9 @@ import (
 func TestConcurrentWritesWithRotation(t *testing.T) {
 	var out bytes.Buffer
 
-	ingestor := NewIngestor(_Size1K, &out)
+	ingestor, errCrIngestor := NewIngestor(_Size1K, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -34,7 +36,7 @@ func TestConcurrentWritesWithRotation(t *testing.T) {
 			ingestor.consumerLoop(
 				ctx,
 
-				func(a *arena, used uint32) {
+				func(a *arena) {
 					ingestor.waitForWriters(a)
 					ingestor.flushArena(a)
 					a.reset()

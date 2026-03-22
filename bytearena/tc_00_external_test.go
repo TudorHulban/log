@@ -12,10 +12,12 @@ import (
 func TestHowToUse_As_ioWriter(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
@@ -35,10 +37,12 @@ func TestHowToUse_As_ioWriter(t *testing.T) {
 func TestHowToUse_Directly(t *testing.T) {
 	writer := bytes.Buffer{}
 
-	ingestor := bytearena.NewIngestor(
+	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K,
 		&writer,
 	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)

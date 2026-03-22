@@ -12,7 +12,9 @@ import (
 // Test: Producer reserves space exactly as consumer seals
 // Verifies: No writes to arena after it is sealed
 func TestReserveVsSealRace(t *testing.T) {
-	ingestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	// Channel to coordinate race
 	chReady := make(chan struct{})

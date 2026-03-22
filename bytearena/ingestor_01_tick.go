@@ -24,7 +24,7 @@ func (m *Ingestor) tick(flusher flusher) {
 
 	used := min(sealedArena.cursor.Load(), int32(m.arenaSize)) //nolint:gosec
 	if used > 0 {
-		flusher(sealedArena, uint32(used))
+		flusher(sealedArena)
 	}
 
 	sealedArena.reset()

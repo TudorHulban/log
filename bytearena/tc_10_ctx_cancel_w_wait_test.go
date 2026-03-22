@@ -14,7 +14,9 @@ import (
 // Test: Consumer context cancelled while waiting for writers.
 // Verifies: Shutdown happens promptly, no hangs.
 func TestContextCancelDuringWait(t *testing.T) {
-	ingestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	// Start a write that never completes
 	region, errWrite := ingestor.beginWrite(100)
@@ -36,7 +38,7 @@ func TestContextCancelDuringWait(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, _ uint32) {
+			func(a *arena) {
 				ingestor.flushArena(a)
 			},
 		)

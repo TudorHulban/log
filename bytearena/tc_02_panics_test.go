@@ -12,7 +12,9 @@ import (
 // Test: Producer panics during write
 // Verifies: writers counter is decremented even on panic
 func TestWritePanicDoesNotLeak(t *testing.T) {
-	ingestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	func() {
 		defer func() { _ = recover() }()
@@ -30,7 +32,9 @@ func TestWritePanicDoesNotLeak(t *testing.T) {
 }
 
 func TestProducerInWritePanic(t *testing.T) {
-	rawLogger := NewIngestor(_Size1K, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(_Size1K, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	// Use defer/recover to simulate panic in producer
 	func() {
@@ -38,7 +42,7 @@ func TestProducerInWritePanic(t *testing.T) {
 
 		payload := t.Name()
 
-		rawLogger.write(
+		ingestor.write(
 			uint32(len(payload)),
 
 			func(_ []byte) {
@@ -48,7 +52,7 @@ func TestProducerInWritePanic(t *testing.T) {
 	}()
 
 	// writers should be zero as the write finishes with an endwrite.
-	activeArena := rawLogger.active.Load()
+	activeArena := ingestor.active.Load()
 	require.Zero(t,
 		activeArena.numberWriters.Load(),
 		"blocked writer should be handled",

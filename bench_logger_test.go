@@ -14,7 +14,10 @@ import (
 func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -44,7 +47,10 @@ func BenchmarkLogger_NilTimestamp(b *testing.B) {
 func BenchmarkLogger_NilTimestamp_Safe(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -76,7 +82,10 @@ func BenchmarkLogger_NilTimestamp_Safe(b *testing.B) {
 func BenchmarkLogger_Print(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chEnd := ingestor.StartIngestion(ctx)
 
@@ -106,7 +115,10 @@ func BenchmarkLogger_Print(b *testing.B) {
 func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chEnd := ingestor.StartIngestion(ctx)
 
@@ -136,7 +148,10 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 func BenchmarkLogger_PrintRaw(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -168,7 +183,10 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -202,7 +220,10 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -237,7 +258,10 @@ func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -271,7 +295,10 @@ func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -305,7 +332,10 @@ func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 func BenchmarkLogger_Printf_TimestampNano(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
@@ -339,7 +369,10 @@ func BenchmarkLogger_Printf_TimestampNano(b *testing.B) {
 func BenchmarkLogger_Print_TimestampNano(b *testing.B) {
 	var writer bytes.Buffer
 
-	ingestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 

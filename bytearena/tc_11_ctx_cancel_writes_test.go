@@ -28,7 +28,9 @@ func TestContextCancel_DuringHeavyWrite(t *testing.T) {
 		numProducers    = 12
 	)
 
-	ingestor := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	// Create a cancellable context for the consumer
 	ctx, cancel := context.WithCancel(context.Background())
@@ -56,19 +58,19 @@ func TestContextCancel_DuringHeavyWrite(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				// Count this rotation
 				rotations := rotationCount.Add(1)
 
 				// Track flushed bytes
-				flushedBytes.Add(int64(used))
+				flushedBytes.Add(int64(a.cursor.Load()))
 
 				// Log progress periodically
 				if rotations%100 == 0 {
 					t.Logf(
 						"Rotation %d: flushed %d bytes",
 						rotations,
-						used,
+						a.cursor.Load(),
 					)
 				}
 
@@ -262,7 +264,9 @@ func TestContextCancel_DuringRotation(t *testing.T) {
 
 	const arenaSize = 1024
 
-	ingestor := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	// Create context that will be cancelled mid-rotation
 	ctx, cancel := context.WithCancel(context.Background())
@@ -284,13 +288,13 @@ func TestContextCancel_DuringRotation(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				rotationStarted.Store(true)
 				flusherCalled.Store(true)
 
 				t.Logf(
 					"Flusher called with %d bytes",
-					used,
+					a.cursor.Load(),
 				)
 
 				// Simulate slow flush
@@ -380,7 +384,9 @@ func TestContextCancel_WithPendingWrites(t *testing.T) {
 
 	const arenaSize = 1024 // large enough to hold all pending writes comfortably
 
-	ingestor := NewIngestor(arenaSize, &out)
+	ingestor, errCrIngestor := NewIngestor(arenaSize, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -438,10 +444,13 @@ func TestContextCancel_WithPendingWrites(t *testing.T) {
 		ingestor.consumerLoop(
 			ctx,
 
-			func(a *arena, used uint32) {
+			func(a *arena) {
 				flusherCallCount.Add(1)
 
-				t.Logf("Flusher called for arena with %d bytes", used)
+				t.Logf(
+					"Flusher called for arena with %d bytes",
+					a.cursor.Load(),
+				)
 
 				ingestor.flushArena(a)
 				a.reset()

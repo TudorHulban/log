@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 // Test Case 17: NUMA-Style False Sharing Detection
@@ -15,7 +17,10 @@ func TestFalseSharingResistance(t *testing.T) {
 		t.Skip("Skipping performance test in short mode")
 	}
 
-	ingestor := NewIngestor(Size1M, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(Size1M, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
+
 	arena := ingestor.active.Load()
 
 	numberExecutions := 1000000

@@ -16,7 +16,9 @@ import (
 func TestSealDuringActiveWrites(t *testing.T) {
 	var out bytes.Buffer
 
-	ingestor := NewIngestor(_Size1K, &out)
+	ingestor, errCrIngestor := NewIngestor(_Size1K, &out)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	var wgProducers sync.WaitGroup
 

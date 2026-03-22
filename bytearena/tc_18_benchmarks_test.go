@@ -12,15 +12,17 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArena_ConstantPayload-16    	87987344	        13.46 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArena_ConstantPayload-16    	84908293	        13.89 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkArena_ConstantPayload(b *testing.B) {
-	b.ReportAllocs()
+	writer := helpers.CountWriter{}
 
-	sink := helpers.CountWriter{}
-	ingestor := NewIngestor(1024*1024, &sink)
+	ingestor, errCrIngestor := NewIngestor(1024*1024, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
 
 	payload := []byte(`{"level":"info","msg":"user login","user_id":123}`)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -33,16 +35,18 @@ func BenchmarkArena_ConstantPayload(b *testing.B) {
 		)
 	}
 
-	_ = sink.TotalBytesWritten.Load()
+	_ = writer.TotalBytesWritten.Load()
 }
 
-// BenchmarkArena_FormattedPayload-16    	10564129	       115.2 ns/op	      64 B/op	       1 allocs/op
+// BenchmarkArena_FormattedPayload-16    	11129125	       109.9 ns/op	      64 B/op	       1 allocs/op
 func BenchmarkArena_FormattedPayload(b *testing.B) {
+	writer := helpers.CountWriter{}
+
+	ingestor, errCrIngestor := NewIngestor(1024, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
+
 	b.ReportAllocs()
-
-	sink := helpers.CountWriter{}
-	ingestor := NewIngestor(1024, &sink)
-
 	b.ResetTimer()
 
 	for i := 0; b.Loop(); i++ {
@@ -53,13 +57,14 @@ func BenchmarkArena_FormattedPayload(b *testing.B) {
 
 		ingestor.write(
 			uint32(len(payload)),
+
 			func(destination []byte) {
 				copy(destination, []byte(payload))
 			},
 		)
 	}
 
-	_ = sink.TotalBytesWritten.Load() // force sink to stay live
+	_ = writer.TotalBytesWritten.Load() // force sink to stay live
 }
 
 // go test -run '^$' -bench '^BenchmarkIngestor_Write$' -benchmem
@@ -68,7 +73,9 @@ func BenchmarkArena_FormattedPayload(b *testing.B) {
 func BenchmarkIngestor_Write(b *testing.B) {
 	writer := helpers.CountWriter{}
 
-	ingestor := NewIngestor(Size1M, &writer)
+	ingestor, errCrIngestor := NewIngestor(Size1M, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
@@ -103,7 +110,9 @@ func BenchmarkIngestor_Write(b *testing.B) {
 func BenchmarkIngestor_WriteParallel(b *testing.B) {
 	writer := helpers.CountWriter{}
 
-	ingestor := NewIngestor(Size100K, &writer)
+	ingestor, errCrIngestor := NewIngestor(Size100K, &writer)
+	require.NoError(b, errCrIngestor)
+	require.NotNil(b, ingestor)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
@@ -166,10 +175,12 @@ func BenchmarkIngestor_MultipleSizes(b *testing.B) {
 				),
 
 				func(b *testing.B) {
-					ingestor := NewIngestor(
+					ingestor, errCrIngestor := NewIngestor(
 						Size1M,
 						&helpers.CountWriter{},
 					)
+					require.NoError(b, errCrIngestor)
+					require.NotNil(b, ingestor)
 
 					ctx, cancel := context.WithCancel(context.Background())
 					chIngestionEnd := ingestor.StartIngestion(ctx)

@@ -14,7 +14,9 @@ import (
 func TestExactAndOversizedWrites(t *testing.T) {
 	var sizeArena uint32 = 100
 
-	ingestor := NewIngestor(sizeArena, &bytes.Buffer{})
+	ingestor, errCrIngestor := NewIngestor(sizeArena, &bytes.Buffer{})
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	// Case 1: Write exactly arena size
 	region, errWrite := ingestor.beginWrite(sizeArena)

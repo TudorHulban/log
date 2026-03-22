@@ -409,7 +409,10 @@ func TestContextCancel_WithPendingWrites(t *testing.T) {
 		require.NoError(t, err)
 
 		regions = append(regions, region)
-		copy(region.Buf(), []byte(fmt.Sprintf("second-arena-%d", i)))
+		copy(
+			region.Buf(),
+			[]byte(fmt.Sprintf("second-arena-%d", i)),
+		)
 	}
 
 	for i := range 3 {

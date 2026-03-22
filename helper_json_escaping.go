@@ -35,6 +35,7 @@ func appendJSONString(buf []byte, formatting string) []byte {
 				buf = newBuf
 				backingArray = unsafe.Slice(unsafe.SliceData(buf), cap(buf))
 			}
+
 			backingArray[writeIndex] = c
 			writeIndex++
 
@@ -64,6 +65,7 @@ func appendJSONString(buf []byte, formatting string) []byte {
 			backingArray[writeIndex] = '\\'
 			backingArray[writeIndex+1] = 't'
 		}
+
 		writeIndex += 2
 	}
 

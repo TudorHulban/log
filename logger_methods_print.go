@@ -201,11 +201,7 @@ func (l *Logger) PrintfSafe(format string, args ...any) {
 	var buf []byte
 
 	if l.withJSON {
-		if l.fnTimestamp != nil {
-			buf = l.appendJSON(buf, l.labelInfo(), format, args...)
-		} else {
-			buf = l.appendJSON(buf, l.labelInfo(), format, args...)
-		}
+		buf = l.appendJSON(buf, l.labelInfo(), format, args...)
 	} else {
 		if l.fnTimestamp != nil {
 			buf = l.fnTimestamp(buf)

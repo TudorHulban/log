@@ -44,8 +44,8 @@ func appendMsg(buf []byte, format string, args ...any) []byte {
 	return buf
 }
 
-func appendAny(buf []byte, v any) []byte {
-	switch x := v.(type) {
+func appendAny(buf []byte, value any) []byte {
+	switch x := value.(type) {
 	case string:
 		return appendJSONString(buf, x)
 

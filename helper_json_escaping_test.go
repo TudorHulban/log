@@ -33,49 +33,49 @@ func TestAppendJSONString(t *testing.T) {
 	}{
 		{
 			name:       "1. empty string",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "",
 			expected:   []byte{},
 		},
 		{
 			name:       "2. simple string no escaping needed",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "hello",
 			expected:   []byte("hello"),
 		},
 		{
 			name:       "3. string with double quote",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      `hello "world"`,
 			expected:   []byte(`hello \"world\"`),
 		},
 		{
 			name:       "4. string with backslash",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      `path\to\file`,
 			expected:   []byte(`path\\to\\file`),
 		},
 		{
 			name:       "5. string with newline",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "line1\nline2",
 			expected:   []byte(`line1\nline2`),
 		},
 		{
 			name:       "6. string with carriage return",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "text\rwith\rcarriage",
 			expected:   []byte(`text\rwith\rcarriage`),
 		},
 		{
 			name:       "7. string with tab",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "col1\tcol2\tcol3",
 			expected:   []byte(`col1\tcol2\tcol3`),
 		},
 		{
 			name:       "8. string with multiple escaped characters",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "hello \"world\"\n\t",
 			expected:   []byte(`hello \"world\"\n\t`),
 		},
@@ -151,9 +151,10 @@ func TestDebugBufferGrowth(t *testing.T) {
 func TestAppendJSONStringBufferGrowth(t *testing.T) {
 	tests := []struct {
 		name          string
-		initialCap    int
 		input         string
 		expectedFinal []byte
+
+		initialCap int
 	}{
 		{
 			name:          "1. grow from zero capacity",
@@ -252,19 +253,19 @@ func TestAppendJSONStringEdgeCases(t *testing.T) {
 		},
 		{
 			name:       "5. unicode characters (no escaping needed)",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "Hello, 世界",
 			expected:   []byte("Hello, 世界"),
 		},
 		{
 			name:       "6. mixed ascii and unicode with escapes",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "Hello\n世界",
 			expected:   []byte("Hello\\n世界"),
 		},
 		{
 			name:       "7. all escaped characters",
-			initialBuf: make([]byte, 0, 0),
+			initialBuf: make([]byte, 0),
 			input:      "\"\\\n\r\t",
 			expected:   []byte(`\"\\\n\r\t`),
 		},
@@ -317,15 +318,16 @@ func TestAppendJSONStringPerformance(t *testing.T) {
 		}
 	}
 
-	buf := make([]byte, 0, 0)
+	buf := make([]byte, 0)
 	result := appendJSONString(buf, string(largeInput))
 
 	expectedLen := 0
+
 	for _, c := range largeInput {
 		if c == '"' {
-			expectedLen += 2 // escaped quote
+			expectedLen = expectedLen + 2 // escaped quote
 		} else {
-			expectedLen += 1
+			expectedLen++
 		}
 	}
 
@@ -348,6 +350,7 @@ func TestAppendJSONStringPerformance(t *testing.T) {
 
 func TestAppendJSONStringNilBuffer(t *testing.T) {
 	var buf []byte
+
 	result := appendJSONString(buf, "test")
 
 	expected := []byte("test")
@@ -405,6 +408,7 @@ func BenchmarkAppendJSONString(b *testing.B) {
 			bm.name,
 			func(b *testing.B) {
 				buf := make([]byte, 0, 1024)
+
 				b.ResetTimer()
 
 				for b.Loop() {

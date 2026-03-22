@@ -24,11 +24,13 @@ linters:
     - forbidigo
     - funlen
     - funcorder
+    - forcetypeassert
     - gochecknoglobals
     - gocognit
     - godoclint
     - godot
     - godox
+    - gosmopolitan
     - goprintffuncname
     - inamedparam
     - intrange
@@ -169,6 +171,10 @@ linters:
 
         - name: var-naming 
           disabled: true
+
+    modernize:
+      disable:
+          - fmtappendf
 
     wsl_v5:
       allow-first-in-block: true

@@ -52,7 +52,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 	}
 
 	if result.estimatedMessageSize == 0 {
-		result.estimatedMessageSize = MessageMediumSize
+		result.estimatedMessageSize = MessageSmallSize
 	}
 
 	result.Printf(

@@ -10,7 +10,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkLogger_NilTimestamp-16    	31137730	        44.72 ns/op	     120 B/op	       0 allocs/op
+// BenchmarkLogger_NilTimestamp-16    	35434408	        33.57 ns/op	     106 B/op	       0 allocs/op
 func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	var sink bytes.Buffer
 
@@ -198,7 +198,7 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp_JSON-16    	29838009	        41.18 ns/op	      66 B/op	       0 allocs/op
+// BenchmarkLogger_NanoTimestamp_JSON-16    	26897366	        44.00 ns/op	      72 B/op	       0 allocs/op
 func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	var sink bytes.Buffer
 

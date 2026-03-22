@@ -6,8 +6,6 @@ import (
 	"sync/atomic"
 )
 
-// TODO: move to uint32 aatomics for less cache pressure, smaller.
-
 // arena represents a single fixed-size logging buffer used in a
 // double-buffered, lock-free producer/consumer setup.
 //
@@ -18,17 +16,17 @@ type arena struct { //nolint:govet
 	// cursor is the current write position (in bytes) inside buf.
 	// Producers use atomic fetch-add on this to reserve regions.
 	cursor atomic.Int32
-	_      [56]byte // pad to 64 bytes (typical cache line size)
+	_      [60]byte // pad to 64 bytes (typical cache line size)
 
 	// numberWriters tracks the number of producers currently writing into this arena.
 	// The consumer waits for this to reach zero before flushing.
 	numberWriters atomic.Int32
-	_             [56]byte // pad to 64 bytes
+	_             [60]byte // pad to 64 bytes
 
 	// rollbackCounter counts failed reservations near the end of the arena.
 	// Used by the consumer as a signal that the arena is under pressure.
 	rollbackCounter atomic.Int32
-	_               [56]byte // pad to 64 bytes
+	_               [60]byte // pad to 64 bytes
 
 	// buf is the underlying byte storage for this arena.
 	// Its capacity defines the arena size.

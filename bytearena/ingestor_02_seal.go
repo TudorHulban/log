@@ -10,11 +10,6 @@ package bytearena
 func (m *Ingestor) shouldSeal(a *arena) bool {
 	used := a.cursor.Load()
 
-	// Hard threshold: near capacity.
-	if used >= int32(m.arenaSize) { //nolint:gosec
-		return true
-	}
-
 	if used >= int32((m.arenaSize*m.arenaSealPercentage)/100) { //nolint:gosec
 		return true
 	}

@@ -33,7 +33,7 @@ type Ingestor struct {
 
 // NewIngestor allocates two arenas of the given size and initializes
 // the Manager with a0 as the active arena and a1 as the standby arena.
-func NewIngestor(arenaSize uint32, w io.Writer) *Ingestor {
+func NewIngestor(arenaSize uint32, w io.Writer, options ...Options) *Ingestor {
 	result := Ingestor{
 		arenaFirst: &arena{
 			buf: make([]byte, arenaSize),
@@ -47,6 +47,10 @@ func NewIngestor(arenaSize uint32, w io.Writer) *Ingestor {
 		writer:              w,
 
 		chFlush: make(chan struct{}, 1),
+	}
+
+	for _, option := range options {
+		option(&result)
 	}
 
 	// Set active arena to a0.

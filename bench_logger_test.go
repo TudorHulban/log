@@ -132,7 +132,7 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_PrintRaw-16    	86922866	        13.38 ns/op	      20 B/op	       0 allocs/op
+// BenchmarkLogger_PrintRaw-16    	85781427	        13.16 ns/op	      20 B/op	       0 allocs/op
 func BenchmarkLogger_PrintRaw(b *testing.B) {
 	var writer bytes.Buffer
 

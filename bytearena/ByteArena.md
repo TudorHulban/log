@@ -1,4 +1,4 @@
-# Arena‑Based Logging Architecture
+# Arena‑Based Ingestor Architecture
 
 The document describes the high‑performance, lock‑free, double‑buffered byte arena system based on atomic region reservation, and writers‑in‑flight tracking.  
 It is designed for high throughput ingestion with predictable memory usage and bounded behavior under load.
@@ -46,7 +46,7 @@ They only interact with a stable API:
 
 ## 4. Producer Write Algorithm
 
-For each log entry:
+For each ingestion:
 
 1. load current arena context  (this gives the correct enter/leave closures)
 2. enter()
@@ -120,7 +120,7 @@ If the application is shutting down, the consumer must:
 - flush whatever is currently in both arenas
 - exit cleanly
 
-This ensures logs are flushed even during shutdown.
+This ensures messages are flushed even during shutdown.
 
 ## 8. Flushing the Sealed Arena
 
@@ -148,10 +148,10 @@ This is correct and necessary for a bounded system.
 
 Possible policies:
 
-- drop the log entry with emiting log entries about the drop through other loggers
+- drop the message ingested with emiting log entries about the drop through other methods / loggers
 - block until space is available
 - return an error
-- degrade to minimal logging
+- degrade to minimal ingestion
 
 The system does not allocate new memory or create hidden queues.
 
@@ -179,17 +179,17 @@ The atomics should be in different cache lines:
 
 ```go
 type arena struct {
-    cursor  atomic.Int64
-    _      [56]byte
+    cursor  atomic.Int32
+    _      [60]byte
 
-    writers atomic.Int64
-    _      [56]byte
+    writers atomic.Int32
+    _      [60]byte
 
     buf []byte
 }
 ```
 
-Otherwise heavy logging causes cache contention. If they sit in the same cache line, every update causes cache line bouncing between cores. The cache line constantly migrates between cores, creating MESI coherence traffic.
+Otherwise heavy ingestion causes cache contention. If they sit in the same cache line, every update causes cache line bouncing between cores. The cache line constantly migrates between cores, creating MESI coherence traffic.
 
 Cache line is 64 bytes. atomic.Int64 is 8 bytes value therefore 8 bytes + padding = 64 bytes.  
 This ensures each atomic occupies its own line relative to the struct layout.

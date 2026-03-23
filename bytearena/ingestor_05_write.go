@@ -51,11 +51,11 @@ func (m *Ingestor) beginWrite(n uint32) (WriteRegion, error) {
 	// === CAS-based overflow-safe reservation ===
 	var offset uint32
 
+	limit := int32(m.arenaSize) - int32(n) //nolint:gosec
 	for {
 		cur := arena.cursor.Load()
 
 		// Overflow-safe check: avoid computing cur + n directly.
-		limit := int32(m.arenaSize) - int32(n) //nolint:gosec
 		if cur > limit {
 			arena.AddRollback()
 			arena.Leave()

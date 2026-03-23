@@ -37,7 +37,7 @@ func updateStandardTimeCache() {
 	now := time.Now()
 	nowMillisecond := now.UnixNano() / 1e6
 
-	current := gateYYYYMonth.Load()
+	current := gateStandard.Load()
 	if current == nowMillisecond {
 		return // still fresh, skip entirely
 	}

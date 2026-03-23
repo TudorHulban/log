@@ -46,3 +46,12 @@ func TimestampRFC3339Nano(appendTo []byte) []byte {
 		[]byte(time.Now().UTC().Format(time.RFC3339Nano))...,
 	)
 }
+
+func TimestampRFC3339Bucharest(appendTo []byte) []byte {
+	loc, _ := time.LoadLocation("Europe/Bucharest")
+
+	return append(
+		appendTo,
+		[]byte(time.Now().In(loc).Format(time.RFC3339))...,
+	)
+}

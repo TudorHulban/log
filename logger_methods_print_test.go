@@ -26,7 +26,7 @@ func TestLogger_Print(t *testing.T) {
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
 			LoggerLevel:   Level(LevelDEBUG),
-			WithTimestamp: timestamp.TimestampRFC3339,
+			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 		},
 	)
 	require.NoError(t, errCrLogger)

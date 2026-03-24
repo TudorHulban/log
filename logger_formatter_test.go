@@ -34,15 +34,18 @@ func TestFormater(t *testing.T) {
 
 	f := NewFormatter(serviceLogging).
 		WithRoot("service", "auth").
-		WithInt("req_id", 12345).
-		WithBool("cache_hit", true)
+		SetInt("req_id", 12345).
+		SetBool("cache_hit", true)
 
 	require.NotNil(t, f.cfg.Load().root)
 
 	f.Print("login ok")
 
-	f.WithString("area", "some area")
+	f.SetString("area", "some area")
 	f.Print("login ok again")
+
+	f.With("xxx", 2).Print()
+	f.With("yyy", 3).Print()
 
 	cancel()
 	<-chIngestionEnd

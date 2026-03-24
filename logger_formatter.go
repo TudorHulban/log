@@ -35,10 +35,10 @@ type Formatter struct {
 }
 
 func NewFormatter(logger *Logger) *Formatter {
-	f := &Formatter{logger: logger}
+	f := Formatter{logger: logger}
 	f.cfg.Store(&formatterConfig{fields: nil})
 
-	return f
+	return &f
 }
 
 func makeFieldPtr(key string, value any) *field {
@@ -65,7 +65,14 @@ func (f *Formatter) WithRoot(key string, value any) *Formatter {
 	return f
 }
 
-func (f *Formatter) WithString(key, value string) *Formatter {
+func (f *Formatter) With(key string, value any) *Request {
+	return &Request{
+		formatter: f,
+		fields:    []field{makeField(key, value)},
+	}
+}
+
+func (f *Formatter) SetString(key, value string) *Formatter {
 	old := f.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
@@ -87,7 +94,7 @@ func (f *Formatter) WithString(key, value string) *Formatter {
 	return f
 }
 
-func (f *Formatter) WithInt(key string, value int) *Formatter {
+func (f *Formatter) SetInt(key string, value int) *Formatter {
 	old := f.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
@@ -103,7 +110,7 @@ func (f *Formatter) WithInt(key string, value int) *Formatter {
 	return f
 }
 
-func (f *Formatter) WithBool(key string, value bool) *Formatter {
+func (f *Formatter) SetBool(key string, value bool) *Formatter {
 	old := f.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)

@@ -1,7 +1,7 @@
 package log
 
 import (
-	"strconv"
+	"sync/atomic"
 
 	"github.com/tudorhulban/log/helpers"
 )
@@ -15,79 +15,130 @@ const (
 )
 
 type field struct {
-	key  string
+	key          string
+	valueString  string
+	valueNumeric int
+
 	kind fieldKind
-	sval string
-	ival int
-	bval bool
+
+	valueBool bool
+}
+
+type formatterConfig struct {
+	root   *field  // nil if no root
+	fields []field // ephemeral fields
 }
 
 type Formatter struct {
 	logger *Logger
-	fields []field // immutable once created
+	cfg    atomic.Pointer[formatterConfig]
 }
 
-func NewFormatter(logger *Logger) Formatter {
-	return Formatter{
-		logger: logger,
-		fields: nil,
-	}
+func NewFormatter(logger *Logger) *Formatter {
+	f := &Formatter{logger: logger}
+	f.cfg.Store(&formatterConfig{fields: nil})
+
+	return f
 }
 
-func (f Formatter) WithString(key, value string) Formatter {
-	result := Formatter{
-		logger: f.logger,
-		fields: make([]field, len(f.fields)+1),
-	}
+func makeFieldPtr(key string, value any) *field {
+	fld := makeField(key, value)
 
-	copy(result.fields, f.fields)
-
-	result.fields[len(f.fields)] = field{
-		key:  key,
-		kind: kindString,
-		sval: value,
-	}
-
-	return result
+	return &fld
 }
 
-func (f Formatter) WithInt(key string, value int) Formatter {
-	result := Formatter{
-		logger: f.logger,
-		fields: make([]field, len(f.fields)+1),
+func (f *Formatter) WithRoot(key string, value any) *Formatter {
+	old := f.cfg.Load()
+
+	// copy ephemeral fields
+	newFields := make([]field, len(old.fields))
+	copy(newFields, old.fields)
+
+	// replace root
+	newCfg := &formatterConfig{
+		root:   makeFieldPtr(key, value),
+		fields: newFields,
 	}
 
-	copy(result.fields, f.fields)
+	f.cfg.Store(newCfg)
 
-	result.fields[len(f.fields)] = field{
-		key:  key,
-		kind: kindInt,
-		ival: value,
-	}
-
-	return result
+	return f
 }
 
-func (f Formatter) WithBool(key string, value bool) Formatter {
-	result := Formatter{
-		logger: f.logger,
-		fields: make([]field, len(f.fields)+1),
+func (f *Formatter) WithString(key, value string) *Formatter {
+	old := f.cfg.Load()
+
+	newFields := make([]field, len(old.fields)+1)
+	copy(newFields, old.fields)
+
+	newFields[len(old.fields)] = field{
+		key:         key,
+		kind:        kindString,
+		valueString: value,
 	}
 
-	copy(result.fields, f.fields)
-
-	result.fields[len(f.fields)] = field{
-		key:  key,
-		kind: kindBool,
-		bval: value,
+	newCfg := &formatterConfig{
+		root:   old.root,  // keep root
+		fields: newFields, // updated ephemeral fields
 	}
 
-	return result
+	f.cfg.Store(newCfg)
+
+	return f
 }
 
-func (f Formatter) Print(args ...any) {
-	region, errWrite := f.logger.ingestor.TryWrite(f.logger.estimatedMessageSize)
-	if errWrite != nil {
+func (f *Formatter) WithInt(key string, value int) *Formatter {
+	old := f.cfg.Load()
+
+	newFields := make([]field, len(old.fields)+1)
+	copy(newFields, old.fields)
+	newFields[len(old.fields)] = field{
+		key:          key,
+		kind:         kindInt,
+		valueNumeric: value,
+	}
+
+	f.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
+
+	return f
+}
+
+func (f *Formatter) WithBool(key string, value bool) *Formatter {
+	old := f.cfg.Load()
+
+	newFields := make([]field, len(old.fields)+1)
+	copy(newFields, old.fields)
+	newFields[len(old.fields)] = field{
+		key:       key,
+		kind:      kindBool,
+		valueBool: value,
+	}
+
+	f.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
+
+	return f
+}
+
+func (f *Formatter) ClearFields() {
+	old := f.cfg.Load()
+
+	newCfg := &formatterConfig{
+		root:   old.root, // keep root
+		fields: nil,      // clear ephemeral fields
+	}
+
+	f.cfg.Store(newCfg)
+}
+
+func (f *Formatter) Reset() {
+	f.cfg.Store(&formatterConfig{})
+}
+
+func (f *Formatter) Print(args ...any) {
+	cfg := f.cfg.Load() // atomic read
+
+	region, err := f.logger.ingestor.TryWrite(f.logger.estimatedMessageSize)
+	if err != nil {
 		return
 	}
 
@@ -98,22 +149,20 @@ func (f Formatter) Print(args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	// encode fields
-	for ix := range f.fields {
-		fld := f.fields[ix]
+	// encode root field first (if present)
+	if cfg.root != nil {
+		fld := cfg.root
 
 		buf = append(buf, fld.key...)
 		buf = append(buf, '=')
 
 		switch fld.kind {
 		case kindString:
-			buf = append(buf, fld.sval...)
-
+			buf = append(buf, fld.valueString...)
 		case kindInt:
-			buf = strconv.AppendInt(buf, int64(fld.ival), 10)
-
+			buf = helpers.AppendInt(buf, fld.valueNumeric)
 		case kindBool:
-			if fld.bval {
+			if fld.valueBool {
 				buf = append(buf, "true"...)
 			} else {
 				buf = append(buf, "false"...)
@@ -123,11 +172,32 @@ func (f Formatter) Print(args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	// encode args
+	// encode ephemeral fields
+	for i := range cfg.fields {
+		fld := &cfg.fields[i]
+
+		buf = append(buf, fld.key...)
+		buf = append(buf, '=')
+
+		switch fld.kind {
+		case kindString:
+			buf = append(buf, fld.valueString...)
+		case kindInt:
+			buf = helpers.AppendInt(buf, fld.valueNumeric)
+		case kindBool:
+			if fld.valueBool {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+		}
+
+		buf = append(buf, ' ')
+	}
+
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)
-
 	f.logger.ingestor.EndWrite(region)
 }

@@ -52,6 +52,7 @@ func (m *Ingestor) beginWrite(n uint32) (WriteRegion, error) {
 	var offset uint32
 
 	limit := int32(m.arenaSize) - int32(n) //nolint:gosec
+
 	for {
 		cur := arena.cursor.Load()
 

@@ -20,7 +20,7 @@ func TestFormater(t *testing.T) {
 	require.NoError(t, errCrIngestor)
 	require.NotNil(t, ingestor)
 
-	l, errCrLogger := NewLogger(
+	serviceLogging, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
 			LoggerLevel:   Level(LevelDEBUG),
@@ -32,10 +32,12 @@ func TestFormater(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	f := NewFormatter(l).
-		WithString("service", "auth").
-		WithInt("req_id", 42).
+	f := NewFormatter(serviceLogging).
+		WithRoot("service", "auth").
+		WithInt("req_id", 12345).
 		WithBool("cache_hit", true)
+
+	require.NotNil(t, f.cfg.Load().root)
 
 	f.Print("login ok")
 

@@ -62,3 +62,28 @@ func appendField(buf []byte, fld *field) []byte {
 
 	return append(buf, ' ')
 }
+
+func appendQuotedJSON(buf []byte, s string) []byte {
+	buf = append(buf, '"')
+
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+
+		switch c {
+		case '\\', '"':
+			buf = append(buf, '\\', c)
+		case '\n':
+			buf = append(buf, '\\', 'n')
+		case '\r':
+			buf = append(buf, '\\', 'r')
+		case '\t':
+			buf = append(buf, '\\', 't')
+		default:
+			buf = append(buf, c)
+		}
+	}
+
+	buf = append(buf, '"')
+
+	return buf
+}

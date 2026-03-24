@@ -32,8 +32,9 @@ func (e *Entry) With(key string, value any) *Entry {
 
 func (e *Entry) Print(args ...any) {
 	cfg := e.formatter.cfg.Load()
+	logger := e.formatter.logger
 
-	region, err := e.formatter.logger.ingestor.TryWrite(e.formatter.logger.estimatedMessageSize)
+	region, err := logger.ingestor.TryWrite(logger.estimatedMessageSize)
 	if err != nil {
 		entryPool.Put(e)
 		return
@@ -41,29 +42,154 @@ func (e *Entry) Print(args ...any) {
 
 	buf := region.Buf()[:0]
 
-	if e.formatter.logger.fnTimestamp != nil {
-		buf = e.formatter.logger.fnTimestamp(buf)
+	// JSON MODE
+	if logger.withJSON {
+		buf = append(buf, '{')
+
+		// timestamp
+		if logger.fnTimestamp != nil {
+			buf = append(buf, `"ts":`...)
+			ts := logger.fnTimestamp(nil) // your timestamp appender returns []byte
+			buf = appendQuotedJSON(buf, string(ts))
+			buf = append(buf, ',')
+		}
+
+		// root field
+		if cfg.root != nil {
+			fld := cfg.root
+
+			buf = append(buf, '"')
+			buf = append(buf, fld.key...)
+			buf = append(buf, '"', ':')
+
+			switch fld.kind {
+			case kindString:
+				buf = appendQuotedJSON(buf, fld.valueString)
+			case kindInt:
+				buf = helpers.AppendInt(buf, fld.valueNumeric)
+			case kindBool:
+				buf = helpers.AppendBool(buf, fld.valueBool)
+			}
+			buf = append(buf, ',')
+		}
+
+		// context fields
+		for i := range cfg.fields {
+			fld := &cfg.fields[i]
+
+			buf = append(buf, '"')
+			buf = append(buf, fld.key...)
+			buf = append(buf, '"', ':')
+
+			switch fld.kind {
+			case kindString:
+				buf = appendQuotedJSON(buf, fld.valueString)
+			case kindInt:
+				buf = helpers.AppendInt(buf, fld.valueNumeric)
+			case kindBool:
+				buf = helpers.AppendBool(buf, fld.valueBool)
+			}
+			buf = append(buf, ',')
+		}
+
+		// entry fields
+		for i := range e.fields {
+			fld := &e.fields[i]
+
+			buf = append(buf, '"')
+			buf = append(buf, fld.key...)
+			buf = append(buf, '"', ':')
+
+			switch fld.kind {
+			case kindString:
+				buf = appendQuotedJSON(buf, fld.valueString)
+			case kindInt:
+				buf = helpers.AppendInt(buf, fld.valueNumeric)
+			case kindBool:
+				buf = helpers.AppendBool(buf, fld.valueBool)
+			}
+			buf = append(buf, ',')
+		}
+
+		// message
+		buf = append(buf, `"msg":`...)
+		buf = appendQuotedJSON(buf, helpers.ArgsToString(args))
+		buf = append(buf, '}', '\n')
+
+		copy(region.Buf(), buf)
+		logger.ingestor.EndWrite(region)
+		entryPool.Put(e)
+		return
+	}
+
+	// TEXT MODE (fast path)
+	if logger.fnTimestamp != nil {
+		buf = logger.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
+	// root
 	if cfg.root != nil {
-		buf = appendField(buf, cfg.root)
+		fld := cfg.root
+
+		buf = append(buf, fld.key...)
+		buf = append(buf, '=')
+
+		switch fld.kind {
+		case kindString:
+			buf = append(buf, fld.valueString...)
+		case kindInt:
+			buf = helpers.AppendInt(buf, fld.valueNumeric)
+		case kindBool:
+			buf = helpers.AppendBool(buf, fld.valueBool)
+		}
+
+		buf = append(buf, ' ')
 	}
 
+	// context fields
 	for i := range cfg.fields {
-		buf = appendField(buf, &cfg.fields[i])
+		fld := &cfg.fields[i]
+
+		buf = append(buf, fld.key...)
+		buf = append(buf, '=')
+
+		switch fld.kind {
+		case kindString:
+			buf = append(buf, fld.valueString...)
+		case kindInt:
+			buf = helpers.AppendInt(buf, fld.valueNumeric)
+		case kindBool:
+			buf = helpers.AppendBool(buf, fld.valueBool)
+		}
+
+		buf = append(buf, ' ')
 	}
 
+	// entry fields
 	for i := range e.fields {
-		buf = appendField(buf, &e.fields[i])
+		fld := &e.fields[i]
+
+		buf = append(buf, fld.key...)
+		buf = append(buf, '=')
+
+		switch fld.kind {
+		case kindString:
+			buf = append(buf, fld.valueString...)
+		case kindInt:
+			buf = helpers.AppendInt(buf, fld.valueNumeric)
+		case kindBool:
+			buf = helpers.AppendBool(buf, fld.valueBool)
+		}
+
+		buf = append(buf, ' ')
 	}
 
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)
-	e.formatter.logger.ingestor.EndWrite(region)
+	logger.ingestor.EndWrite(region)
 
-	// return to pool
 	entryPool.Put(e)
 }

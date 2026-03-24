@@ -151,3 +151,51 @@ func AppendArgs(destination []byte, args []any) []byte {
 
 	return destination
 }
+
+func toString(v any) string {
+	switch x := v.(type) {
+	case string:
+		return x
+	case []byte:
+		return string(x)
+	default:
+		return fmt.Sprint(x)
+	}
+}
+
+func ArgsToString(args []any) string {
+	// Fast path: no args
+	if len(args) == 0 {
+		return ""
+	}
+
+	// We build into a byte slice and convert once at the end.
+	// This avoids multiple string concatenations.
+	buf := make([]byte, 0, 64) // small initial cap; grows if needed
+
+	for i := range args {
+		if i > 0 {
+			buf = append(buf, ' ')
+		}
+
+		switch v := args[i].(type) {
+		case string:
+			buf = append(buf, v...)
+
+		case int:
+			buf = AppendInt(buf, v)
+
+		case bool:
+			buf = AppendBool(buf, v)
+
+		case []byte:
+			buf = append(buf, v...)
+
+		default:
+			// Fallback: convert to string once
+			buf = append(buf, []byte(toString(v))...)
+		}
+	}
+
+	return string(buf)
+}

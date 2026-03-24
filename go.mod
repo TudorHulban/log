@@ -3,6 +3,7 @@ module github.com/tudorhulban/log
 go 1.26
 
 require (
+	github.com/phuslu/log v1.0.123
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
 )

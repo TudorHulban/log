@@ -65,11 +65,14 @@ func (f *LogContext) WithRoot(key string, value any) *LogContext {
 	return f
 }
 
-func (f *LogContext) With(key string, value any) *Entry {
-	return &Entry{
-		formatter: f,
-		fields:    []field{makeField(key, value)},
-	}
+func (ctx *LogContext) With(key string, value any) *Entry {
+	e := entryPool.Get().(*Entry)
+
+	e.formatter = ctx
+	e.fields = e.fields[:0] // reset slice
+	e.fields = append(e.fields, makeField(key, value))
+
+	return e
 }
 
 func (f *LogContext) SetString(key, value string) *LogContext {

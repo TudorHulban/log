@@ -1,18 +1,18 @@
 package log
 
 import (
-	"bytes"
 	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/log/bytearena"
+	"github.com/tudorhulban/log/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkLogger_NilTimestamp-16    	35434408	        33.57 ns/op	     106 B/op	       0 allocs/op
+// BenchmarkLogger_NilTimestamp-16    	36902835	        32.48 ns/op	       8 B/op	       1 allocs/op
 func BenchmarkLogger_NilTimestamp(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -43,9 +43,9 @@ func BenchmarkLogger_NilTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NilTimestamp_Safe-16    	 9477679	       123.9 ns/op	     164 B/op	       1 allocs/op
+// BenchmarkLogger_NilTimestamp_Safe-16    	 9587048	       125.6 ns/op	      72 B/op	       2 allocs/op
 func BenchmarkLogger_NilTimestamp_Safe(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -78,9 +78,9 @@ func BenchmarkLogger_NilTimestamp_Safe(b *testing.B) {
 
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem -race
-// BenchmarkLogger_Print-16    	66342212	        17.05 ns/op	      52 B/op	       0 allocs/op
+// BenchmarkLogger_Print-16    	73801082	        16.25 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -111,9 +111,9 @@ func BenchmarkLogger_Print(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_PrintWithNoTimestamp-16    	69018649	        16.96 ns/op	      50 B/op	       0 allocs/op
+// BenchmarkLogger_PrintWithNoTimestamp-16    	74154141	        16.26 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -144,9 +144,9 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_PrintRaw-16    	85781427	        13.16 ns/op	      20 B/op	       0 allocs/op
+// BenchmarkLogger_PrintRaw-16    	100000000	        10.87 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_PrintRaw(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -179,9 +179,9 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp-16    	29470323	        39.59 ns/op	      67 B/op	       0 allocs/op
+// BenchmarkLogger_NanoTimestamp-16    	28327180	        43.53 ns/op	       8 B/op	       1 allocs/op
 func BenchmarkLogger_NanoTimestamp(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -216,9 +216,9 @@ func BenchmarkLogger_NanoTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_NanoTimestamp_JSON-16    	26897366	        44.00 ns/op	      72 B/op	       0 allocs/op
+// BenchmarkLogger_NanoTimestamp_JSON-16    	24533622	        47.86 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -254,9 +254,9 @@ func BenchmarkLogger_NanoTimestamp_JSON(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_StandardTimestamp-16    	27820491	        48.12 ns/op	      77 B/op	       1 allocs/op
+// BenchmarkLogger_StandardTimestamp-16    	30710284	        39.61 ns/op	       8 B/op	       1 allocs/op
 func BenchmarkLogger_StandardTimestamp(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -291,9 +291,9 @@ func BenchmarkLogger_StandardTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_YYYYTimestamp-16    	26702970	        39.50 ns/op	      73 B/op	       1 allocs/op
+// BenchmarkLogger_YYYYTimestamp-16    	29826070	        39.19 ns/op	       8 B/op	       1 allocs/op
 func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -328,9 +328,9 @@ func BenchmarkLogger_YYYYTimestamp(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_Printf_TimestampNano-16    	29792701	        42.18 ns/op	      66 B/op	       0 allocs/op
+// BenchmarkLogger_Printf_TimestampNano-16    	28026976	        42.45 ns/op	       8 B/op	       1 allocs/op
 func BenchmarkLogger_Printf_TimestampNano(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)
@@ -365,9 +365,9 @@ func BenchmarkLogger_Printf_TimestampNano(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_Print_TimestampNano-16    	58096893	        20.44 ns/op	      60 B/op	       0 allocs/op
+// BenchmarkLogger_Print_TimestampNano-16    	56562405	        21.79 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_Print_TimestampNano(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)

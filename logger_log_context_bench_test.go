@@ -1,17 +1,17 @@
 package log
 
 import (
-	"bytes"
 	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/log/bytearena"
+	"github.com/tudorhulban/log/helpers"
 )
 
-// BenchmarkFormatterWithRequest-16    	 5000041	       227.8 ns/op	     692 B/op	       3 allocs/op
+// BenchmarkFormatterWithRequest-16    	13504674	        90.12 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkFormatterWithRequest(b *testing.B) {
-	var writer bytes.Buffer
+	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
 	require.NoError(b, errCrIngestor)

@@ -1,6 +1,18 @@
 package log
 
-import "github.com/tudorhulban/log/helpers"
+import (
+	"sync"
+
+	"github.com/tudorhulban/log/helpers"
+)
+
+var entryPool = sync.Pool{
+	New: func() any {
+		return &Entry{
+			fields: make([]field, 0, 8), // small reusable buffer
+		}
+	},
+}
 
 // Entry is not safe for concurrent use.
 // Each goroutine should obtain its own Entry via Formatter.With.
@@ -23,6 +35,7 @@ func (e *Entry) Print(args ...any) {
 
 	region, err := e.formatter.logger.ingestor.TryWrite(e.formatter.logger.estimatedMessageSize)
 	if err != nil {
+		entryPool.Put(e)
 		return
 	}
 
@@ -50,4 +63,7 @@ func (e *Entry) Print(args ...any) {
 
 	copy(region.Buf(), buf)
 	e.formatter.logger.ingestor.EndWrite(region)
+
+	// return to pool
+	entryPool.Put(e)
 }

@@ -139,7 +139,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-12    	 7756347	       156.8 ns/op	      22 B/op	       1 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-12    	 9880800	       122.4 ns/op	      12 B/op	       0 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -176,9 +176,9 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	for i := 0; b.Loop(); i++ {
 		// 1. Create request with 4 attributes
 		entry := logContext.With("area", "some area").
-			With("user", "tudor").
-			With("attempt", i).
-			With("success", true)
+			WithString("user", "tudor").
+			WithInt("attempt", i).
+			WithBool("success", true)
 
 		// 2. Print
 		entry.Print("benchmark test")

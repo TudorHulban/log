@@ -30,6 +30,48 @@ func (e *Entry) With(key string, value any) *Entry {
 	return e
 }
 
+// WithString appends a string field without boxing value into any.
+func (e *Entry) WithString(key, value string) *Entry {
+	e.fields = append(
+		e.fields,
+		field{
+			key:         key,
+			kind:        kindString,
+			valueString: value,
+		},
+	)
+
+	return e
+}
+
+// WithInt appends an int field without boxing value into any.
+func (e *Entry) WithInt(key string, value int) *Entry {
+	e.fields = append(
+		e.fields,
+		field{
+			key:          key,
+			kind:         kindInt,
+			valueNumeric: value,
+		},
+	)
+
+	return e
+}
+
+// WithBool appends a bool field without boxing value into any.
+func (e *Entry) WithBool(key string, value bool) *Entry {
+	e.fields = append(
+		e.fields,
+		field{
+			key:       key,
+			kind:      kindBool,
+			valueBool: value,
+		},
+	)
+
+	return e
+}
+
 func (e *Entry) Print(args ...any) {
 	cfg := e.formatter.cfg.Load()
 	logger := e.formatter.logger

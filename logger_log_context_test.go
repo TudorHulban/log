@@ -10,7 +10,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-func TestFormater(t *testing.T) {
+func TestContext(t *testing.T) {
 	writer := os.Stdout
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
@@ -52,7 +52,7 @@ func TestFormater(t *testing.T) {
 	<-chIngestionEnd
 }
 
-func TestFormater_With_JSON(t *testing.T) {
+func Test_With_JSON_Context(t *testing.T) {
 	writer := os.Stdout
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(

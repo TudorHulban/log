@@ -97,7 +97,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	}
 }
 
-// BenchmarkContext_WithJSON_OneField-12    	16340635	        73.02 ns/op	      10 B/op	       0 allocs/op
+// BenchmarkContext_WithJSON_OneField-12    	17870000	        67.06 ns/op	       7 B/op	       0 allocs/op
 func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -139,7 +139,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-12    	 6953108	       170.2 ns/op	      27 B/op	       1 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-12    	 7756347	       156.8 ns/op	      22 B/op	       1 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 

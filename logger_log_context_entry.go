@@ -34,9 +34,10 @@ func (e *Entry) Print(args ...any) {
 	cfg := e.formatter.cfg.Load()
 	logger := e.formatter.logger
 
-	region, err := logger.ingestor.TryWrite(logger.estimatedMessageSize)
-	if err != nil {
+	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSize)
+	if errWrite != nil {
 		entryPool.Put(e)
+
 		return
 	}
 
@@ -49,8 +50,10 @@ func (e *Entry) Print(args ...any) {
 		// timestamp
 		if logger.fnTimestamp != nil {
 			buf = append(buf, `"ts":`...)
-			ts := logger.fnTimestamp(nil) // your timestamp appender returns []byte
-			buf = appendQuotedJSON(buf, string(ts))
+			buf = appendQuotedJSON(
+				buf,
+				string(logger.fnTimestamp(nil)),
+			)
 			buf = append(buf, ',')
 		}
 
@@ -70,12 +73,13 @@ func (e *Entry) Print(args ...any) {
 			case kindBool:
 				buf = helpers.AppendBool(buf, fld.valueBool)
 			}
+
 			buf = append(buf, ',')
 		}
 
 		// context fields
-		for i := range cfg.fields {
-			fld := &cfg.fields[i]
+		for ix := range cfg.fields {
+			fld := &cfg.fields[ix]
 
 			buf = append(buf, '"')
 			buf = append(buf, fld.key...)
@@ -89,12 +93,13 @@ func (e *Entry) Print(args ...any) {
 			case kindBool:
 				buf = helpers.AppendBool(buf, fld.valueBool)
 			}
+
 			buf = append(buf, ',')
 		}
 
 		// entry fields
-		for i := range e.fields {
-			fld := &e.fields[i]
+		for ix := range e.fields {
+			fld := &e.fields[ix]
 
 			buf = append(buf, '"')
 			buf = append(buf, fld.key...)
@@ -108,17 +113,19 @@ func (e *Entry) Print(args ...any) {
 			case kindBool:
 				buf = helpers.AppendBool(buf, fld.valueBool)
 			}
+
 			buf = append(buf, ',')
 		}
 
 		// message
 		buf = append(buf, `"msg":`...)
-		buf = appendQuotedJSON(buf, helpers.ArgsToString(args))
+		buf = appendArgsQuotedJSON(buf, args)
 		buf = append(buf, '}', '\n')
 
 		copy(region.Buf(), buf)
 		logger.ingestor.EndWrite(region)
 		entryPool.Put(e)
+
 		return
 	}
 
@@ -138,8 +145,10 @@ func (e *Entry) Print(args ...any) {
 		switch fld.kind {
 		case kindString:
 			buf = append(buf, fld.valueString...)
+
 		case kindInt:
 			buf = helpers.AppendInt(buf, fld.valueNumeric)
+
 		case kindBool:
 			buf = helpers.AppendBool(buf, fld.valueBool)
 		}
@@ -148,8 +157,8 @@ func (e *Entry) Print(args ...any) {
 	}
 
 	// context fields
-	for i := range cfg.fields {
-		fld := &cfg.fields[i]
+	for ix := range cfg.fields {
+		fld := &cfg.fields[ix]
 
 		buf = append(buf, fld.key...)
 		buf = append(buf, '=')
@@ -157,8 +166,10 @@ func (e *Entry) Print(args ...any) {
 		switch fld.kind {
 		case kindString:
 			buf = append(buf, fld.valueString...)
+
 		case kindInt:
 			buf = helpers.AppendInt(buf, fld.valueNumeric)
+
 		case kindBool:
 			buf = helpers.AppendBool(buf, fld.valueBool)
 		}
@@ -167,8 +178,8 @@ func (e *Entry) Print(args ...any) {
 	}
 
 	// entry fields
-	for i := range e.fields {
-		fld := &e.fields[i]
+	for ix := range e.fields {
+		fld := &e.fields[ix]
 
 		buf = append(buf, fld.key...)
 		buf = append(buf, '=')
@@ -176,8 +187,10 @@ func (e *Entry) Print(args ...any) {
 		switch fld.kind {
 		case kindString:
 			buf = append(buf, fld.valueString...)
+
 		case kindInt:
 			buf = helpers.AppendInt(buf, fld.valueNumeric)
+
 		case kindBool:
 			buf = helpers.AppendBool(buf, fld.valueBool)
 		}

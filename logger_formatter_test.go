@@ -32,7 +32,7 @@ func TestFormater(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	f := NewFormatter(serviceLogging).
+	f := NewLogContext(serviceLogging).
 		WithRoot("service", "auth").
 		SetInt("req_id", 12345).
 		SetBool("cache_hit", true)
@@ -46,6 +46,7 @@ func TestFormater(t *testing.T) {
 
 	f.With("xxx", 2).Print()
 	f.With("yyy", 3).Print()
+	f.With("zzzz", 4.3).Print()
 
 	cancel()
 	<-chIngestionEnd

@@ -1,6 +1,10 @@
 package log
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/tudorhulban/log/helpers"
+)
 
 func makeField(key string, value any) field {
 	switch v := value.(type) {
@@ -39,4 +43,22 @@ func makeField(key string, value any) field {
 			valueString: fmt.Sprint(v),
 		}
 	}
+}
+
+func appendField(buf []byte, fld *field) []byte {
+	buf = append(buf, fld.key...)
+	buf = append(buf, '=')
+
+	switch fld.kind {
+	case kindString:
+		buf = append(buf, fld.valueString...)
+
+	case kindInt:
+		buf = helpers.AppendInt(buf, fld.valueNumeric)
+
+	case kindBool:
+		buf = helpers.AppendBool(buf, fld.valueBool)
+	}
+
+	return append(buf, ' ')
 }

@@ -29,13 +29,13 @@ type formatterConfig struct {
 	fields []field // ephemeral fields
 }
 
-type Formatter struct {
+type LogContext struct {
 	logger *Logger
 	cfg    atomic.Pointer[formatterConfig]
 }
 
-func NewFormatter(logger *Logger) *Formatter {
-	f := Formatter{logger: logger}
+func NewLogContext(logger *Logger) *LogContext {
+	f := LogContext{logger: logger}
 	f.cfg.Store(&formatterConfig{fields: nil})
 
 	return &f
@@ -47,7 +47,7 @@ func makeFieldPtr(key string, value any) *field {
 	return &fld
 }
 
-func (f *Formatter) WithRoot(key string, value any) *Formatter {
+func (f *LogContext) WithRoot(key string, value any) *LogContext {
 	old := f.cfg.Load()
 
 	// copy ephemeral fields
@@ -65,14 +65,14 @@ func (f *Formatter) WithRoot(key string, value any) *Formatter {
 	return f
 }
 
-func (f *Formatter) With(key string, value any) *Request {
-	return &Request{
+func (f *LogContext) With(key string, value any) *Entry {
+	return &Entry{
 		formatter: f,
 		fields:    []field{makeField(key, value)},
 	}
 }
 
-func (f *Formatter) SetString(key, value string) *Formatter {
+func (f *LogContext) SetString(key, value string) *LogContext {
 	old := f.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
@@ -94,7 +94,7 @@ func (f *Formatter) SetString(key, value string) *Formatter {
 	return f
 }
 
-func (f *Formatter) SetInt(key string, value int) *Formatter {
+func (f *LogContext) SetInt(key string, value int) *LogContext {
 	old := f.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
@@ -110,7 +110,7 @@ func (f *Formatter) SetInt(key string, value int) *Formatter {
 	return f
 }
 
-func (f *Formatter) SetBool(key string, value bool) *Formatter {
+func (f *LogContext) SetBool(key string, value bool) *LogContext {
 	old := f.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
@@ -126,7 +126,7 @@ func (f *Formatter) SetBool(key string, value bool) *Formatter {
 	return f
 }
 
-func (f *Formatter) ClearFields() {
+func (f *LogContext) Clear() {
 	old := f.cfg.Load()
 
 	newCfg := &formatterConfig{
@@ -137,11 +137,11 @@ func (f *Formatter) ClearFields() {
 	f.cfg.Store(newCfg)
 }
 
-func (f *Formatter) Reset() {
+func (f *LogContext) Reset() {
 	f.cfg.Store(&formatterConfig{})
 }
 
-func (f *Formatter) Print(args ...any) {
+func (f *LogContext) Print(args ...any) {
 	cfg := f.cfg.Load() // atomic read
 
 	region, err := f.logger.ingestor.TryWrite(f.logger.estimatedMessageSize)
@@ -158,48 +158,12 @@ func (f *Formatter) Print(args ...any) {
 
 	// encode root field first (if present)
 	if cfg.root != nil {
-		fld := cfg.root
-
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
-
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
-		case kindBool:
-			if fld.valueBool {
-				buf = append(buf, "true"...)
-			} else {
-				buf = append(buf, "false"...)
-			}
-		}
-
-		buf = append(buf, ' ')
+		buf = appendField(buf, cfg.root)
 	}
 
 	// encode ephemeral fields
 	for i := range cfg.fields {
-		fld := &cfg.fields[i]
-
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
-
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
-		case kindBool:
-			if fld.valueBool {
-				buf = append(buf, "true"...)
-			} else {
-				buf = append(buf, "false"...)
-			}
-		}
-
-		buf = append(buf, ' ')
+		buf = appendField(buf, &cfg.fields[i])
 	}
 
 	buf = helpers.AppendArgs(buf, args)

@@ -34,24 +34,15 @@ func TimestampYYYYMonth(appendTo []byte) []byte {
 }
 
 func TimestampRFC3339(appendTo []byte) []byte {
-	return append(
-		appendTo,
-		[]byte(time.Now().UTC().Format(time.RFC3339))...,
-	)
+	return time.Now().UTC().AppendFormat(appendTo, time.RFC3339)
 }
 
 func TimestampRFC3339Nano(appendTo []byte) []byte {
-	return append(
-		appendTo,
-		[]byte(time.Now().UTC().Format(time.RFC3339Nano))...,
-	)
+	return time.Now().UTC().AppendFormat(appendTo, time.RFC3339Nano)
 }
 
 func TimestampRFC3339Bucharest(appendTo []byte) []byte {
 	loc, _ := time.LoadLocation("Europe/Bucharest")
 
-	return append(
-		appendTo,
-		[]byte(time.Now().In(loc).Format(time.RFC3339))...,
-	)
+	return time.Now().In(loc).AppendFormat(appendTo, time.RFC3339)
 }

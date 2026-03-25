@@ -21,6 +21,11 @@ type Entry struct {
 	fields    []field // per-request, owned by this Entry
 }
 
+// With allocates.
+//
+// Passing as any, the Go compiler must box the concrete value into an interface.
+// The boxing causes a heap allocation when the value does not fit in a pointer word
+// or the compiler cannot prove it escapes to the stack only.
 func (e *Entry) With(key string, value any) *Entry {
 	e.fields = append(
 		e.fields,

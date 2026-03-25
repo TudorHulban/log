@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tudorhulban/log/bytearena"
+	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/timestamp"
 )
 

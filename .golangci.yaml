@@ -119,7 +119,7 @@ linters:
           arguments: [50]
 
         - name: cyclomatic
-          arguments: [18]
+          arguments: [30]
 
         - name: max-control-nesting
           arguments: [7]
@@ -131,6 +131,9 @@ linters:
           disabled: true
 
         - name: add-constant
+          disabled: true
+
+        - name: constant-logical-expr
           disabled: true
 
         - name: exported

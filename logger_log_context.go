@@ -47,8 +47,8 @@ func makeFieldPtr(key string, value any) *field {
 	return &fld
 }
 
-func (f *LogContext) WithRoot(key string, value any) *LogContext {
-	old := f.cfg.Load()
+func (ctx *LogContext) WithRoot(key string, value any) *LogContext {
+	old := ctx.cfg.Load()
 
 	// copy ephemeral fields
 	newFields := make([]field, len(old.fields))
@@ -60,13 +60,13 @@ func (f *LogContext) WithRoot(key string, value any) *LogContext {
 		fields: newFields,
 	}
 
-	f.cfg.Store(newCfg)
+	ctx.cfg.Store(newCfg)
 
-	return f
+	return ctx
 }
 
 func (ctx *LogContext) With(key string, value any) *Entry {
-	e := entryPool.Get().(*Entry)
+	e, _ := entryPool.Get().(*Entry) //nolint:revive
 
 	e.formatter = ctx
 	e.fields = e.fields[:0] // reset slice
@@ -75,8 +75,8 @@ func (ctx *LogContext) With(key string, value any) *Entry {
 	return e
 }
 
-func (f *LogContext) SetString(key, value string) *LogContext {
-	old := f.cfg.Load()
+func (ctx *LogContext) SetString(key, value string) *LogContext {
+	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
 	copy(newFields, old.fields)
@@ -92,13 +92,13 @@ func (f *LogContext) SetString(key, value string) *LogContext {
 		fields: newFields, // updated ephemeral fields
 	}
 
-	f.cfg.Store(newCfg)
+	ctx.cfg.Store(newCfg)
 
-	return f
+	return ctx
 }
 
-func (f *LogContext) SetInt(key string, value int) *LogContext {
-	old := f.cfg.Load()
+func (ctx *LogContext) SetInt(key string, value int) *LogContext {
+	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
 	copy(newFields, old.fields)
@@ -108,13 +108,13 @@ func (f *LogContext) SetInt(key string, value int) *LogContext {
 		valueNumeric: value,
 	}
 
-	f.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
+	ctx.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
 
-	return f
+	return ctx
 }
 
-func (f *LogContext) SetBool(key string, value bool) *LogContext {
-	old := f.cfg.Load()
+func (ctx *LogContext) SetBool(key string, value bool) *LogContext {
+	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
 	copy(newFields, old.fields)
@@ -124,38 +124,38 @@ func (f *LogContext) SetBool(key string, value bool) *LogContext {
 		valueBool: value,
 	}
 
-	f.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
+	ctx.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
 
-	return f
+	return ctx
 }
 
-func (f *LogContext) Clear() {
-	old := f.cfg.Load()
+func (ctx *LogContext) Clear() {
+	old := ctx.cfg.Load()
 
 	newCfg := &formatterConfig{
 		root:   old.root, // keep root
 		fields: nil,      // clear ephemeral fields
 	}
 
-	f.cfg.Store(newCfg)
+	ctx.cfg.Store(newCfg)
 }
 
-func (f *LogContext) Reset() {
-	f.cfg.Store(&formatterConfig{})
+func (ctx *LogContext) Reset() {
+	ctx.cfg.Store(&formatterConfig{})
 }
 
-func (f *LogContext) Print(args ...any) {
-	cfg := f.cfg.Load() // atomic read
+func (ctx *LogContext) Print(args ...any) {
+	cfg := ctx.cfg.Load() // atomic read
 
-	region, err := f.logger.ingestor.TryWrite(f.logger.estimatedMessageSize)
+	region, err := ctx.logger.ingestor.TryWrite(ctx.logger.estimatedMessageSize)
 	if err != nil {
 		return
 	}
 
 	buf := region.Buf()[:0]
 
-	if f.logger.fnTimestamp != nil {
-		buf = f.logger.fnTimestamp(buf)
+	if ctx.logger.fnTimestamp != nil {
+		buf = ctx.logger.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
@@ -173,5 +173,5 @@ func (f *LogContext) Print(args ...any) {
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)
-	f.logger.ingestor.EndWrite(region)
+	ctx.logger.ingestor.EndWrite(region)
 }

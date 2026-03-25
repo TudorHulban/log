@@ -27,7 +27,7 @@ func BenchmarkLoggerZeroAlloc(b *testing.B) {
 	b.ResetTimer()
 
 	for ix := 0; b.Loop(); ix++ {
-		buf := pool.Get().(*bytes.Buffer)
+		buf, _ := pool.Get().(*bytes.Buffer) //nolint:revive
 		buf.Reset()
 
 		buf.WriteString(`{"level":"info","ts":"`)

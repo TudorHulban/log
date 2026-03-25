@@ -6,6 +6,7 @@ require (
 	github.com/phuslu/log v1.0.123
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
+	github.com/tudorhulban/bytearena v0.0.2-0.20260325120135-7c9a1ce7d47e
 )
 
 require (

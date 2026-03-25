@@ -3,7 +3,7 @@ package log
 import (
 	"errors"
 
-	"github.com/tudorhulban/log/bytearena"
+	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/timestamp"
 )
 

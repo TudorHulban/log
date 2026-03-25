@@ -55,6 +55,9 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	}
 }
 
+// go test -bench=BenchmarkContext_NoJSON_MultipleFields -benchmem -memprofile=mem.out
+// go tool pprof -alloc_space ./your.test mem.out
+
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
 // BenchmarkContext_NoJSON_MultipleFields-12    	10104504	       120.2 ns/op	      15 B/op	       1 allocs/op
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {

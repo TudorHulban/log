@@ -1,17 +1,17 @@
 package log
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
+	"github.com/tudorhulban/bytearena/helpers"
 )
 
 func Test_GetLogLevel(t *testing.T) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
-		&bytes.Buffer{},
+		&helpers.NoopWriter{},
 	)
 	require.NoError(t, errCrIngestor)
 	require.NotNil(t, ingestor)
@@ -34,7 +34,7 @@ func Test_GetLogLevel(t *testing.T) {
 func Test_SetLogLevel(t *testing.T) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
-		&bytes.Buffer{},
+		&helpers.NoopWriter{},
 	)
 	require.NoError(t, errCrIngestor)
 	require.NotNil(t, ingestor)

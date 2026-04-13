@@ -14,7 +14,7 @@ func TestContext(t *testing.T) {
 	writer := os.Stdout
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
-		bytearena.Size100K,
+		bytearena.Size100K(),
 		writer,
 	)
 	require.NoError(t, errCrIngestor)
@@ -56,7 +56,7 @@ func Test_With_JSON_Context(t *testing.T) {
 	writer := os.Stdout
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
-		bytearena.Size100K,
+		bytearena.Size100K(),
 		writer,
 	)
 	require.NoError(t, errCrIngestor)

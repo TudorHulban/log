@@ -1,6 +1,7 @@
 package log
 
 import (
+	"sync"
 	"sync/atomic"
 
 	"github.com/tudorhulban/log/helpers"
@@ -147,12 +148,8 @@ func (ctx *LogContext) Reset() {
 func (ctx *LogContext) Print(args ...any) {
 	cfg := ctx.cfg.Load() // atomic read
 
-	region, err := ctx.logger.ingestor.TryWrite(ctx.logger.estimatedMessageSize)
-	if err != nil {
-		return
-	}
-
-	buf := region.Buf()[:0]
+	buf := logBufPool.Get().([]byte)
+	buf = buf[:0]
 
 	if ctx.logger.fnTimestamp != nil {
 		buf = ctx.logger.fnTimestamp(buf)
@@ -172,6 +169,12 @@ func (ctx *LogContext) Print(args ...any) {
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
-	copy(region.Buf(), buf)
-	ctx.logger.ingestor.EndWrite(region)
+	_, _ = ctx.logger.ingestor.Write(buf)
+}
+
+var logBufPool = sync.Pool{
+	New: func() any {
+		// One-time alloc per pool entry, amortized.
+		return make([]byte, 0, 4096)
+	},
 }

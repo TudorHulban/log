@@ -14,7 +14,7 @@ import (
 func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
 	require.NoError(b, errCrIngestor)
 	require.NotNil(b, ingestor)
 
@@ -58,7 +58,7 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
 	require.NoError(b, errCrIngestor)
 	require.NotNil(b, ingestor)
 
@@ -103,7 +103,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
 	require.NoError(b, errCrIngestor)
 	require.NotNil(b, ingestor)
 
@@ -145,7 +145,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K, &writer)
+	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
 	require.NoError(b, errCrIngestor)
 	require.NotNil(b, ingestor)
 

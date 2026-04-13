@@ -2,8 +2,6 @@ package log
 
 import (
 	"sync"
-
-	"github.com/tudorhulban/log/helpers"
 )
 
 var entryPool = sync.Pool{
@@ -77,179 +75,179 @@ func (e *Entry) WithBool(key string, value bool) *Entry {
 	return e
 }
 
-func (e *Entry) Print(args ...any) {
-	cfg := e.formatter.cfg.Load()
-	logger := e.formatter.logger
+// func (e *Entry) Print(args ...any) {
+// 	cfg := e.formatter.cfg.Load()
+// 	logger := e.formatter.logger
 
-	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSize)
-	if errWrite != nil {
-		entryPool.Put(e)
+// 	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSize)
+// 	if errWrite != nil {
+// 		entryPool.Put(e)
 
-		return
-	}
+// 		return
+// 	}
 
-	buf := region.Buf()[:0]
+// 	buf := region.Buf()[:0]
 
-	// JSON MODE
-	if logger.withJSON {
-		buf = append(buf, '{')
+// 	// JSON MODE
+// 	if logger.withJSON {
+// 		buf = append(buf, '{')
 
-		// timestamp
-		if logger.fnTimestamp != nil {
-			buf = append(buf, `"ts":`...)
-			buf = appendQuotedJSON(
-				buf,
-				string(logger.fnTimestamp(nil)),
-			)
-			buf = append(buf, ',')
-		}
+// 		// timestamp
+// 		if logger.fnTimestamp != nil {
+// 			buf = append(buf, `"ts":`...)
+// 			buf = appendQuotedJSON(
+// 				buf,
+// 				string(logger.fnTimestamp(nil)),
+// 			)
+// 			buf = append(buf, ',')
+// 		}
 
-		// root field
-		if cfg.root != nil {
-			fld := cfg.root
+// 		// root field
+// 		if cfg.root != nil {
+// 			fld := cfg.root
 
-			buf = append(buf, '"')
-			buf = append(buf, fld.key...)
-			buf = append(buf, '"', ':')
+// 			buf = append(buf, '"')
+// 			buf = append(buf, fld.key...)
+// 			buf = append(buf, '"', ':')
 
-			switch fld.kind {
-			case kindString:
-				buf = appendQuotedJSON(buf, fld.valueString)
-			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
-			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
-			}
+// 			switch fld.kind {
+// 			case kindString:
+// 				buf = appendQuotedJSON(buf, fld.valueString)
+// 			case kindInt:
+// 				buf = helpers.AppendInt(buf, fld.valueNumeric)
+// 			case kindBool:
+// 				buf = helpers.AppendBool(buf, fld.valueBool)
+// 			}
 
-			buf = append(buf, ',')
-		}
+// 			buf = append(buf, ',')
+// 		}
 
-		// context fields
-		for ix := range cfg.fields {
-			fld := &cfg.fields[ix]
+// 		// context fields
+// 		for ix := range cfg.fields {
+// 			fld := &cfg.fields[ix]
 
-			buf = append(buf, '"')
-			buf = append(buf, fld.key...)
-			buf = append(buf, '"', ':')
+// 			buf = append(buf, '"')
+// 			buf = append(buf, fld.key...)
+// 			buf = append(buf, '"', ':')
 
-			switch fld.kind {
-			case kindString:
-				buf = appendQuotedJSON(buf, fld.valueString)
-			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
-			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
-			}
+// 			switch fld.kind {
+// 			case kindString:
+// 				buf = appendQuotedJSON(buf, fld.valueString)
+// 			case kindInt:
+// 				buf = helpers.AppendInt(buf, fld.valueNumeric)
+// 			case kindBool:
+// 				buf = helpers.AppendBool(buf, fld.valueBool)
+// 			}
 
-			buf = append(buf, ',')
-		}
+// 			buf = append(buf, ',')
+// 		}
 
-		// entry fields
-		for ix := range e.fields {
-			fld := &e.fields[ix]
+// 		// entry fields
+// 		for ix := range e.fields {
+// 			fld := &e.fields[ix]
 
-			buf = append(buf, '"')
-			buf = append(buf, fld.key...)
-			buf = append(buf, '"', ':')
+// 			buf = append(buf, '"')
+// 			buf = append(buf, fld.key...)
+// 			buf = append(buf, '"', ':')
 
-			switch fld.kind {
-			case kindString:
-				buf = appendQuotedJSON(buf, fld.valueString)
-			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
-			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
-			}
+// 			switch fld.kind {
+// 			case kindString:
+// 				buf = appendQuotedJSON(buf, fld.valueString)
+// 			case kindInt:
+// 				buf = helpers.AppendInt(buf, fld.valueNumeric)
+// 			case kindBool:
+// 				buf = helpers.AppendBool(buf, fld.valueBool)
+// 			}
 
-			buf = append(buf, ',')
-		}
+// 			buf = append(buf, ',')
+// 		}
 
-		// message
-		buf = append(buf, `"msg":`...)
-		buf = appendArgsQuotedJSON(buf, args)
-		buf = append(buf, '}', '\n')
+// 		// message
+// 		buf = append(buf, `"msg":`...)
+// 		buf = appendArgsQuotedJSON(buf, args)
+// 		buf = append(buf, '}', '\n')
 
-		copy(region.Buf(), buf)
-		logger.ingestor.EndWrite(region)
-		entryPool.Put(e)
+// 		copy(region.Buf(), buf)
+// 		logger.ingestor.EndWrite(region)
+// 		entryPool.Put(e)
 
-		return
-	}
+// 		return
+// 	}
 
-	// TEXT MODE (fast path)
-	if logger.fnTimestamp != nil {
-		buf = logger.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
+// 	// TEXT MODE (fast path)
+// 	if logger.fnTimestamp != nil {
+// 		buf = logger.fnTimestamp(buf)
+// 		buf = append(buf, ' ')
+// 	}
 
-	// root
-	if cfg.root != nil {
-		fld := cfg.root
+// 	// root
+// 	if cfg.root != nil {
+// 		fld := cfg.root
 
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
+// 		buf = append(buf, fld.key...)
+// 		buf = append(buf, '=')
 
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
+// 		switch fld.kind {
+// 		case kindString:
+// 			buf = append(buf, fld.valueString...)
 
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
+// 		case kindInt:
+// 			buf = helpers.AppendInt(buf, fld.valueNumeric)
 
-		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
-		}
+// 		case kindBool:
+// 			buf = helpers.AppendBool(buf, fld.valueBool)
+// 		}
 
-		buf = append(buf, ' ')
-	}
+// 		buf = append(buf, ' ')
+// 	}
 
-	// context fields
-	for ix := range cfg.fields {
-		fld := &cfg.fields[ix]
+// 	// context fields
+// 	for ix := range cfg.fields {
+// 		fld := &cfg.fields[ix]
 
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
+// 		buf = append(buf, fld.key...)
+// 		buf = append(buf, '=')
 
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
+// 		switch fld.kind {
+// 		case kindString:
+// 			buf = append(buf, fld.valueString...)
 
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
+// 		case kindInt:
+// 			buf = helpers.AppendInt(buf, fld.valueNumeric)
 
-		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
-		}
+// 		case kindBool:
+// 			buf = helpers.AppendBool(buf, fld.valueBool)
+// 		}
 
-		buf = append(buf, ' ')
-	}
+// 		buf = append(buf, ' ')
+// 	}
 
-	// entry fields
-	for ix := range e.fields {
-		fld := &e.fields[ix]
+// 	// entry fields
+// 	for ix := range e.fields {
+// 		fld := &e.fields[ix]
 
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
+// 		buf = append(buf, fld.key...)
+// 		buf = append(buf, '=')
 
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
+// 		switch fld.kind {
+// 		case kindString:
+// 			buf = append(buf, fld.valueString...)
 
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
+// 		case kindInt:
+// 			buf = helpers.AppendInt(buf, fld.valueNumeric)
 
-		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
-		}
+// 		case kindBool:
+// 			buf = helpers.AppendBool(buf, fld.valueBool)
+// 		}
 
-		buf = append(buf, ' ')
-	}
+// 		buf = append(buf, ' ')
+// 	}
 
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
+// 	buf = helpers.AppendArgs(buf, args)
+// 	buf = append(buf, '\n')
 
-	copy(region.Buf(), buf)
-	logger.ingestor.EndWrite(region)
+// 	copy(region.Buf(), buf)
+// 	logger.ingestor.EndWrite(region)
 
-	entryPool.Put(e)
-}
+// 	entryPool.Put(e)
+// }

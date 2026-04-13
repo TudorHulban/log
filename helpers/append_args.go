@@ -199,3 +199,97 @@ func ArgsToString(args []any) string {
 
 	return string(buf)
 }
+
+func Appendf(dst []byte, format string, args ...any) []byte {
+	ai := 0
+	flen := len(format)
+
+	for i := 0; i < flen; i++ {
+		c := format[i]
+
+		if c != '%' {
+			dst = append(dst, c)
+			continue
+		}
+
+		// Handle "%%"
+		if i+1 < flen && format[i+1] == '%' {
+			dst = append(dst, '%')
+			i++
+			continue
+		}
+
+		// Move to verb
+		i++
+		if i >= flen {
+			// malformed trailing '%'
+			dst = append(dst, '%')
+			break
+		}
+
+		if ai >= len(args) {
+			// no argument provided
+			dst = append(dst, '%', format[i])
+			continue
+		}
+
+		arg := args[ai]
+		ai++
+
+		switch format[i] {
+		case 's':
+			switch v := arg.(type) {
+			case string:
+				dst = append(dst, v...)
+			case []byte:
+				dst = append(dst, v...)
+			default:
+				dst = append(dst, fmt.Sprint(v)...) // exotic fallback
+			}
+
+		case 'd':
+			switch v := arg.(type) {
+			case int:
+				dst = AppendInt(dst, v)
+			case int64:
+				dst = AppendInt(dst, int(v))
+			case int32:
+				dst = AppendInt(dst, int(v))
+			case uint:
+				dst = AppendUint64(dst, uint64(v))
+			case uint64:
+				dst = AppendUint64(dst, v)
+			default:
+				dst = append(dst, fmt.Sprint(v)...)
+			}
+
+		case 'v':
+			// direct passthrough to your existing fast path
+			dst = AppendArgs(dst, []any{arg})
+
+		case 't':
+			switch v := arg.(type) {
+			case bool:
+				dst = AppendBool(dst, v)
+			default:
+				dst = append(dst, fmt.Sprint(v)...)
+			}
+
+		case 'f':
+			switch v := arg.(type) {
+			case float64:
+				dst = strconv.AppendFloat(dst, v, 'f', -1, 64)
+			case float32:
+				dst = strconv.AppendFloat(dst, float64(v), 'f', -1, 32)
+			default:
+				dst = append(dst, fmt.Sprint(v)...)
+			}
+
+		default:
+			// unsupported verb → literal fallback
+			dst = append(dst, '%', format[i])
+		}
+	}
+
+	return dst
+}

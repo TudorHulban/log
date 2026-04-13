@@ -1,12 +1,12 @@
 module github.com/tudorhulban/log
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/phuslu/log v1.0.123
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
-	github.com/tudorhulban/bytearena v0.0.2-0.20260325120135-7c9a1ce7d47e
+	github.com/tudorhulban/bytearena v0.0.12-0.20260412124327-4891dd4ea725
 )
 
 require (

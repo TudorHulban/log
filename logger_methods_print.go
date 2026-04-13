@@ -187,7 +187,7 @@ func (l *Logger) Printf(format string, args ...any) {
 				buf = append(buf, ' ')
 			}
 
-			buf = fmt.Appendf(buf, format, args...)
+			buf = helpers.Appendf(buf, format, args...)
 			buf = append(buf, '\n')
 
 			copy(region.Buf(), buf)

@@ -87,11 +87,17 @@ func (l *Logger) PrintfFast(format string, args ...any) {
 		buf := region.Buf()[:0]
 
 		if l.withJSON {
+			msg := helpers.Appendf(nil, format, args)
+
 			buf = l.appendJSON(
 				buf,
 				l.labelInfo(),
-				format, args...,
+				"",
+				0,
+				string(msg),
 			)
+
+			buf = append(buf, '\n')
 
 			copy(region.Buf(), buf)
 

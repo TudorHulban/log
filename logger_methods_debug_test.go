@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -24,8 +25,9 @@ func TestDebug(t *testing.T) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			Ingestor:    ingestor,
+			LoggerLevel: Level(LevelDEBUG),
+
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 			WithCaller:    true,
 			WithColor:     false, // JSON + color = messy output
@@ -46,25 +48,35 @@ func TestDebug(t *testing.T) {
 	out := writer.String()
 	require.NotEmpty(t, out)
 
+	fmt.Println(out)
+
 	// JSON mode → each log entry is a JSON object on its own line
 	lines := strings.Split(strings.TrimSpace(out), "\n")
-	require.Len(t, lines, 2)
+	require.Len(t, lines, 3)
 
-	// First log: Debug("0")
-	require.Contains(t, lines[0], `"level":"debug"`)
-	require.Contains(t, lines[0], `"msg":"0"`)
+	require.Contains(t,
+		lines[1],
+		`"level":"DEBUG"`,
 
-	// Second log: Debugf("%d", 1)
-	require.Contains(t, lines[1], `"level":"debug"`)
-	require.Contains(t, lines[1], `"msg":"1"`)
+		lines[1],
+	)
+	require.Contains(t, lines[1], `"msg":"0"`)
+
+	require.Contains(t,
+		lines[2],
+		`"level":"DEBUG"`,
+
+		lines[2],
+	)
+	require.Contains(t, lines[2], `"msg":"1"`)
 
 	// Timestamp must exist in both
 	require.Contains(t, lines[0], `"ts":`)
 	require.Contains(t, lines[1], `"ts":`)
 
 	// Caller info must exist if enabled
-	require.Contains(t, lines[0], `"caller":`)
 	require.Contains(t, lines[1], `"caller":`)
+	require.Contains(t, lines[2], `"caller":`)
 }
 
 // Benchmark_Debug-16    	  741261	      1905 ns/op	    5256 B/op	      19 allocs/op

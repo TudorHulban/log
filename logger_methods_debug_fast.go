@@ -19,34 +19,30 @@ func (l *Logger) DebugFast(args ...any) {
 	buf := region.Buf()[:0]
 
 	if l.withJSON {
-		// timestamp
-		if l.fnTimestamp != nil {
-			buf = l.fnTimestamp(buf)
-		}
-
-		// caller info
 		var file string
-		var line int64
+		var line int
 
 		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(1)
+			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+
 			file = fileCaller
-			line = int64(lineCaller)
+			line = lineCaller
 		}
 
-		// JSON append: timestamp, label, caller, args
 		buf = l.appendJSON(
 			buf,
 			l.labelDebug(),
 			file,
 			line,
-			args,
+			string(helpers.AppendArgs(nil, args)),
 		)
 
 		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
+
 		l.ingestor.EndWrite(region)
+
 		return
 	}
 
@@ -72,5 +68,6 @@ func (l *Logger) DebugFast(args ...any) {
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)
+
 	l.ingestor.EndWrite(region)
 }

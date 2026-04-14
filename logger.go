@@ -15,6 +15,7 @@ type Logger struct {
 
 	estimatedMessageSize uint32
 	logLevel             uint8
+	callerLevel          int
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool
@@ -27,6 +28,8 @@ type ParamsNewLogger struct {
 
 	EstimatedMessageSize uint32
 	LoggerLevel          Level
+
+	CallerLevel uint8
 
 	WithCaller bool
 	WithColor  bool
@@ -43,6 +46,8 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		logLevel: convertLevel(params.LoggerLevel),
 
 		withCaller:  params.WithCaller,
+		callerLevel: int(params.CallerLevel),
+
 		fnTimestamp: params.WithTimestamp,
 		withColor:   params.WithColor,
 		withJSON:    params.WithJSON,
@@ -53,6 +58,10 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 
 	if result.estimatedMessageSize == 0 {
 		result.estimatedMessageSize = MessageSmallSize
+	}
+
+	if result.callerLevel == 0 {
+		result.callerLevel = 1
 	}
 
 	result.PrintfFast(

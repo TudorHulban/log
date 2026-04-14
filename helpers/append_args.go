@@ -200,6 +200,7 @@ func ArgsToString(args []any) string {
 	return string(buf)
 }
 
+// Appendf produces a []byte message without allocations.
 func Appendf(dst []byte, format string, args ...any) []byte {
 	ai := 0
 	flen := len(format)

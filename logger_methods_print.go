@@ -92,7 +92,15 @@ func (l *Logger) Printf(format string, args ...any) {
 	var buf []byte
 
 	if l.withJSON {
-		buf = l.appendJSON(buf, l.labelInfo(), format, args...)
+		buf = l.appendJSON(
+			buf,
+			l.labelInfo(),
+			"",
+			0,
+
+			// string(helpers.Appendf(nil, format, args)),
+			string(fmt.Appendf(nil, format, args...)),
+		)
 	} else {
 		if l.fnTimestamp != nil {
 			buf = l.fnTimestamp(buf)

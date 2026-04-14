@@ -119,6 +119,7 @@ func BenchmarkLogger_Printf(b *testing.B) {
 		timestampFunc timestamp.Timestamp
 		description   string
 		withJSON      bool
+		withCaller    bool
 	}{
 		{
 			description:   "1. standard timestamp",
@@ -138,7 +139,13 @@ func BenchmarkLogger_Printf(b *testing.B) {
 			withJSON:      true,
 		},
 		{
-			description: "5. nil timestamp",
+			description:   "5. nano timestamp - json, caller",
+			timestampFunc: timestamp.TimestampNano,
+			withJSON:      true,
+			withCaller:    true,
+		},
+		{
+			description: "6. nil timestamp",
 		},
 	}
 
@@ -158,10 +165,12 @@ func BenchmarkLogger_Printf(b *testing.B) {
 
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
-						Ingestor:      ingestor,
-						LoggerLevel:   Level(LevelINFO),
+						Ingestor:    ingestor,
+						LoggerLevel: Level(LevelINFO),
+
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,
+						WithCaller:    tcase.withCaller,
 					},
 				)
 				require.NoError(b, errCrLogger)

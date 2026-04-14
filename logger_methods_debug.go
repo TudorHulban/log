@@ -21,15 +21,47 @@ func (l *Logger) Debug(args ...any) {
 
 	var buf []byte
 
-	// timestamp
+	if l.withJSON {
+		var file string
+		var line int
+
+		if l.withCaller {
+			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			file = fileCaller
+			line = lineCaller
+		}
+
+		msg := helpers.AppendArgs(nil, args)
+
+		// JSON append: timestamp, label, caller, args
+		buf = l.appendJSON(
+			buf,
+			l.labelDebug(),
+			file,
+			line,
+			string(msg),
+		)
+
+		buf = append(buf, '\n')
+
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+		if errWrite == nil {
+			copy(region.Buf(), buf)
+
+			l.ingestor.EndWrite(region)
+		}
+
+		return
+	}
+
+	// Non‑JSON path
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
-	// caller info
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(1)
+		_, file, line, _ := runtime.Caller(l.callerLevel)
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
@@ -38,15 +70,11 @@ func (l *Logger) Debug(args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	// label
 	buf = append(buf, l.labelDebug()...)
 	buf = append(buf, delim...)
-
-	// args
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
-	// ingestion
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
 	if errWrite == nil {
 		copy(region.Buf(), buf)
@@ -60,15 +88,48 @@ func (l *Logger) Debugf(format string, args ...any) {
 		return
 	}
 
+	// JSON path
+	if l.withJSON {
+		var buf []byte
+
+		var file string
+		var line int
+
+		if l.withCaller {
+			_, fileCaller, lineCaller, _ := runtime.Caller(1)
+			file = fileCaller
+			line = lineCaller
+		}
+
+		buf = l.appendJSON(
+			buf,
+			l.labelDebug(),
+			file,
+			line,
+
+			string((helpers.Appendf(nil, format, args...))),
+		)
+
+		buf = append(buf, '\n')
+
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+		if errWrite == nil {
+			copy(region.Buf(), buf)
+
+			l.ingestor.EndWrite(region)
+		}
+
+		return
+	}
+
+	// Non‑JSON path
 	var buf []byte
 
-	// timestamp
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
-	// caller info
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(1)
 
@@ -79,15 +140,12 @@ func (l *Logger) Debugf(format string, args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	// label
 	buf = append(buf, l.labelDebug()...)
 	buf = append(buf, delim...)
 
-	// formatted message (zero‑alloc)
 	buf = helpers.Appendf(buf, format, args)
 	buf = append(buf, '\n')
 
-	// ingestion
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
 	if errWrite == nil {
 		copy(region.Buf(), buf)

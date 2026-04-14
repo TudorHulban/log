@@ -34,7 +34,7 @@ func (l *Logger) DebugFast(args ...any) {
 			l.labelDebug(),
 			file,
 			line,
-			string(helpers.AppendArgs(nil, args)),
+			(helpers.AppendArgs(nil, args)),
 		)
 
 		buf = append(buf, '\n')

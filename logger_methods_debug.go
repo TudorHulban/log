@@ -31,15 +31,12 @@ func (l *Logger) Debug(args ...any) {
 			line = lineCaller
 		}
 
-		msg := helpers.AppendArgs(nil, args)
-
-		// JSON append: timestamp, label, caller, args
 		buf = l.appendJSON(
 			buf,
 			l.labelDebug(),
 			file,
 			line,
-			string(msg),
+			helpers.AppendArgs(nil, args),
 		)
 
 		buf = append(buf, '\n')
@@ -88,7 +85,6 @@ func (l *Logger) Debugf(format string, args ...any) {
 		return
 	}
 
-	// JSON path
 	if l.withJSON {
 		var buf []byte
 
@@ -106,8 +102,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 			l.labelDebug(),
 			file,
 			line,
-
-			string((helpers.Appendf(nil, format, args...))),
+			helpers.Appendf(nil, format, args...),
 		)
 
 		buf = append(buf, '\n')

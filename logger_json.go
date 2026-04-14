@@ -68,9 +68,30 @@ func appendAny(buf []byte, value any) []byte {
 	}
 }
 
-func appendEscapedJSON(buf []byte, s string) []byte {
-	for i := 0; i < len(s); i++ {
-		switch c := s[i]; c {
+// func appendEscapedJSON(buf []byte, s string) []byte {
+// 	for i := 0; i < len(s); i++ {
+// 		switch c := s[i]; c {
+// 		case '\\':
+// 			buf = append(buf, '\\', '\\')
+// 		case '"':
+// 			buf = append(buf, '\\', '"')
+// 		case '\n':
+// 			buf = append(buf, '\\', 'n')
+// 		case '\r':
+// 			buf = append(buf, '\\', 'r')
+// 		case '\t':
+// 			buf = append(buf, '\\', 't')
+// 		default:
+// 			buf = append(buf, c)
+// 		}
+// 	}
+
+// 	return buf
+// }
+
+func appendEscapedJSON(buf []byte, b []byte) []byte {
+	for i := 0; i < len(b); i++ {
+		switch c := b[i]; c {
 		case '\\':
 			buf = append(buf, '\\', '\\')
 		case '"':
@@ -85,14 +106,13 @@ func appendEscapedJSON(buf []byte, s string) []byte {
 			buf = append(buf, c)
 		}
 	}
-
 	return buf
 }
 
 // appendJSON builds a JSON log entry.
 // `msg` must already be a fully formatted string.
 // Caller info is included only when file != "" and line > 0.
-func (l *Logger) appendJSON(buf []byte, level, file string, line int, msg string) []byte {
+func (l *Logger) appendJSON(buf []byte, level, file string, line int, msg []byte) []byte {
 	buf = append(buf, '{')
 
 	// timestamp

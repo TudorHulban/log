@@ -99,7 +99,7 @@ func (l *Logger) Printf(format string, args ...any) {
 			0,
 
 			// string(helpers.Appendf(nil, format, args)),
-			string(fmt.Appendf(nil, format, args...)),
+			(fmt.Appendf(nil, format, args...)),
 		)
 	} else {
 		if l.fnTimestamp != nil {

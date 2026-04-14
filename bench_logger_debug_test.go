@@ -11,12 +11,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Debugf/1._standard_timestamp-12         	 8762857	       137.6 ns/op	      80 B/op	       3 allocs/op
-// BenchmarkLogger_Debugf/2._yyyy-month_timestamp-12       	 8349907	       140.3 ns/op	      80 B/op	       3 allocs/op
-// BenchmarkLogger_Debugf/3._nano_timestamp-12             	 7462010	       160.1 ns/op	      80 B/op	       3 allocs/op
-// BenchmarkLogger_Debugf/4._nano_timestamp_-_json-12      	 5490399	       220.6 ns/op	     120 B/op	       5 allocs/op
-// BenchmarkLogger_Debugf/5._nano_timestamp_-_json,_caller-12         	 2058727	       584.8 ns/op	     496 B/op	       8 allocs/op
-// BenchmarkLogger_Debugf/6._nil_timestamp-12                         	15195619	        80.61 ns/op	      32 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/1._standard_timestamp-12         	 8808216	       138.3 ns/op	      80 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/2._yyyy-month_timestamp-12       	 8670583	       138.3 ns/op	      80 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/3._nano_timestamp-12             	 7410902	       160.6 ns/op	      80 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/4._nano_timestamp_-_json-12      	 5635876	       214.9 ns/op	     120 B/op	       5 allocs/op
+// BenchmarkLogger_Debugf/5._nano_timestamp_-_json,_caller-12         	 2087293	       577.3 ns/op	     496 B/op	       8 allocs/op
+// BenchmarkLogger_Debugf/6._nil_timestamp-12                         	15543352	        79.14 ns/op	      32 B/op	       3 allocs/op
 func BenchmarkLogger_Debugf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp

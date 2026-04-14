@@ -209,6 +209,7 @@ func Appendf(dst []byte, format string, args ...any) []byte {
 
 		if c != '%' {
 			dst = append(dst, c)
+
 			continue
 		}
 
@@ -216,6 +217,7 @@ func Appendf(dst []byte, format string, args ...any) []byte {
 		if i+1 < flen && format[i+1] == '%' {
 			dst = append(dst, '%')
 			i++
+
 			continue
 		}
 
@@ -224,12 +226,14 @@ func Appendf(dst []byte, format string, args ...any) []byte {
 		if i >= flen {
 			// malformed trailing '%'
 			dst = append(dst, '%')
+
 			break
 		}
 
 		if ai >= len(args) {
 			// no argument provided
 			dst = append(dst, '%', format[i])
+
 			continue
 		}
 

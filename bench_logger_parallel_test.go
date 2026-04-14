@@ -10,42 +10,8 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
-
-// BenchmarkLogger_Print-16    	19233896	        63.44 ns/op	      24 B/op	       2 allocs/op
-func BenchmarkLogger_Print(b *testing.B) {
-	ingestor, errCrIngestor := bytearena.NewIngestor(
-		bytearena.Size100K(),
-		&helpers.NoopWriter{},
-	)
-	require.NoError(b, errCrIngestor)
-	require.NotNil(b, ingestor)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	chIngestionEnd := ingestor.StartIngestion(ctx)
-
-	logger, errCrLogger := NewLogger(
-		&ParamsNewLogger{
-			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelINFO),
-		},
-	)
-	require.NoError(b, errCrLogger)
-	require.NotNil(b, logger)
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		logger.Print("hi", 123, "world")
-	}
-
-	cancel()
-	<-chIngestionEnd
-}
-
-// BenchmarkLogger_PrintWithNoTimestamp-16    	30770088	        39.77 ns/op	       0 B/op	       0 allocs/op
-func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
+// BenchmarkLogger_Parallel_PrintRaw-16    	22106994	        56.75 ns/op	       0 B/op	       0 allocs/op
+func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 	var writer helpers.NoopWriter
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
@@ -64,57 +30,31 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
 
+	b.SetParallelism(1)
 	b.ReportAllocs()
 	b.ResetTimer()
 
-	for b.Loop() {
-		logger.PrintWithNoTimestampFast("hi", 123, "world")
-	}
-
-	cancel()
-	<-chIngestionEnd
-}
-
-// BenchmarkLogger_PrintRaw-16    	70315348	        16.87 ns/op	       0 B/op	       0 allocs/op
-func BenchmarkLogger_PrintRaw(b *testing.B) {
-	var writer helpers.NoopWriter
-
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
-	require.NoError(b, errCrIngestor)
-	require.NotNil(b, ingestor)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	chIngestionEnd := ingestor.StartIngestion(ctx)
-
-	logger, errCrLogger := NewLogger(
-		&ParamsNewLogger{
-			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelINFO),
+	b.RunParallel(
+		func(pb *testing.PB) {
+			for pb.Next() {
+				logger.PrintRaw([]byte("xxxxxxxxxxxxxxxxxxx"))
+			}
 		},
 	)
-	require.NoError(b, errCrLogger)
-	require.NotNil(b, logger)
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		logger.PrintRaw(
-			[]byte("xxxxxxxxxxxxxxxxxxx"),
-		)
-	}
 
 	cancel()
 	<-chIngestionEnd
 }
+
+// go test -run '^$' -bench '^BenchmarkLogger_Parallel_Printf$' -benchmem -race
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Printf/1._standard_timestamp-16         	 6013597	       203.5 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/2._yyyy-month_timestamp-16       	 5959220	       202.0 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/3._nano_timestamp-16             	 5376099	       223.3 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/4._nano_timestamp_-_json-16      	 3799242	       315.9 ns/op	     240 B/op	       5 allocs/op
-// BenchmarkLogger_Printf/5._nil_timestamp-16              	 9080132	       132.8 ns/op	      72 B/op	       2 allocs/op
-func BenchmarkLogger_Printf(b *testing.B) {
+// BenchmarkLogger_Parallel_Printf/1._standard_timestamp-16         	17041684	        74.35 ns/op	     112 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Printf/2._yyyy-month_timestamp-16       	16036966	        74.37 ns/op	     112 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Printf/3._nano_timestamp-16             	15739663	        75.68 ns/op	     112 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Printf/4._nano_timestamp_-_json-16      	12146430	        99.75 ns/op	     240 B/op	       5 allocs/op
+// BenchmarkLogger_Parallel_Printf/5._nil_timestamp-16              	18202852	        66.88 ns/op	      72 B/op	       2 allocs/op
+func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
 		description   string
@@ -167,15 +107,20 @@ func BenchmarkLogger_Printf(b *testing.B) {
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
 
+				b.SetParallelism(1)
 				b.ReportAllocs()
 				b.ResetTimer()
 
-				for i := 0; b.Loop(); i++ {
-					logger.Printf(
-						`{"level":"info","msg":"user login","user_id":%d}`,
-						i,
-					)
-				}
+				b.RunParallel(func(pb *testing.PB) {
+					i := 0
+					for pb.Next() {
+						logger.Printf(
+							`{"level":"info","msg":"user login","user_id":%d}`,
+							i,
+						)
+						i++
+					}
+				})
 
 				cancel()
 				<-chIngestionEnd
@@ -185,12 +130,12 @@ func BenchmarkLogger_Printf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_PrintFast/1._standard_timestamp-16         	19161618	        61.47 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/2._yyyy-month_timestamp-16       	18268606	        63.50 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/3._nano_timestamp-16             	17402479	        66.70 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/4._nano_timestamp_-_json-16      	17916865	        67.46 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/5._nil_timestamp-16              	23356777	        50.03 ns/op	       8 B/op	       1 allocs/op
-func BenchmarkLogger_PrintFast(b *testing.B) {
+// BenchmarkLogger_Parallel_PrintfFast/1._standard_timestamp-16         	21208875	        58.62 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/2._yyyy-month_timestamp-16       	20666210	        58.79 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/3._nano_timestamp-16             	20455646	        58.64 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/4._nano_timestamp_-_json-16      	20126348	        58.80 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/5._nil_timestamp-16              	20683252	        59.20 ns/op	       8 B/op	       0 allocs/op
+func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
 		description   string
@@ -243,15 +188,20 @@ func BenchmarkLogger_PrintFast(b *testing.B) {
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
 
+				b.SetParallelism(1)
 				b.ReportAllocs()
 				b.ResetTimer()
 
-				for i := 0; b.Loop(); i++ {
-					logger.PrintFast(
-						`{"level":"info","msg":"user login","user_id":%d}`,
-						i,
-					)
-				}
+				b.RunParallel(func(pb *testing.PB) {
+					i := 0
+					for pb.Next() {
+						logger.PrintfFast(
+							`{"level":"info","msg":"user login","user_id":%d}`,
+							i,
+						)
+						i++
+					}
+				})
 
 				cancel()
 				<-chIngestionEnd

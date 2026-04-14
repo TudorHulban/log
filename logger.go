@@ -55,7 +55,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		result.estimatedMessageSize = MessageSmallSize
 	}
 
-	result.Printf(
+	result.PrintfFast(
 		"created logger, level %v",
 		logLevels[params.LoggerLevel],
 	)

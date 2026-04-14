@@ -36,7 +36,7 @@ func TestLogger_Print(t *testing.T) {
 
 	payload := "xxx"
 
-	l.Print(payload)
+	l.PrintFast(payload)
 
 	cancel()
 	<-chIngestionEnd
@@ -69,7 +69,7 @@ func TestLogger_NoTimestampPrint(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	l.PrintWithNoTimestamp("hi", 123, "world")
+	l.PrintWithNoTimestampFast("hi", 123, "world")
 
 	cancel()
 	<-chIngestionEnd
@@ -103,11 +103,11 @@ func TestLogger_NanoPrint(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	go l.PrintMessage("xxx1")
-	go l.PrintMessage("xxx2")
-	go l.PrintMessage("xxx3")
+	go l.PrintMessageFast("xxx1")
+	go l.PrintMessageFast("xxx2")
+	go l.PrintMessageFast("xxx3")
 
-	l.Printw(
+	l.PrintwFast(
 		"message:",
 		[]string{
 			"x1",
@@ -148,11 +148,11 @@ func TestLogger_YYYYPrint(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	go l.PrintMessage("xxx1")
-	go l.PrintMessage("xxx2")
-	go l.PrintMessage("xxx3")
+	go l.PrintMessageFast("xxx1")
+	go l.PrintMessageFast("xxx2")
+	go l.PrintMessageFast("xxx3")
 
-	l.Printw(
+	l.PrintwFast(
 		"message:",
 		[]string{
 			"x1",
@@ -198,7 +198,7 @@ func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 
 	payload := "xxx"
 
-	l.Printf("%s", payload)
+	l.PrintfFast("%s", payload)
 
 	cancel()
 	<-chIngestionEnd
@@ -236,7 +236,7 @@ func TestLogger_JSON_Print_No_Timestamp(t *testing.T) {
 
 	payload := "xxx"
 
-	l.Printf("%s", payload)
+	l.PrintfFast("%s", payload)
 
 	cancel()
 	<-chIngestionEnd

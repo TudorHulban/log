@@ -11,12 +11,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Debugf/1._standard_timestamp-16         	 3771642	       324.0 ns/op	     134 B/op	       6 allocs/op
-// BenchmarkLogger_Debugf/2._yyyy-month_timestamp-16       	 3736538	       330.1 ns/op	     134 B/op	       6 allocs/op
-// BenchmarkLogger_Debugf/3._nano_timestamp-16             	 3522434	       343.5 ns/op	     133 B/op	       6 allocs/op
-// BenchmarkLogger_Debugf/4._nano_timestamp_-_json-16      	 4975443	       242.9 ns/op	     136 B/op	       6 allocs/op
-// BenchmarkLogger_Debugf/5._nano_timestamp_-_json-16      	 5024364	       242.1 ns/op	     136 B/op	       6 allocs/op
-// BenchmarkLogger_Debugf/6._nil_timestamp-16              	 4602891	       281.1 ns/op	     111 B/op	       6 allocs/op
+// BenchmarkLogger_Debugf/1._standard_timestamp-12         	 8762857	       137.6 ns/op	      80 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/2._yyyy-month_timestamp-12       	 8349907	       140.3 ns/op	      80 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/3._nano_timestamp-12             	 7462010	       160.1 ns/op	      80 B/op	       3 allocs/op
+// BenchmarkLogger_Debugf/4._nano_timestamp_-_json-12      	 5490399	       220.6 ns/op	     120 B/op	       5 allocs/op
+// BenchmarkLogger_Debugf/5._nano_timestamp_-_json,_caller-12         	 2058727	       584.8 ns/op	     496 B/op	       8 allocs/op
+// BenchmarkLogger_Debugf/6._nil_timestamp-12                         	15195619	        80.61 ns/op	      32 B/op	       3 allocs/op
 func BenchmarkLogger_Debugf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -42,7 +42,7 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 			withJSON:      true,
 		},
 		{
-			description:   "5. nano timestamp - json",
+			description:   "5. nano timestamp - json, caller",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
 			withCaller:    true,
@@ -72,6 +72,7 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 						LoggerLevel:   Level(LevelDEBUG),
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,
+						WithCaller:    tcase.withCaller,
 					},
 				)
 				require.NoError(b, errCrLogger)

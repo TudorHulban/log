@@ -109,11 +109,12 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Printf/1._standard_timestamp-16         	 6013597	       203.5 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/2._yyyy-month_timestamp-16       	 5959220	       202.0 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/3._nano_timestamp-16             	 5376099	       223.3 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/4._nano_timestamp_-_json-16      	 3799242	       315.9 ns/op	     240 B/op	       5 allocs/op
-// BenchmarkLogger_Printf/5._nil_timestamp-16              	 9080132	       132.8 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Printf/1._standard_timestamp-12         	 5646418	       212.6 ns/op	     112 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/2._yyyy-month_timestamp-12       	 5671552	       213.4 ns/op	     112 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/3._nano_timestamp-12             	 5158227	       232.0 ns/op	     112 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/4._nano_timestamp_-_json-12      	 2741593	       440.9 ns/op	     368 B/op	       7 allocs/op
+// BenchmarkLogger_Printf/5._nano_timestamp_-_json,_caller-12         	 2815629	       426.8 ns/op	     368 B/op	       7 allocs/op
+// BenchmarkLogger_Printf/6._nil_timestamp-12                         	 8653663	       140.1 ns/op	      72 B/op	       2 allocs/op
 func BenchmarkLogger_Printf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp

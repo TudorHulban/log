@@ -143,7 +143,10 @@ func (l *Logger) Debugf(format string, args ...any) {
 	buf = append(buf, l.labelDebug()...)
 	buf = append(buf, delim...)
 
-	buf = helpers.Appendf(buf, format, args)
+	// Without ..., Go wraps the entire []any slice as a single any argument.
+	// Inside Appendf, the case 'd': type-switch doesn't match []any,
+	// so it falls through to fmt.Sprint(v) — that is 2 extra allocs (fmt's internal buffer + the result string).
+	buf = helpers.Appendf(buf, format, args...)
 	buf = append(buf, '\n')
 
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))

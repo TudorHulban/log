@@ -7,3 +7,5 @@ const (
 	MessageLargeSize  uint32 = 2048
 	MessageExtraLarge uint32 = 4096
 )
+
+const delim = ": "

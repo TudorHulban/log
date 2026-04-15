@@ -20,7 +20,7 @@ type Logger struct {
 	estimatedMessageSizeError   uint32
 
 	callerLevel int
-	logLevel    uint8
+	logLevel    Level
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool

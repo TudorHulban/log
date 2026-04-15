@@ -21,8 +21,8 @@ func TestLevelsMatrix(t *testing.T) {
 
 	tests := []tc{
 		{
-			description: "1. DEBUG threshold → all levels emitted",
-			level:       Level(LevelDEBUG),
+			description: "1. DEBUG threshold → DEBUG, INFO, WARN, ERROR, PRINT emitted",
+			level:       LevelDEBUG,
 			shouldSee: map[string]string{
 				"dbg": `"level":"DEBUG"`,
 				"inf": `"level":"INFO"`,
@@ -33,8 +33,8 @@ func TestLevelsMatrix(t *testing.T) {
 			shouldSkip: nil,
 		},
 		{
-			description: "2. INFO threshold → DEBUG suppressed",
-			level:       Level(LevelINFO),
+			description: "2. INFO threshold → INFO, WARN, ERROR, PRINT emitted; DEBUG suppressed",
+			level:       LevelINFO,
 			shouldSee: map[string]string{
 				"inf": `"level":"INFO"`,
 				"wrn": `"level":"WARN"`,
@@ -44,8 +44,8 @@ func TestLevelsMatrix(t *testing.T) {
 			shouldSkip: []string{"dbg"},
 		},
 		{
-			description: "3. WARN threshold → DEBUG, INFO suppressed",
-			level:       Level(LevelWARN),
+			description: "3. WARN threshold → WARN, ERROR, PRINT emitted; DEBUG, INFO suppressed",
+			level:       LevelWARN,
 			shouldSee: map[string]string{
 				"wrn": `"level":"WARN"`,
 				"err": `"level":"ERROR"`,
@@ -54,8 +54,8 @@ func TestLevelsMatrix(t *testing.T) {
 			shouldSkip: []string{"dbg", "inf"},
 		},
 		{
-			description: "4. ERROR threshold → DEBUG, INFO, WARN suppressed",
-			level:       Level(LevelERROR),
+			description: "4. ERROR threshold → ERROR, PRINT emitted; DEBUG, INFO, WARN suppressed",
+			level:       LevelERROR,
 			shouldSee: map[string]string{
 				"err": `"level":"ERROR"`,
 				"prt": `"level":"PRINT"`,
@@ -63,8 +63,8 @@ func TestLevelsMatrix(t *testing.T) {
 			shouldSkip: []string{"dbg", "inf", "wrn"},
 		},
 		{
-			description: "5. PRINT threshold → only PRINT emitted",
-			level:       Level(LevelNONE),
+			description: "5. NONE threshold → only PRINT emitted",
+			level:       LevelNONE,
 			shouldSee: map[string]string{
 				"prt": `"level":"PRINT"`,
 			},
@@ -126,6 +126,7 @@ func TestLevelsMatrix(t *testing.T) {
 							strings.Contains(ln, `"ts":`) &&
 							strings.Contains(ln, `"caller":`) {
 							found = true
+
 							break
 						}
 					}
@@ -133,9 +134,10 @@ func TestLevelsMatrix(t *testing.T) {
 					require.True(t,
 						found,
 
-						"expected to see msg=%s level=%s",
+						"expected to see msg=%s level=%s in\n%s",
 						msg,
 						lvl,
+						out,
 					)
 				}
 

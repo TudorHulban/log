@@ -9,7 +9,7 @@ func (l Logger) labelDebug() string {
 }
 
 func (l *Logger) Debug(args ...any) {
-	if l.logLevel < LevelDEBUG {
+	if l.logLevel > LevelDEBUG || l.logLevel == LevelNONE {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Debug(args ...any) {
 }
 
 func (l *Logger) Debugf(format string, args ...any) {
-	if l.logLevel < LevelDEBUG {
+	if l.logLevel > LevelDEBUG || l.logLevel == LevelNONE {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 }
 
 func (l *Logger) Debugw(msg string, keysAndValues ...any) {
-	if l.logLevel < LevelDEBUG {
+	if l.logLevel > LevelDEBUG || l.logLevel == LevelNONE {
 		return
 	}
 
@@ -39,7 +39,7 @@ func (l *Logger) Debugw(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) DebugFast(args ...any) {
-	if l.logLevel < LevelDEBUG {
+	if l.logLevel > LevelDEBUG || l.logLevel == LevelNONE {
 		return
 	}
 

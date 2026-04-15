@@ -1,9 +1,9 @@
 package log
 
-func (l *Logger) GetLogLevel() uint8 {
+func (l *Logger) GetLogLevel() Level {
 	return l.logLevel
 }
 
-func (l *Logger) SetLogLevel(level uint8) {
+func (l *Logger) SetLogLevel(level Level) {
 	l.logLevel = level
 }

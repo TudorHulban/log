@@ -15,6 +15,14 @@ import (
 // PrintRaw is always safe.
 // The caller owns the buffer and the reservation is sized to match.
 
+func (l Logger) labelPrint() string {
+	if l.withColor {
+		return colorDebug(logLevels[l.GetLogLevel()])
+	}
+
+	return logLevels[l.GetLogLevel()]
+}
+
 func (l *Logger) PrintMessage(msg string) {
 	var buf []byte
 
@@ -35,22 +43,9 @@ func (l *Logger) PrintMessage(msg string) {
 }
 
 func (l *Logger) Print(args ...any) {
-	var buf []byte
-
-	if l.fnTimestamp != nil {
-		buf = l.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
-
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-	if errWrite == nil {
-		copy(region.Buf(), buf)
-
-		l.ingestor.EndWrite(region)
-	}
+	l.logWithLabel(
+		l.labelPrint(), args...,
+	)
 }
 
 func (l *Logger) PrintWithNoTimestamp(args ...any) {

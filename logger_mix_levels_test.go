@@ -11,6 +11,19 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
+// PRINT is not a severity level. It is always emitted regardless of the
+// configured logLevel, but its *label* is inherited from the current
+// threshold. This means:
+//
+//   logLevel = DEBUG → PRINT entries use "DEBUG"
+//   logLevel = INFO  → PRINT entries use "INFO"
+//   logLevel = WARN  → PRINT entries use "WARN"
+//   logLevel = ERROR → PRINT entries use "ERROR"
+//   logLevel = NONE  → PRINT entries use "NONE"
+//
+// PRINT therefore bypasses filtering, but does not have its own label.
+// Tests must assert the inherited label, not "PRINT".
+
 func TestLevelsMatrix(t *testing.T) {
 	type tc struct {
 		description string
@@ -28,7 +41,7 @@ func TestLevelsMatrix(t *testing.T) {
 				"inf": `"level":"INFO"`,
 				"wrn": `"level":"WARN"`,
 				"err": `"level":"ERROR"`,
-				"prt": `"level":"PRINT"`,
+				"prt": `"level":"` + logLevels[LevelDEBUG] + `"`,
 			},
 			shouldSkip: nil,
 		},
@@ -39,7 +52,7 @@ func TestLevelsMatrix(t *testing.T) {
 				"inf": `"level":"INFO"`,
 				"wrn": `"level":"WARN"`,
 				"err": `"level":"ERROR"`,
-				"prt": `"level":"PRINT"`,
+				"prt": `"level":"` + logLevels[LevelINFO] + `"`,
 			},
 			shouldSkip: []string{"dbg"},
 		},
@@ -49,7 +62,7 @@ func TestLevelsMatrix(t *testing.T) {
 			shouldSee: map[string]string{
 				"wrn": `"level":"WARN"`,
 				"err": `"level":"ERROR"`,
-				"prt": `"level":"PRINT"`,
+				"prt": `"level":"` + logLevels[LevelWARN] + `"`,
 			},
 			shouldSkip: []string{"dbg", "inf"},
 		},
@@ -58,7 +71,7 @@ func TestLevelsMatrix(t *testing.T) {
 			level:       LevelERROR,
 			shouldSee: map[string]string{
 				"err": `"level":"ERROR"`,
-				"prt": `"level":"PRINT"`,
+				"prt": `"level":"` + logLevels[LevelERROR] + `"`,
 			},
 			shouldSkip: []string{"dbg", "inf", "wrn"},
 		},
@@ -66,7 +79,7 @@ func TestLevelsMatrix(t *testing.T) {
 			description: "5. NONE threshold → only PRINT emitted",
 			level:       LevelNONE,
 			shouldSee: map[string]string{
-				"prt": `"level":"PRINT"`,
+				"prt": `"level":"` + logLevels[LevelNONE] + `"`,
 			},
 			shouldSkip: []string{"dbg", "inf", "wrn", "err"},
 		},
@@ -147,8 +160,9 @@ func TestLevelsMatrix(t *testing.T) {
 						require.NotContains(t,
 							ln,
 
-							`"msg":"`+msg+`"`, "msg=%s must be suppressed",
+							`"msg":"`+msg+`"`, "msg=%s must be suppressed from\n%s",
 							msg,
+							out,
 						)
 					}
 				}

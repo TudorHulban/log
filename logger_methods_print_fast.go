@@ -94,7 +94,7 @@ func (l *Logger) PrintfFast(format string, args ...any) {
 				l.labelInfo(),
 				"",
 				0,
-				(msg),
+				msg,
 			)
 
 			buf = append(buf, '\n')

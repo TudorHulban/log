@@ -109,12 +109,11 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Printf/1._standard_timestamp-12         	 5646418	       212.6 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/2._yyyy-month_timestamp-12       	 5671552	       213.4 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/3._nano_timestamp-12             	 5158227	       232.0 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/4._nano_timestamp_-_json-12      	 2741593	       440.9 ns/op	     368 B/op	       7 allocs/op
-// BenchmarkLogger_Printf/5._nano_timestamp_-_json,_caller-12         	 2815629	       426.8 ns/op	     368 B/op	       7 allocs/op
-// BenchmarkLogger_Printf/6._nil_timestamp-12                         	 8653663	       140.1 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Printf/1.nil_timestamp-16         	 9420816	       130.3 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Printf/2.standard_timestamp-16    	 5771464	       210.5 ns/op	     200 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/3.yyyy-month_timestamp-16  	 5723036	       210.7 ns/op	     200 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/4.nano_timestamp-16        	 5187085	       232.3 ns/op	     200 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/5.nano_timestamp_-_json-16 	 3347700	       360.8 ns/op	     360 B/op	       4 allocs/op
 func BenchmarkLogger_Printf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -123,30 +122,24 @@ func BenchmarkLogger_Printf(b *testing.B) {
 		withCaller    bool
 	}{
 		{
-			description:   "1. standard timestamp",
+			description: "1.nil timestamp",
+		},
+		{
+			description:   "2.standard timestamp",
 			timestampFunc: timestamp.TimestampStandard,
 		},
 		{
-			description:   "2. yyyy-month timestamp",
+			description:   "3.yyyy-month timestamp",
 			timestampFunc: timestamp.TimestampYYYYMonth,
 		},
 		{
-			description:   "3. nano timestamp",
+			description:   "4.nano timestamp",
 			timestampFunc: timestamp.TimestampNano,
 		},
 		{
-			description:   "4. nano timestamp - json",
-			timestampFunc: timestamp.TimestampNano,
-			withJSON:      true,
-		},
-		{
-			description:   "5. nano timestamp - json, caller",
+			description:   "5.nano timestamp - json",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
-			withCaller:    true,
-		},
-		{
-			description: "6. nil timestamp",
 		},
 	}
 

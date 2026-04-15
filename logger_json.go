@@ -112,37 +112,37 @@ func appendEscapedJSON(buf []byte, b []byte) []byte {
 // appendJSON builds a JSON log entry.
 // `msg` must already be a fully formatted string.
 // Caller info is included only when file != "" and line > 0.
-func (l *Logger) appendJSON(buf []byte, level, file string, line int, msg []byte) []byte {
-	buf = append(buf, '{')
+func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []byte) []byte {
+	buffer = append(buffer, '{')
 
 	// timestamp
 	if l.fnTimestamp != nil {
-		buf = append(buf, `"ts":"`...)
-		buf = l.fnTimestamp(buf)
-		buf = append(buf, `",`...)
+		buffer = append(buffer, `"ts":"`...)
+		buffer = l.fnTimestamp(buffer)
+		buffer = append(buffer, `",`...)
 	}
 
 	// level
-	buf = append(buf, `"level":"`...)
-	buf = append(buf, level...)
-	buf = append(buf, `",`...)
+	buffer = append(buffer, `"level":"`...)
+	buffer = append(buffer, level...)
+	buffer = append(buffer, `",`...)
 
 	// caller info
 	if len(file) > 0 && line > 0 {
-		buf = append(buf, `"caller":"`...)
-		buf = append(buf, file...)
-		buf = append(buf, `","line":`...)
-		buf = helpers.AppendInt(buf, line)
-		buf = append(buf, ',')
+		buffer = append(buffer, `"caller":"`...)
+		buffer = append(buffer, file...)
+		buffer = append(buffer, `","line":`...)
+		buffer = helpers.AppendInt(buffer, line)
+		buffer = append(buffer, ',')
 
 	}
 
 	// message
-	buf = append(buf, `"msg":"`...)
-	buf = appendEscapedJSON(buf, msg)
-	buf = append(buf, `"}`...)
+	buffer = append(buffer, `"msg":"`...)
+	buffer = appendEscapedJSON(buffer, msg)
+	buffer = append(buffer, `"}`...)
 
-	return buf
+	return buffer
 }
 
 // Formats

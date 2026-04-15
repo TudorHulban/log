@@ -86,10 +86,10 @@ func (l *Logger) Debugf(format string, args ...any) {
 	}
 
 	if l.withJSON {
-		var buf []byte
-
 		var file string
 		var line int
+
+		buf := make([]byte, 0, _PreallocationJSON)
 
 		if l.withCaller {
 			_, fileCaller, lineCaller, _ := runtime.Caller(1)
@@ -118,7 +118,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 	}
 
 	// Non‑JSON path
-	var buf []byte
+	buf := make([]byte, 0, _PreallocationBuffer)
 
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)

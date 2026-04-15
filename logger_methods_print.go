@@ -89,19 +89,26 @@ func (l *Logger) Printw(msg string, args ...any) {
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	var buf []byte
-
 	if l.withJSON {
+		buf := make([]byte, 0, _PreallocationJSON)
+
 		buf = l.appendJSON(
 			buf,
 			l.labelInfo(),
 			"",
 			0,
-
-			// string(helpers.Appendf(nil, format, args)),
-			(fmt.Appendf(nil, format, args...)),
+			fmt.Appendf(nil, format, args...),
 		)
+
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
+		if errWrite == nil {
+			copy(region.Buf(), buf)
+
+			l.ingestor.EndWrite(region)
+		}
 	} else {
+		buf := make([]byte, 0, _PreallocationBuffer)
+
 		if l.fnTimestamp != nil {
 			buf = l.fnTimestamp(buf)
 			buf = append(buf, ' ')
@@ -109,13 +116,13 @@ func (l *Logger) Printf(format string, args ...any) {
 
 		buf = fmt.Appendf(buf, format, args...)
 		buf = append(buf, '\n')
-	}
 
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-	if errWrite == nil {
-		copy(region.Buf(), buf)
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
+		if errWrite == nil {
+			copy(region.Buf(), buf)
 
-		l.ingestor.EndWrite(region)
+			l.ingestor.EndWrite(region)
+		}
 	}
 }
 

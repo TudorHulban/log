@@ -1,6 +1,11 @@
 package log
 
 const (
+	_PreallocationBuffer = 64
+	_PreallocationJSON   = 96
+)
+
+const (
 	MessageSmallSize  uint32 = 256
 	MessageMediumSize uint32 = 512
 	MessageJSONSize   uint32 = 768

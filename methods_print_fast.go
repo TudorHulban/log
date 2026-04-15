@@ -9,7 +9,7 @@ import "github.com/tudorhulban/log/helpers"
 //   Use when throughput matters and message size is predictable.
 
 func (l *Logger) PrintFast(args ...any) {
-	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSizeOverall)
 	if errWrite == nil {
 		buf := region.Buf()[:0]
 
@@ -28,7 +28,7 @@ func (l *Logger) PrintFast(args ...any) {
 }
 
 func (l *Logger) PrintMessageFast(msg string) {
-	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSizeOverall)
 	if errWrite == nil {
 		buf := region.Buf()[:0]
 
@@ -47,7 +47,7 @@ func (l *Logger) PrintMessageFast(msg string) {
 }
 
 func (l *Logger) PrintWithNoTimestampFast(args ...any) {
-	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSizeOverall)
 	if errWrite == nil {
 		buf := region.Buf()[:0]
 
@@ -61,7 +61,7 @@ func (l *Logger) PrintWithNoTimestampFast(args ...any) {
 }
 
 func (l *Logger) PrintwFast(msg string, args ...any) {
-	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSizeOverall)
 	if errWrite == nil {
 		buf := region.Buf()[:0]
 
@@ -82,7 +82,7 @@ func (l *Logger) PrintwFast(msg string, args ...any) {
 }
 
 func (l *Logger) PrintfFast(format string, args ...any) {
-	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSize)
+	region, errWrite := l.ingestor.TryWrite(l.estimatedMessageSizeOverall)
 	if errWrite == nil {
 		buf := region.Buf()[:0]
 

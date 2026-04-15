@@ -1,97 +1,12 @@
 package log
 
 import (
-	"strconv"
-
 	"github.com/tudorhulban/log/helpers"
 )
 
-func appendMsg(buf []byte, format string, args ...any) []byte {
-	argIdx := 0
-	position := 0
-
-	for ix := 0; ix < len(format); ix++ {
-		if format[ix] == '%' && ix+1 < len(format) {
-			// flush literal segment safely
-			if position < ix {
-				buf = appendJSONString(buf, format[position:ix])
-			}
-
-			ix++
-
-			switch format[ix] {
-			case 's':
-				buf = appendJSONString(buf, args[argIdx].(string))
-
-			case 'd':
-				buf = strconv.AppendInt(buf, int64(args[argIdx].(int)), 10)
-
-			case 'v':
-				buf = appendAny(buf, args[argIdx])
-
-			default:
-				buf = append(buf, '%', format[ix])
-			}
-
-			argIdx++
-			position = ix + 1
-		}
-	}
-
-	// flush remaining literal
-	if position < len(format) {
-		buf = appendJSONString(buf, format[position:])
-	}
-
-	return buf
-}
-
-func appendAny(buf []byte, value any) []byte {
-	switch x := value.(type) {
-	case string:
-		return appendJSONString(buf, x)
-
-	case int:
-		return strconv.AppendInt(buf, int64(x), 10)
-
-	case int64:
-		return strconv.AppendInt(buf, x, 10)
-
-	case bool:
-		return strconv.AppendBool(buf, x)
-
-	case float64:
-		return strconv.AppendFloat(buf, x, 'f', -1, 64)
-
-	default:
-		return append(buf, "<unsupported>"...)
-	}
-}
-
-// func appendEscapedJSON(buf []byte, s string) []byte {
-// 	for i := 0; i < len(s); i++ {
-// 		switch c := s[i]; c {
-// 		case '\\':
-// 			buf = append(buf, '\\', '\\')
-// 		case '"':
-// 			buf = append(buf, '\\', '"')
-// 		case '\n':
-// 			buf = append(buf, '\\', 'n')
-// 		case '\r':
-// 			buf = append(buf, '\\', 'r')
-// 		case '\t':
-// 			buf = append(buf, '\\', 't')
-// 		default:
-// 			buf = append(buf, c)
-// 		}
-// 	}
-
-// 	return buf
-// }
-
 func appendEscapedJSON(buf []byte, b []byte) []byte {
-	for i := 0; i < len(b); i++ {
-		switch c := b[i]; c {
+	for ix := range b {
+		switch c := b[ix]; c {
 		case '\\':
 			buf = append(buf, '\\', '\\')
 		case '"':
@@ -106,6 +21,7 @@ func appendEscapedJSON(buf []byte, b []byte) []byte {
 			buf = append(buf, c)
 		}
 	}
+
 	return buf
 }
 
@@ -134,7 +50,6 @@ func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []b
 		buffer = append(buffer, `","line":`...)
 		buffer = helpers.AppendInt(buffer, line)
 		buffer = append(buffer, ',')
-
 	}
 
 	// message

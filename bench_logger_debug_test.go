@@ -97,12 +97,12 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_DebugFast/1.nil_timestamp-16         	23713419	        50.90 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_DebugFast/2.standard_timestamp-16    	19907048	        61.56 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_DebugFast/3.yyyy-month_timestamp-16  	19084339	        61.72 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_DebugFast/4.nano_timestamp-16        	18180298	        65.93 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_DebugFast/5.nano_timestamp_-_json-16 	15345548	        79.88 ns/op	      14 B/op	       1 allocs/op
-// BenchmarkLogger_DebugFast/6.nano_-_json,_caller-16   	 7599511	       158.8 ns/op	      73 B/op	       1 allocs/op
+// BenchmarkLogger_DebugFast/1.nil_timestamp-16         	22843332	        53.04 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_DebugFast/2.standard_timestamp-16    	19039914	        64.34 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_DebugFast/3.yyyy-month_timestamp-16  	18960468	        64.87 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_DebugFast/4.nano_timestamp-16        	17616594	        68.71 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_DebugFast/5.nano_timestamp_-_json-16 	14479726	        83.08 ns/op	      14 B/op	       1 allocs/op
+// BenchmarkLogger_DebugFast/6.nano_-_json,_caller-16   	 7473280	       162.5 ns/op	      75 B/op	       1 allocs/op
 func BenchmarkLogger_DebugFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp

@@ -11,12 +11,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_DebugFast/1.nil_timestamp-16         	21176649	        58.51 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/2.standard_timestamp-16    	20562205	        58.57 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/3.yyyy-month_timestamp-16  	20149448	        58.52 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/4.nano_timestamp-16        	20375785	        58.87 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/5.nano_timestamp_-_json-16 	20627494	        58.77 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/6.nano_-_json,_caller-16   	20285047	        59.43 ns/op	       9 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/1.nil_timestamp-16         	20935722	        58.98 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/2.standard_timestamp-16    	20320483	        59.29 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/3.yyyy-month_timestamp-16  	19997485	        59.22 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/4.nano_timestamp-16        	20287327	        59.34 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/5.nano_timestamp_-_json-16 	20216437	        59.43 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/6.nano_-_json,_caller-16   	19846812	        60.27 ns/op	       9 B/op	       1 allocs/op
 func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp

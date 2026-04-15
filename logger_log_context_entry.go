@@ -81,7 +81,7 @@ func (e *Entry) Print(args ...any) {
 	cfg := e.formatter.cfg.Load()
 	logger := e.formatter.logger
 
-	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSize)
+	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSizeOverall)
 	if errWrite != nil {
 		entryPool.Put(e)
 

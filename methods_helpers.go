@@ -6,24 +6,18 @@ import (
 	"github.com/tudorhulban/log/helpers"
 )
 
-func (l Logger) labelDebug() string {
-	if l.withColor {
-		return colorDebug(logLevels[LevelDEBUG])
-	} else {
-		return logLevels[LevelDEBUG]
-	}
-}
-
-func (l *Logger) Debug(args ...any) {
+func (l *Logger) logWithLabel(label string, args ...any) {
 	if l.logLevel < LevelDEBUG {
 		return
 	}
 
-	var buf []byte
-
 	if l.withJSON {
-		var file string
-		var line int
+		var (
+			file string
+			line int
+		)
+
+		buf := make([]byte, 0, _PreallocationJSON)
 
 		if l.withCaller {
 			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
@@ -33,7 +27,7 @@ func (l *Logger) Debug(args ...any) {
 
 		buf = l.appendJSON(
 			buf,
-			l.labelDebug(),
+			label,
 			file,
 			line,
 			helpers.AppendArgs(nil, args),
@@ -41,76 +35,9 @@ func (l *Logger) Debug(args ...any) {
 
 		buf = append(buf, '\n')
 
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
 		if errWrite == nil {
 			copy(region.Buf(), buf)
-
-			l.ingestor.EndWrite(region)
-		}
-
-		return
-	}
-
-	// Non‑JSON path
-	if l.fnTimestamp != nil {
-		buf = l.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
-
-	if l.withCaller {
-		_, file, line, _ := runtime.Caller(l.callerLevel)
-
-		buf = append(buf, file...)
-		buf = append(buf, ' ')
-		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = helpers.AppendInt(buf, line)
-		buf = append(buf, ' ')
-	}
-
-	buf = append(buf, l.labelDebug()...)
-	buf = append(buf, delim...)
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
-	if errWrite == nil {
-		copy(region.Buf(), buf)
-
-		l.ingestor.EndWrite(region)
-	}
-}
-
-func (l *Logger) Debugf(format string, args ...any) {
-	if l.logLevel < LevelDEBUG {
-		return
-	}
-
-	if l.withJSON {
-		var file string
-		var line int
-
-		buf := make([]byte, 0, _PreallocationJSON)
-
-		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(1)
-			file = fileCaller
-			line = lineCaller
-		}
-
-		buf = l.appendJSON(
-			buf,
-			l.labelDebug(),
-			file,
-			line,
-			helpers.Appendf(nil, format, args...),
-		)
-
-		buf = append(buf, '\n')
-
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
-		if errWrite == nil {
-			copy(region.Buf(), buf)
-
 			l.ingestor.EndWrite(region)
 		}
 
@@ -126,7 +53,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 	}
 
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(1)
+		_, file, line, _ := runtime.Caller(l.callerLevel)
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
@@ -135,16 +62,12 @@ func (l *Logger) Debugf(format string, args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	buf = append(buf, l.labelDebug()...)
+	buf = append(buf, label...)
 	buf = append(buf, delim...)
-
-	// Without ..., Go wraps the entire []any slice as a single any argument.
-	// Inside Appendf, the case 'd': type-switch doesn't match []any,
-	// so it falls through to fmt.Sprint(v) — that is 2 extra allocs (fmt's internal buffer + the result string).
-	buf = helpers.Appendf(buf, format, args...)
+	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
 	if errWrite == nil {
 		copy(region.Buf(), buf)
 
@@ -152,12 +75,81 @@ func (l *Logger) Debugf(format string, args ...any) {
 	}
 }
 
-func (l *Logger) Debugw(msg string, keysAndValues ...any) {
+func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 	if l.logLevel < LevelDEBUG {
 		return
 	}
 
-	var buf []byte
+	if l.withJSON {
+		var (
+			file string
+			line int
+		)
+
+		buf := make([]byte, 0, _PreallocationJSON)
+
+		if l.withCaller {
+			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			file = fileCaller
+			line = lineCaller
+		}
+
+		buf = l.appendJSON(
+			buf,
+			label,
+			file,
+			line,
+			helpers.Appendf(nil, format, args...),
+		)
+
+		buf = append(buf, '\n')
+
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
+		if errWrite == nil {
+			copy(region.Buf(), buf)
+			l.ingestor.EndWrite(region)
+		}
+
+		return
+	}
+
+	// Non‑JSON path
+	buf := make([]byte, 0, _PreallocationBuffer)
+
+	if l.fnTimestamp != nil {
+		buf = l.fnTimestamp(buf)
+		buf = append(buf, ' ')
+	}
+
+	if l.withCaller {
+		_, file, line, _ := runtime.Caller(l.callerLevel)
+
+		buf = append(buf, file...)
+		buf = append(buf, ' ')
+		buf = append(buf, 'L', 'i', 'n', 'e')
+		buf = helpers.AppendInt(buf, line)
+		buf = append(buf, ' ')
+	}
+
+	buf = append(buf, label...)
+	buf = append(buf, delim...)
+	buf = helpers.Appendf(buf, format, args...)
+	buf = append(buf, '\n')
+
+	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
+	if errWrite == nil {
+		copy(region.Buf(), buf)
+
+		l.ingestor.EndWrite(region)
+	}
+}
+
+func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
+	if l.logLevel < LevelDEBUG {
+		return
+	}
+
+	buf := make([]byte, 0, _PreallocationBuffer)
 
 	// timestamp
 	if l.fnTimestamp != nil {
@@ -169,9 +161,9 @@ func (l *Logger) Debugw(msg string, keysAndValues ...any) {
 	buf = append(buf, msg...)
 	buf = append(buf, '\n')
 
-	// caller info
+	// caller
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(1)
+		_, file, line, _ := runtime.Caller(l.callerLevel)
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
@@ -181,7 +173,7 @@ func (l *Logger) Debugw(msg string, keysAndValues ...any) {
 	}
 
 	// label
-	buf = append(buf, l.labelDebug()...)
+	buf = append(buf, label...)
 	buf = append(buf, delim...)
 
 	// structured key/value pairs
@@ -189,9 +181,10 @@ func (l *Logger) Debugw(msg string, keysAndValues ...any) {
 	buf = append(buf, '\n')
 
 	// ingestion
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf)))
+	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
 	if errWrite == nil {
 		copy(region.Buf(), buf)
+
 		l.ingestor.EndWrite(region)
 	}
 }

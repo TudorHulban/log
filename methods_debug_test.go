@@ -127,7 +127,7 @@ func Benchmark_Debug_Fast(b *testing.B) {
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 			WithJSON:      true,
 
-			EstimatedMessageSize: MessageLargeSize,
+			EstimatedMessageSizeOverall: MessageLargeSize,
 		},
 	)
 	require.NoError(b, errCrLogger)

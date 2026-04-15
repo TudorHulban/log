@@ -147,7 +147,7 @@ func (ctx *LogContext) Reset() {
 func (ctx *LogContext) Print(args ...any) {
 	cfg := ctx.cfg.Load() // atomic read
 
-	region, err := ctx.logger.ingestor.TryWrite(ctx.logger.estimatedMessageSize)
+	region, err := ctx.logger.ingestor.TryWrite(ctx.logger.estimatedMessageSizeOverall)
 	if err != nil {
 		return
 	}

@@ -10,12 +10,14 @@ import (
 type Level uint8
 
 type Logger struct {
-	ingestor    *bytearena.Ingestor
 	fnTimestamp timestamp.Timestamp
+	ingestor    *bytearena.Ingestor
 
-	estimatedMessageSize uint32
-	logLevel             uint8
-	callerLevel          int
+	estimatedMessageSizeOverall uint32
+	estimatedMessageSizeDebug   uint32
+
+	callerLevel int
+	logLevel    uint8
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool
@@ -26,8 +28,9 @@ type ParamsNewLogger struct {
 	Ingestor      *bytearena.Ingestor
 	WithTimestamp timestamp.Timestamp
 
-	EstimatedMessageSize uint32
-	LoggerLevel          Level
+	EstimatedMessageSizeOverall uint32
+	EstimatedMessageSizeDebug   uint32
+	LoggerLevel                 Level
 
 	CallerLevel uint8
 
@@ -52,12 +55,18 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		withColor:   params.WithColor,
 		withJSON:    params.WithJSON,
 
-		ingestor:             params.Ingestor,
-		estimatedMessageSize: params.EstimatedMessageSize,
+		ingestor: params.Ingestor,
+
+		estimatedMessageSizeOverall: params.EstimatedMessageSizeOverall,
+		estimatedMessageSizeDebug:   params.EstimatedMessageSizeDebug,
 	}
 
-	if result.estimatedMessageSize == 0 {
-		result.estimatedMessageSize = MessageSmallSize
+	if result.estimatedMessageSizeOverall == 0 {
+		result.estimatedMessageSizeOverall = MessageSmallSize
+	}
+
+	if result.estimatedMessageSizeDebug == 0 {
+		result.estimatedMessageSizeDebug = result.estimatedMessageSizeOverall
 	}
 
 	if result.callerLevel == 0 {

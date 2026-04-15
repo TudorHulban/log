@@ -7,10 +7,6 @@ import (
 )
 
 func (l *Logger) logWithLabel(label string, args ...any) {
-	if l.logLevel < LevelDEBUG {
-		return
-	}
-
 	if l.withJSON {
 		var (
 			file string
@@ -76,10 +72,6 @@ func (l *Logger) logWithLabel(label string, args ...any) {
 }
 
 func (l *Logger) logfWithLabel(label string, format string, args ...any) {
-	if l.logLevel < LevelDEBUG {
-		return
-	}
-
 	if l.withJSON {
 		var (
 			file string
@@ -145,10 +137,6 @@ func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 }
 
 func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
-	if l.logLevel < LevelDEBUG {
-		return
-	}
-
 	buf := make([]byte, 0, _PreallocationBuffer)
 
 	// timestamp

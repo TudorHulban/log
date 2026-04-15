@@ -14,7 +14,10 @@ type Logger struct {
 	ingestor    *bytearena.Ingestor
 
 	estimatedMessageSizeOverall uint32
+	estimatedMessageSizeInfo    uint32
+	estimatedMessageSizeWarn    uint32
 	estimatedMessageSizeDebug   uint32
+	estimatedMessageSizeError   uint32
 
 	callerLevel int
 	logLevel    uint8
@@ -29,7 +32,10 @@ type ParamsNewLogger struct {
 	WithTimestamp timestamp.Timestamp
 
 	EstimatedMessageSizeOverall uint32
+	EstimatedMessageSizeInfo    uint32
+	EstimatedMessageSizeWarn    uint32
 	EstimatedMessageSizeDebug   uint32
+	EstimatedMessageSizeError   uint32
 	LoggerLevel                 Level
 
 	CallerLevel uint8
@@ -65,9 +71,16 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		result.estimatedMessageSizeOverall = MessageSmallSize
 	}
 
-	if result.estimatedMessageSizeDebug == 0 {
-		result.estimatedMessageSizeDebug = result.estimatedMessageSizeOverall
+	setEstimatedIfZero := func(value *uint32) {
+		if *value == 0 {
+			*value = result.estimatedMessageSizeOverall
+		}
 	}
+
+	setEstimatedIfZero(&result.estimatedMessageSizeInfo)
+	setEstimatedIfZero(&result.estimatedMessageSizeWarn)
+	setEstimatedIfZero(&result.estimatedMessageSizeDebug)
+	setEstimatedIfZero(&result.estimatedMessageSizeError)
 
 	if result.callerLevel == 0 {
 		result.callerLevel = 1
@@ -80,12 +93,4 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 
 	return &result,
 		nil
-}
-
-func (l *Logger) labelInfo() string {
-	if l.withColor {
-		return colorInfo(logLevels[LevelINFO])
-	} else { //nolint:revive
-		return logLevels[LevelINFO]
-	}
 }

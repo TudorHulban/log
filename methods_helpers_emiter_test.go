@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
@@ -49,7 +48,7 @@ func TestEmitData(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	var totals uint32 = 3
+	var totals uint32 = 30
 
 	data, errCrData := createEmitData(
 		totals,
@@ -58,8 +57,6 @@ func TestEmitData(t *testing.T) {
 	)
 	require.NoError(t, errCrData)
 	require.NotNil(t, data)
-
-	fmt.Println(data.StringVerbose())
 
 	require.Empty(t,
 		emitData(

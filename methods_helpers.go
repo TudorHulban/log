@@ -137,19 +137,50 @@ func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 }
 
 func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
+	if l.withJSON {
+		var (
+			file string
+			line int
+		)
+
+		buf := make([]byte, 0, _PreallocationJSON)
+
+		if l.withCaller {
+			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			file = fileCaller
+			line = lineCaller
+		}
+
+		buf = l.appendJSON(
+			buf,
+			label,
+			file,
+			line,
+			helpers.AppendArgs(nil, append([]any{msg}, keysAndValues...)),
+		)
+
+		buf = append(buf, '\n')
+
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
+		if errWrite == nil {
+			copy(region.Buf(), buf)
+			l.ingestor.EndWrite(region)
+		}
+
+		return
+	}
+
+	// Non‑JSON path
 	buf := make([]byte, 0, _PreallocationBuffer)
 
-	// timestamp
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
-	// message
 	buf = append(buf, msg...)
 	buf = append(buf, '\n')
 
-	// caller
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(l.callerLevel)
 
@@ -160,15 +191,12 @@ func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
 		buf = append(buf, ' ')
 	}
 
-	// label
 	buf = append(buf, label...)
 	buf = append(buf, delim...)
 
-	// structured key/value pairs
 	buf = helpers.AppendArgs(buf, keysAndValues)
 	buf = append(buf, '\n')
 
-	// ingestion
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
 	if errWrite == nil {
 		copy(region.Buf(), buf)

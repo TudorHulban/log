@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 )
 
 type message struct {
@@ -12,9 +13,10 @@ type message struct {
 }
 
 type state struct {
-	invariants map[Level]*uint32
-	dictionary map[string]message // all requests
-	prints     *uint32
+	invariants   map[Level]*uint32
+	dictionary   map[string]message // all requests
+	muDictionary sync.Mutex
+	prints       *uint32
 
 	totals uint32
 }
@@ -61,12 +63,16 @@ func (s *state) stringVerbose(verbose bool) string {
 	// dictionary summary
 	received := 0
 	byLevel := make(map[Level]uint32)
+
+	s.muDictionary.Lock()
 	for _, msg := range s.dictionary {
 		if msg.wasReceived {
 			received++
 		}
 		byLevel[msg.level]++
 	}
+	s.muDictionary.Unlock()
+
 	sb.WriteString("  dict: {\n")
 	fmt.Fprintf(&sb, "    total: %d,\n", len(s.dictionary))
 	fmt.Fprintf(&sb, "    received: %d,\n", received)
@@ -206,15 +212,21 @@ func emitData(data *state, logger *Logger) []error {
 	var idx uint32
 
 	// Deterministic iteration: map order is randomized in Go
+	data.muDictionary.Lock()
 	ids := make([]string, 0, len(data.dictionary))
 	for id := range data.dictionary {
 		ids = append(ids, id)
 	}
+	data.muDictionary.Unlock()
+
 	sort.Strings(ids)
 
 	for _, id := range ids {
 		idx++
+
+		data.muDictionary.Lock()
 		lvl := data.dictionary[id].level
+		data.muDictionary.Unlock()
 
 		var call func() error
 		var method string

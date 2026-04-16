@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
@@ -25,7 +26,21 @@ func TestCreateEmitData(t *testing.T) {
 }
 
 func TestEmitData(t *testing.T) {
-	writer := os.Stdout
+	var totals uint32 = 300
+
+	data, errCrData := createEmitData(
+		totals,
+		map[Level]*uint32{},
+		new(0),
+	)
+	require.NoError(t, errCrData)
+	require.NotNil(t, data)
+
+	writer := newTrackingWriter(
+		os.Stdout,
+		// io.Discard,
+		data,
+	)
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
@@ -48,15 +63,7 @@ func TestEmitData(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	var totals uint32 = 30
-
-	data, errCrData := createEmitData(
-		totals,
-		map[Level]*uint32{},
-		new(0),
-	)
-	require.NoError(t, errCrData)
-	require.NotNil(t, data)
+	time.Sleep(10 * time.Millisecond) // warm up
 
 	require.Empty(t,
 		emitData(
@@ -67,4 +74,8 @@ func TestEmitData(t *testing.T) {
 
 	cancel()
 	<-chIngestionEnd
+
+	require.Zero(t,
+		writer.UnreceivedCount(),
+	)
 }

@@ -7,8 +7,6 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-type Level uint8
-
 type Logger struct {
 	fnTimestamp timestamp.Timestamp
 	ingestor    *bytearena.Ingestor

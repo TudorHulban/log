@@ -11,12 +11,12 @@ import "unsafe"
 // Writes directly into the backing array.
 //
 // No worst‑case over‑allocation.
-func appendJSONString(buf []byte, formatting string) []byte {
+func appendJSONString(buf []byte, input string) []byte {
 	writeIndex := len(buf)
 
 	// Grow capacity only, without changing length
 	if cap(buf)-len(buf) < 8 {
-		newBuf := make([]byte, len(buf), len(buf)+len(formatting)+8)
+		newBuf := make([]byte, len(buf), len(buf)+len(input)+8)
 
 		copy(newBuf, buf)
 		buf = newBuf
@@ -24,8 +24,8 @@ func appendJSONString(buf []byte, formatting string) []byte {
 
 	backingArray := unsafe.Slice(unsafe.SliceData(buf), cap(buf))
 
-	for ix := 0; ix < len(formatting); ix++ {
-		c := formatting[ix]
+	for ix := 0; ix < len(input); ix++ {
+		c := input[ix]
 
 		if c != '\\' && c != '"' && c != '\n' && c != '\r' && c != '\t' {
 			if writeIndex == cap(buf) {

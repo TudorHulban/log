@@ -1,0 +1,316 @@
+package log
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+type message struct {
+	level       Level
+	wasReceived bool
+}
+
+type state struct {
+	invariants map[Level]*uint32
+	dictionary map[string]message // all requests
+	prints     *uint32
+
+	totals uint32
+}
+
+func (s *state) String() string {
+	return s.stringVerbose(false)
+}
+
+func (s *state) StringVerbose() string {
+	return s.stringVerbose(true)
+}
+
+func (s *state) stringVerbose(verbose bool) string {
+	var sb strings.Builder
+
+	sb.WriteString("state{\n")
+
+	// totals
+	fmt.Fprintf(&sb, "  totals: %d,\n", s.totals)
+
+	// prints
+	if s.prints != nil {
+		fmt.Fprintf(&sb, "  prints: %d,\n", *s.prints)
+	} else {
+		fmt.Fprintf(&sb, "  prints: <nil>,\n")
+	}
+
+	// invariants
+	sb.WriteString("  invariants: [")
+	first := true
+	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
+		if !first {
+			sb.WriteString(" ")
+		}
+		first = false
+		if cnt, ok := s.invariants[lvl]; ok && cnt != nil {
+			fmt.Fprintf(&sb, "%s:%d", lvl.String(), *cnt)
+		} else {
+			fmt.Fprintf(&sb, "%s:*", lvl.String())
+		}
+	}
+	sb.WriteString("],\n")
+
+	// dictionary summary
+	received := 0
+	byLevel := make(map[Level]uint32)
+	for _, msg := range s.dictionary {
+		if msg.wasReceived {
+			received++
+		}
+		byLevel[msg.level]++
+	}
+	sb.WriteString("  dict: {\n")
+	fmt.Fprintf(&sb, "    total: %d,\n", len(s.dictionary))
+	fmt.Fprintf(&sb, "    received: %d,\n", received)
+	sb.WriteString("    byLevel: [")
+	vFirst := true
+
+	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
+		if !vFirst {
+			sb.WriteString(" ")
+		}
+		vFirst = false
+		fmt.Fprintf(&sb, "%s:%d", lvl.String(), byLevel[lvl])
+	}
+	sb.WriteString("]\n")
+	sb.WriteString("  }")
+
+	// entries (always show in verbose, optionally in concise)
+	if verbose || len(s.dictionary) <= 5 {
+		sb.WriteString(",\n  entries: [")
+		ids := make([]string, 0, len(s.dictionary))
+		for id := range s.dictionary {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+		for _, id := range ids {
+			msg := s.dictionary[id]
+			rcv := ""
+			if msg.wasReceived {
+				rcv = " ✓"
+			}
+			fmt.Fprintf(&sb, "\n    %s: %s%s", id, msg.level.String(), rcv)
+		}
+		sb.WriteString("\n  ]")
+	}
+
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
+
+func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*state, error) {
+	// Minimal validation: reserved must not exceed total
+	var reserved uint32
+
+	for _, cnt := range invariants {
+		if cnt != nil {
+			reserved = reserved + *cnt
+		}
+	}
+	if prints != nil {
+		reserved = reserved + uint32(*prints)
+	}
+
+	if reserved > total {
+		return nil,
+			fmt.Errorf("reserved (%d) > total (%d)", reserved, total)
+	}
+
+	// Collect flexible levels: nil invariants, skip LevelNONE if prints is fixed
+	var flexible []Level
+
+	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
+		if lvl == LevelNONE && prints != nil {
+			continue
+		}
+
+		if invariants[lvl] == nil {
+			flexible = append(flexible, lvl)
+		}
+	}
+
+	// Build dictionary with exactly `total` entries
+	dictionary := make(map[string]message, total)
+	var reqID uint32
+
+	// Assign fixed invariant levels
+	for lvl, cnt := range invariants {
+		if cnt != nil {
+			for i := uint32(0); i < *cnt; i++ {
+				dictionary[fmt.Sprintf("req-%d", reqID)] =
+					message{
+						level:       lvl,
+						wasReceived: false,
+					}
+
+				reqID++
+			}
+		}
+	}
+
+	// Assign PRINT (LevelNONE) messages
+	if prints != nil {
+		for i := uint32(0); i < uint32(*prints); i++ {
+			dictionary[fmt.Sprintf("req-%d", reqID)] = message{level: LevelNONE, wasReceived: false}
+
+			reqID++
+		}
+	}
+
+	// Distribute remaining via round-robin to flexible levels
+	remaining := total - reqID
+
+	if len(flexible) > 0 && remaining > 0 {
+		for i := range remaining {
+			lvl := flexible[i%uint32(len(flexible))]
+
+			dictionary[fmt.Sprintf("req-%d", reqID)] =
+				message{
+					level:       lvl,
+					wasReceived: false,
+				}
+
+			reqID++
+		}
+	}
+
+	// Initialize state prints pointer
+	var statePrints *uint32
+
+	if prints != nil {
+		v := uint32(*prints)
+		statePrints = &v
+	}
+
+	return &state{
+			invariants: invariants,
+			dictionary: dictionary,
+			prints:     statePrints,
+			totals:     total,
+		},
+		nil
+}
+
+func emitData(data *state, logger *Logger) []error {
+	var errs []error
+	consecFails := make(map[string]int)
+	var idx uint32
+
+	// Deterministic iteration: map order is randomized in Go
+	ids := make([]string, 0, len(data.dictionary))
+	for id := range data.dictionary {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+
+	for _, id := range ids {
+		idx++
+		lvl := data.dictionary[id].level
+
+		var call func() error
+		var method string
+
+		switch lvl {
+		case LevelDEBUG:
+			switch idx % 4 {
+			case 0:
+				call, method = func() error { logger.Debug(id); return nil }, "Debug"
+			case 1:
+				call, method = func() error { logger.DebugFast(id); return nil }, "DebugFast"
+			case 2:
+				call, method = func() error { logger.Debugf("%s", id); return nil }, "Debugf"
+			case 3:
+				call, method = func() error { logger.Debugw(id); return nil }, "Debugw"
+			}
+
+		case LevelINFO:
+			switch idx % 4 {
+			case 0:
+				call, method = func() error { logger.Info(id); return nil }, "Info"
+			case 1:
+				call, method = func() error { logger.InfoFast(id); return nil }, "InfoFast"
+			case 2:
+				call, method = func() error { logger.Infof("%s", id); return nil }, "Infof"
+			case 3:
+				call, method = func() error { logger.Infow(id); return nil }, "Infow"
+			}
+
+		case LevelWARN:
+			switch idx % 4 {
+			case 0:
+				call, method = func() error { logger.Warn(id); return nil }, "Warn"
+			case 1:
+				call, method = func() error { logger.WarnFast(id); return nil }, "WarnFast"
+			case 2:
+				call, method = func() error { logger.Warnf("%s", id); return nil }, "Warnf"
+			case 3:
+				call, method = func() error { logger.Warnw(id); return nil }, "Warnw"
+			}
+
+		case LevelERROR:
+			switch idx % 4 {
+			case 0:
+				call, method = func() error { logger.Error(id); return nil }, "Error"
+			case 1:
+				call, method = func() error { logger.ErrorFast(id); return nil }, "ErrorFast"
+			case 2:
+				call, method = func() error { logger.Errorf("%s", id); return nil }, "Errorf"
+			case 3:
+				call, method = func() error { logger.Errorw(id); return nil }, "Errorw"
+			}
+
+		case LevelNONE: // PRINT variants (11 total)
+			switch idx % 11 {
+			case 0:
+				call, method = func() error { logger.Print(id); return nil }, "Print"
+			case 1:
+				call, method = func() error { logger.PrintFast(id); return nil }, "PrintFast"
+			case 2:
+				call, method = func() error { logger.Printf("%s", id); return nil }, "Printf"
+			case 3:
+				call, method = func() error { logger.PrintfFast("%s", id); return nil }, "PrintfFast"
+			case 4:
+				call, method = func() error { logger.Printw(id); return nil }, "Printw"
+			case 5:
+				call, method = func() error { logger.PrintwFast(id); return nil }, "PrintwFast"
+			case 6:
+				call, method = func() error { logger.PrintMessage(id); return nil }, "PrintMessage"
+			case 7:
+				call, method = func() error { logger.PrintMessageFast(id); return nil }, "PrintMessageFast"
+			case 8:
+				call, method = func() error { logger.PrintRaw([]byte(id)); return nil }, "PrintRaw"
+			case 9:
+				call, method = func() error { logger.PrintWithNoTimestamp(id); return nil }, "PrintWithNoTimestamp"
+			case 10:
+				call, method = func() error { logger.PrintWithNoTimestampFast(id); return nil }, "PrintWithNoTimestampFast"
+			}
+
+		// Fallback for undefined levels (TRACE, FATAL, PANIC, etc.)
+		default:
+			call, method = func() error { logger.Debug(id); return nil }, "DebugFallback"
+		}
+
+		// Execute and track errors
+		if err := call(); err != nil {
+			errs = append(errs, fmt.Errorf("%s(%q): %w", method, id, err))
+			consecFails[method]++
+
+			if consecFails[method] >= 2 {
+				return errs // Abort on 2 consecutive failures for this method
+			}
+		} else {
+			consecFails[method] = 0 // Reset on success
+		}
+	}
+
+	return errs
+}

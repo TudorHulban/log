@@ -1,5 +1,7 @@
 package log
 
+import "fmt"
+
 /*
 LOG LEVEL TRUTH TABLE
 ---------------------
@@ -27,6 +29,8 @@ Legend:
     NO  → log entry is suppressed
 */
 
+type Level uint8
+
 const (
 	LevelNONE  Level = 0 // no logs except PRINT
 	LevelDEBUG Level = 1 // everything logs
@@ -34,6 +38,23 @@ const (
 	LevelWARN  Level = 3 // suppress DEBUG, INFO
 	LevelERROR Level = 4 // suppress DEBUG, INFO, WARN
 )
+
+func (l Level) String() string {
+	switch l {
+	case LevelNONE:
+		return "NONE"
+	case LevelDEBUG:
+		return "DEBUG"
+	case LevelINFO:
+		return "INFO"
+	case LevelWARN:
+		return "WARN"
+	case LevelERROR:
+		return "ERROR"
+	default:
+		return fmt.Sprintf("Level(%d)", l)
+	}
+}
 
 var logLevels = [5]string{
 	"NONE",  // 0

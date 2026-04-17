@@ -50,7 +50,7 @@ func (s *state) stringVerbose(verbose bool) string {
 
 	first := true
 
-	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
+	for lvl := LevelTrace; lvl <= LevelPanic; lvl++ {
 		if !first {
 			sb.WriteString(" ")
 		}
@@ -87,7 +87,7 @@ func (s *state) stringVerbose(verbose bool) string {
 
 	vFirst := true
 
-	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
+	for lvl := LevelTrace; lvl <= LevelPanic; lvl++ {
 		if !vFirst {
 			sb.WriteString(" ")
 		}
@@ -159,8 +159,8 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 	// Collect flexible levels: nil invariants, skip LevelNONE if prints is fixed
 	var flexible []Level
 
-	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
-		if lvl == LevelNONE && prints != nil {
+	for lvl := LevelTrace; lvl <= LevelPanic; lvl++ {
+		if lvl == LevelPanic && prints != nil {
 			continue
 		}
 
@@ -192,7 +192,11 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 	// Assign PRINT (LevelNONE) messages
 	if prints != nil {
 		for i := uint32(0); i < uint32(*prints); i++ { //nolint:gosec
-			dictionary[fmt.Sprintf("req-%d", reqID)] = message{level: LevelNONE, wasReceived: false}
+			dictionary[fmt.Sprintf("req-%d", reqID)] =
+				message{
+					level:       LevelPanic,
+					wasReceived: false,
+				}
 
 			reqID++
 		}
@@ -314,7 +318,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 				call, method = func() error { logger.Errorw(id); return nil }, "Errorw"
 			}
 
-		case LevelNONE: // PRINT variants (11 total)
+		case LevelPanic: // PRINT variants (11 total)
 			switch idx % 11 {
 			case 0:
 				call, method = func() error { logger.Print(id); return nil }, "Print"

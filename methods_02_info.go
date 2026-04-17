@@ -9,7 +9,7 @@ func (l *Logger) labelInfo() string {
 }
 
 func (l *Logger) Info(args ...any) {
-	if l.logLevel > LevelINFO || l.logLevel == LevelNONE {
+	if l.logLevel > LevelINFO || l.logLevel == LevelPanic {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Info(args ...any) {
 }
 
 func (l *Logger) Infof(format string, args ...any) {
-	if l.logLevel > LevelINFO || l.logLevel == LevelNONE {
+	if l.logLevel > LevelINFO || l.logLevel == LevelPanic {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Infof(format string, args ...any) {
 }
 
 func (l *Logger) Infow(msg string, keysAndValues ...any) {
-	if l.logLevel > LevelINFO || l.logLevel == LevelNONE {
+	if l.logLevel > LevelINFO || l.logLevel == LevelPanic {
 		return
 	}
 
@@ -39,7 +39,7 @@ func (l *Logger) Infow(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) InfoFast(args ...any) {
-	if l.logLevel > LevelINFO || l.logLevel == LevelNONE {
+	if l.logLevel > LevelINFO || l.logLevel == LevelPanic {
 		return
 	}
 

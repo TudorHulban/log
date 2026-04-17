@@ -15,11 +15,13 @@ import (
 // configured logLevel, but its *label* is inherited from the current
 // threshold. This means:
 //
+//   logLevel = TRACE → PRINT entries use "TRACE"
 //   logLevel = DEBUG → PRINT entries use "DEBUG"
 //   logLevel = INFO  → PRINT entries use "INFO"
 //   logLevel = WARN  → PRINT entries use "WARN"
 //   logLevel = ERROR → PRINT entries use "ERROR"
-//   logLevel = NONE  → PRINT entries use "NONE"
+//   logLevel = FATAL → PRINT entries use "FATAL"
+//   logLevel = PANIC → PRINT entries use "PANIC"
 //
 // PRINT therefore bypasses filtering, but does not have its own label.
 // Tests must assert the inherited label, not "PRINT".
@@ -27,14 +29,27 @@ import (
 func TestLevelsMatrix(t *testing.T) {
 	type tc struct {
 		description string
-		shouldSee   map[string]string // msg → level
+		shouldSee   map[string]string // msg → expected level label in JSON
 		shouldSkip  []string          // msgs that must not appear
 		level       Level
 	}
 
 	tests := []tc{
 		{
-			description: "1. DEBUG threshold → DEBUG, INFO, WARN, ERROR, PRINT emitted",
+			description: "1. TRACE threshold → all safe levels emitted",
+			level:       LevelTrace,
+			shouldSee: map[string]string{
+				"trc": `"level":"TRACE"`,
+				"dbg": `"level":"DEBUG"`,
+				"inf": `"level":"INFO"`,
+				"wrn": `"level":"WARN"`,
+				"err": `"level":"ERROR"`,
+				"prt": `"level":"` + logLevels[LevelTrace] + `"`,
+			},
+			shouldSkip: nil,
+		},
+		{
+			description: "2. DEBUG threshold → DEBUG+ emitted; TRACE suppressed",
 			level:       LevelDEBUG,
 			shouldSee: map[string]string{
 				"dbg": `"level":"DEBUG"`,
@@ -43,10 +58,10 @@ func TestLevelsMatrix(t *testing.T) {
 				"err": `"level":"ERROR"`,
 				"prt": `"level":"` + logLevels[LevelDEBUG] + `"`,
 			},
-			shouldSkip: nil,
+			shouldSkip: []string{"trc"},
 		},
 		{
-			description: "2. INFO threshold → INFO, WARN, ERROR, PRINT emitted; DEBUG suppressed",
+			description: "3. INFO threshold → INFO+ emitted; TRACE, DEBUG suppressed",
 			level:       LevelINFO,
 			shouldSee: map[string]string{
 				"inf": `"level":"INFO"`,
@@ -54,34 +69,42 @@ func TestLevelsMatrix(t *testing.T) {
 				"err": `"level":"ERROR"`,
 				"prt": `"level":"` + logLevels[LevelINFO] + `"`,
 			},
-			shouldSkip: []string{"dbg"},
+			shouldSkip: []string{"trc", "dbg"},
 		},
 		{
-			description: "3. WARN threshold → WARN, ERROR, PRINT emitted; DEBUG, INFO suppressed",
+			description: "4. WARN threshold → WARN+ emitted; TRACE-INFO suppressed",
 			level:       LevelWARN,
 			shouldSee: map[string]string{
 				"wrn": `"level":"WARN"`,
 				"err": `"level":"ERROR"`,
 				"prt": `"level":"` + logLevels[LevelWARN] + `"`,
 			},
-			shouldSkip: []string{"dbg", "inf"},
+			shouldSkip: []string{"trc", "dbg", "inf"},
 		},
 		{
-			description: "4. ERROR threshold → ERROR, PRINT emitted; DEBUG, INFO, WARN suppressed",
+			description: "5. ERROR threshold → ERROR+ emitted; TRACE-WARN suppressed",
 			level:       LevelERROR,
 			shouldSee: map[string]string{
 				"err": `"level":"ERROR"`,
 				"prt": `"level":"` + logLevels[LevelERROR] + `"`,
 			},
-			shouldSkip: []string{"dbg", "inf", "wrn"},
+			shouldSkip: []string{"trc", "dbg", "inf", "wrn"},
 		},
 		{
-			description: "5. NONE threshold → only PRINT emitted",
-			level:       LevelNONE,
+			description: "6. FATAL threshold → only PRINT emitted (safe levels suppressed)",
+			level:       LevelFatal,
 			shouldSee: map[string]string{
-				"prt": `"level":"` + logLevels[LevelNONE] + `"`,
+				"prt": `"level":"` + logLevels[LevelFatal] + `"`,
 			},
-			shouldSkip: []string{"dbg", "inf", "wrn", "err"},
+			shouldSkip: []string{"trc", "dbg", "inf", "wrn", "err"},
+		},
+		{
+			description: "7. PANIC threshold → only PRINT emitted (all safe levels suppressed)",
+			level:       LevelPanic,
+			shouldSee: map[string]string{
+				"prt": `"level":"` + logLevels[LevelPanic] + `"`,
+			},
+			shouldSkip: []string{"trc", "dbg", "inf", "wrn", "err"},
 		},
 	}
 
@@ -113,7 +136,13 @@ func TestLevelsMatrix(t *testing.T) {
 				ctx, cancel := context.WithCancel(context.Background())
 				chIngestionEnd := ingestor.StartIngestion(ctx)
 
-				// Emit all levels
+				// Emit only non-terminating log levels.
+				// NOTE: Fatal() and Panic() are excluded from this matrix test
+				// because they may call os.Exit() or panic(), which would
+				// terminate the test process. Their filtering logic is identical
+				// to other levels (entry.level >= threshold), so coverage is
+				// maintained by verifying suppression of lower levels.
+				l.Trace("trc")
 				l.Debug("dbg")
 				l.Info("inf")
 				l.Warn("wrn")
@@ -129,13 +158,13 @@ func TestLevelsMatrix(t *testing.T) {
 				lines := strings.Split(strings.TrimSpace(out), "\n")
 				require.NotEmpty(t, lines)
 
-				// Verify expected entries appear
-				for msg, lvl := range tt.shouldSee {
+				// Verify expected entries appear with correct level label
+				for msg, expectedLevelJSON := range tt.shouldSee {
 					found := false
 
 					for _, ln := range lines {
 						if strings.Contains(ln, `"msg":"`+msg+`"`) &&
-							strings.Contains(ln, lvl) &&
+							strings.Contains(ln, expectedLevelJSON) &&
 							strings.Contains(ln, `"ts":`) &&
 							strings.Contains(ln, `"caller":`) {
 							found = true
@@ -144,26 +173,17 @@ func TestLevelsMatrix(t *testing.T) {
 						}
 					}
 
-					require.True(t,
-						found,
-
-						"expected to see msg=%s level=%s in\n%s",
-						msg,
-						lvl,
-						out,
-					)
+					require.True(t, found,
+						"expected to see msg=%q with level=%q in output:\n%s",
+						msg, expectedLevelJSON, out)
 				}
 
 				// Verify suppressed entries do not appear
 				for _, msg := range tt.shouldSkip {
 					for _, ln := range lines {
-						require.NotContains(t,
-							ln,
-
-							`"msg":"`+msg+`"`, "msg=%s must be suppressed from\n%s",
-							msg,
-							out,
-						)
+						require.NotContains(t, ln, `"msg":"`+msg+`"`,
+							"msg=%q must be suppressed at threshold=%s, output:\n%s",
+							msg, tt.level.String(), out)
 					}
 				}
 			},

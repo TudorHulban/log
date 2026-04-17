@@ -7,22 +7,24 @@ LOG LEVEL TRUTH TABLE
 ---------------------
 
 Numeric ordering (lowest → highest severity):
-    NONE(0) < DEBUG(1) < INFO(2) < WARN(3) < ERROR(4)
+    TRACE(0) < DEBUG(1) < INFO(2) < WARN(3) < ERROR(4) < FATAL(5) < PANIC(6)
 
 Filtering rule:
     A log entry is emitted if entry.level >= logger.threshold
 
 PRINT is outside the severity hierarchy and always emitted.
 
-+----------------+---------+---------+---------+---------+---------+
-| Threshold ↓    | DEBUG   | INFO    | WARN    | ERROR   | PRINT   |
-+----------------+---------+---------+---------+---------+---------+
-| NONE (0)       |   NO    |   NO    |   NO    |   NO    |  YES    |
-| DEBUG (1)      |  YES    |  YES    |  YES    |  YES    |  YES    |
-| INFO (2)       |   NO    |  YES    |  YES    |  YES    |  YES    |
-| WARN (3)       |   NO    |   NO    |  YES    |  YES    |  YES    |
-| ERROR (4)      |   NO    |   NO    |   NO    |  YES    |  YES    |
-+----------------+---------+---------+---------+---------+---------+
++----------------+-------+-------+-------+-------+-------+-------+-------+
+| Threshold ↓    | TRACE | DEBUG | INFO  | WARN  | ERROR | FATAL | PANIC |
++----------------+-------+-------+-------+-------+-------+-------+-------+
+| TRACE (0)      |  YES  |  YES  |  YES  |  YES  |  YES  |  YES  |  YES  |
+| DEBUG (1)      |   NO  |  YES  |  YES  |  YES  |  YES  |  YES  |  YES  |
+| INFO  (2)      |   NO  |   NO  |  YES  |  YES  |  YES  |  YES  |  YES  |
+| WARN  (3)      |   NO  |   NO  |   NO  |  YES  |  YES  |  YES  |  YES  |
+| ERROR (4)      |   NO  |   NO  |   NO  |   NO  |  YES  |  YES  |  YES  |
+| FATAL (5)      |   NO  |   NO  |   NO  |   NO  |   NO  |  YES  |  YES  |
+| PANIC (6)      |   NO  |   NO  |   NO  |   NO  |   NO  |   NO  |  YES  |
++----------------+-------+-------+-------+-------+-------+-------+-------+
 
 Legend:
     YES → log entry is emitted
@@ -32,17 +34,19 @@ Legend:
 type Level uint8
 
 const (
-	LevelNONE  Level = 0 // no logs except PRINT
-	LevelDEBUG Level = 1 // everything logs
-	LevelINFO  Level = 2 // suppress DEBUG
-	LevelWARN  Level = 3 // suppress DEBUG, INFO
-	LevelERROR Level = 4 // suppress DEBUG, INFO, WARN
+	LevelTrace Level = 0 // most verbose: all severity levels emitted
+	LevelDEBUG Level = 1 // suppress TRACE
+	LevelINFO  Level = 2 // suppress TRACE, DEBUG
+	LevelWARN  Level = 3 // suppress TRACE, DEBUG, INFO
+	LevelERROR Level = 4 // suppress TRACE, DEBUG, INFO, WARN
+	LevelFatal Level = 5 // suppress TRACE, DEBUG, INFO, WARN, ERROR
+	LevelPanic Level = 6 // only PANIC emitted (PRINT always emitted)
 )
 
 func (l Level) String() string {
 	switch l {
-	case LevelNONE:
-		return "NONE"
+	case LevelTrace:
+		return "TRACE"
 	case LevelDEBUG:
 		return "DEBUG"
 	case LevelINFO:
@@ -51,26 +55,34 @@ func (l Level) String() string {
 		return "WARN"
 	case LevelERROR:
 		return "ERROR"
+	case LevelFatal:
+		return "FATAL"
+	case LevelPanic:
+		return "PANIC"
+
 	default:
 		return fmt.Sprintf("Level(%d)", l)
 	}
 }
 
-var logLevels = [5]string{
-	"NONE",  // 0
+var logLevels = [7]string{
+	"TRACE", // 0
 	"DEBUG", // 1
 	"INFO",  // 2
 	"WARN",  // 3
 	"ERROR", // 4
+	"FATAL", // 5
+	"PANIC", // 6
 }
 
+// convertLevel clamps an input level to the valid range [LevelTrace, LevelPanic]
 func convertLevel(level Level) Level {
-	if level < LevelNONE {
-		return LevelNONE
+	if level < LevelTrace {
+		return LevelTrace
 	}
 
-	if level > LevelERROR {
-		return LevelERROR
+	if level > LevelPanic {
+		return LevelPanic
 	}
 
 	return level

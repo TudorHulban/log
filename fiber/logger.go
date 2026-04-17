@@ -9,6 +9,8 @@ import (
 	fiberlog "github.com/gofiber/fiber/v3/log"
 )
 
+// see https://docs.gofiber.io/api/log#global-log
+
 var _ fiberlog.AllLogger[*log.Logger] = (*FiberLogger)(nil)
 
 type FiberLogger struct {

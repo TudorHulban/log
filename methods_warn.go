@@ -2,7 +2,7 @@ package log
 
 func (l Logger) labelWarn() string {
 	if l.withColor {
-		return colorDebug(logLevels[LevelWARN])
+		return colorWarn(logLevels[LevelWARN])
 	}
 
 	return logLevels[LevelWARN]

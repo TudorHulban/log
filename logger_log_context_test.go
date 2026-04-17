@@ -23,7 +23,7 @@ func TestContext(t *testing.T) {
 	serviceLogging, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 		},
 	)
@@ -65,7 +65,7 @@ func Test_With_JSON_Context(t *testing.T) {
 	serviceLogging, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 			WithJSON:      true,
 		},

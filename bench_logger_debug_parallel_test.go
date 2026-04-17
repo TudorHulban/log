@@ -69,7 +69,7 @@ func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:    ingestor,
-						LoggerLevel: Level(LevelDEBUG),
+						LoggerLevel: LevelDEBUG,
 
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,

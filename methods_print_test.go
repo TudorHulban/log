@@ -25,7 +25,7 @@ func TestLogger_Print(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 		},
 	)
@@ -61,7 +61,7 @@ func TestLogger_NoTimestampPrint(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelDEBUG),
+			LoggerLevel: LevelDEBUG,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -94,7 +94,7 @@ func TestLogger_NanoPrint(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampNano,
 		},
 	)
@@ -139,7 +139,7 @@ func TestLogger_YYYYPrint(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampYYYYMonth,
 		},
 	)
@@ -184,7 +184,7 @@ func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampNano,
 
 			WithJSON:  true,
@@ -223,7 +223,7 @@ func TestLogger_JSON_Print_No_Timestamp(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelDEBUG),
+			LoggerLevel: LevelDEBUG,
 
 			WithJSON:  true,
 			WithColor: true,

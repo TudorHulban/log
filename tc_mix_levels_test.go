@@ -27,9 +27,9 @@ import (
 func TestLevelsMatrix(t *testing.T) {
 	type tc struct {
 		description string
-		level       Level
 		shouldSee   map[string]string // msg → level
 		shouldSkip  []string          // msgs that must not appear
+		level       Level
 	}
 
 	tests := []tc{

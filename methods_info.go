@@ -2,7 +2,7 @@ package log
 
 func (l *Logger) labelInfo() string {
 	if l.withColor {
-		return colorError(logLevels[LevelINFO])
+		return colorInfo(logLevels[LevelINFO])
 	}
 
 	return logLevels[LevelINFO]

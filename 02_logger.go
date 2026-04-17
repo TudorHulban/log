@@ -8,8 +8,10 @@ import (
 )
 
 type Logger struct {
-	fnTimestamp timestamp.Timestamp
 	ingestor    *bytearena.Ingestor
+	fnTimestamp timestamp.Timestamp
+
+	callerLevel int
 
 	estimatedMessageSizeOverall uint32
 	estimatedMessageSizeInfo    uint32
@@ -17,8 +19,7 @@ type Logger struct {
 	estimatedMessageSizeDebug   uint32
 	estimatedMessageSizeError   uint32
 
-	callerLevel int
-	logLevel    Level
+	logLevel Level
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool

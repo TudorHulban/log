@@ -19,7 +19,7 @@ func Test_GetLogLevel(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelDEBUG),
+			LoggerLevel: LevelDEBUG,
 		},
 	)
 	require.NoError(t, errCrLogger)

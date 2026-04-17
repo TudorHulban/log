@@ -24,7 +24,7 @@ func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelINFO),
+			LoggerLevel: LevelINFO,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -99,7 +99,7 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:      ingestor,
-						LoggerLevel:   Level(LevelINFO),
+						LoggerLevel:   LevelINFO,
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,
 					},
@@ -184,7 +184,7 @@ func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:      ingestor,
-						LoggerLevel:   Level(LevelINFO),
+						LoggerLevel:   LevelINFO,
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,
 					},

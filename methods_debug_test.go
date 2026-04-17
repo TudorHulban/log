@@ -26,7 +26,7 @@ func TestDebug(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: Level(LevelDEBUG),
+			LoggerLevel: LevelDEBUG,
 
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 			WithCaller:    true,
@@ -91,7 +91,7 @@ func Benchmark_Debug(b *testing.B) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 			WithJSON:      true,
 		},
@@ -123,7 +123,7 @@ func Benchmark_Debug_Fast(b *testing.B) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   Level(LevelDEBUG),
+			LoggerLevel:   LevelDEBUG,
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
 			WithJSON:      true,
 

@@ -13,12 +13,13 @@ type message struct {
 }
 
 type state struct {
-	invariants   map[Level]*uint32
-	dictionary   map[string]message // all requests
-	muDictionary sync.Mutex
-	prints       *uint32
+	dictionary map[string]message // all requests
+	invariants map[Level]*uint32
 
+	prints *uint32
 	totals uint32
+
+	muDictionary sync.Mutex
 }
 
 func (s *state) String() string {
@@ -41,23 +42,28 @@ func (s *state) stringVerbose(verbose bool) string {
 	if s.prints != nil {
 		fmt.Fprintf(&sb, "  prints: %d,\n", *s.prints)
 	} else {
-		fmt.Fprintf(&sb, "  prints: <nil>,\n")
+		fmt.Fprint(&sb, "  prints: <nil>,\n")
 	}
 
 	// invariants
 	sb.WriteString("  invariants: [")
+
 	first := true
+
 	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
 		if !first {
 			sb.WriteString(" ")
 		}
+
 		first = false
+
 		if cnt, ok := s.invariants[lvl]; ok && cnt != nil {
 			fmt.Fprintf(&sb, "%s:%d", lvl.String(), *cnt)
 		} else {
 			fmt.Fprintf(&sb, "%s:*", lvl.String())
 		}
 	}
+
 	sb.WriteString("],\n")
 
 	// dictionary summary
@@ -69,6 +75,7 @@ func (s *state) stringVerbose(verbose bool) string {
 		if msg.wasReceived {
 			received++
 		}
+
 		byLevel[msg.level]++
 	}
 	s.muDictionary.Unlock()
@@ -77,34 +84,51 @@ func (s *state) stringVerbose(verbose bool) string {
 	fmt.Fprintf(&sb, "    total: %d,\n", len(s.dictionary))
 	fmt.Fprintf(&sb, "    received: %d,\n", received)
 	sb.WriteString("    byLevel: [")
+
 	vFirst := true
 
 	for lvl := LevelNONE; lvl <= LevelERROR; lvl++ {
 		if !vFirst {
 			sb.WriteString(" ")
 		}
+
 		vFirst = false
+
 		fmt.Fprintf(&sb, "%s:%d", lvl.String(), byLevel[lvl])
 	}
+
 	sb.WriteString("]\n")
 	sb.WriteString("  }")
 
 	// entries (always show in verbose, optionally in concise)
 	if verbose || len(s.dictionary) <= 5 {
 		sb.WriteString(",\n  entries: [")
+
 		ids := make([]string, 0, len(s.dictionary))
+
 		for id := range s.dictionary {
 			ids = append(ids, id)
 		}
+
 		sort.Strings(ids)
+
 		for _, id := range ids {
 			msg := s.dictionary[id]
 			rcv := ""
+
 			if msg.wasReceived {
 				rcv = " ✓"
 			}
-			fmt.Fprintf(&sb, "\n    %s: %s%s", id, msg.level.String(), rcv)
+
+			fmt.Fprintf(
+				&sb,
+				"\n    %s: %s%s",
+				id,
+				msg.level.String(),
+				rcv,
+			)
 		}
+
 		sb.WriteString("\n  ]")
 	}
 
@@ -122,8 +146,9 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 			reserved = reserved + *cnt
 		}
 	}
+
 	if prints != nil {
-		reserved = reserved + uint32(*prints)
+		reserved = reserved + uint32(*prints) //nolint:gosec
 	}
 
 	if reserved > total {
@@ -146,6 +171,7 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 
 	// Build dictionary with exactly `total` entries
 	dictionary := make(map[string]message, total)
+
 	var reqID uint32
 
 	// Assign fixed invariant levels
@@ -165,7 +191,7 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 
 	// Assign PRINT (LevelNONE) messages
 	if prints != nil {
-		for i := uint32(0); i < uint32(*prints); i++ {
+		for i := uint32(0); i < uint32(*prints); i++ { //nolint:gosec
 			dictionary[fmt.Sprintf("req-%d", reqID)] = message{level: LevelNONE, wasReceived: false}
 
 			reqID++
@@ -177,7 +203,7 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 
 	if len(flexible) > 0 && remaining > 0 {
 		for i := range remaining {
-			lvl := flexible[i%uint32(len(flexible))]
+			lvl := flexible[i%uint32(len(flexible))] //nolint:gosec
 
 			dictionary[fmt.Sprintf("req-%d", reqID)] =
 				message{
@@ -193,7 +219,7 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 	var statePrints *uint32
 
 	if prints != nil {
-		v := uint32(*prints)
+		v := uint32(*prints) //nolint:gosec
 		statePrints = &v
 	}
 
@@ -206,17 +232,23 @@ func createEmitData(total uint32, invariants map[Level]*uint32, prints *int) (*s
 		nil
 }
 
-func emitData(data *state, logger *Logger) []error {
-	var errs []error
+func emitData(data *state, logger *Logger) []error { //nolint:revive
+	var (
+		errs []error
+		idx  uint32
+	)
+
 	consecFails := make(map[string]int)
-	var idx uint32
 
 	// Deterministic iteration: map order is randomized in Go
 	data.muDictionary.Lock()
+
 	ids := make([]string, 0, len(data.dictionary))
+
 	for id := range data.dictionary {
 		ids = append(ids, id)
 	}
+
 	data.muDictionary.Unlock()
 
 	sort.Strings(ids)
@@ -228,8 +260,10 @@ func emitData(data *state, logger *Logger) []error {
 		lvl := data.dictionary[id].level
 		data.muDictionary.Unlock()
 
-		var call func() error
-		var method string
+		var (
+			call   func() error
+			method string
+		)
 
 		switch lvl {
 		case LevelDEBUG:

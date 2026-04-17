@@ -37,23 +37,29 @@ func (tw *TrackingWriter) Write(p []byte) (int, error) {
 func (tw *TrackingWriter) UnreceivedCount() int {
 	tw.state.muDictionary.Lock()
 	defer tw.state.muDictionary.Unlock()
+
 	count := 0
+
 	for _, msg := range tw.state.dictionary {
 		if !msg.wasReceived {
 			count++
 		}
 	}
+
 	return count
 }
 
 func (tw *TrackingWriter) UnreceivedMessages() []string {
 	tw.state.muDictionary.Lock()
 	defer tw.state.muDictionary.Unlock()
+
 	var missing []string
+
 	for key, msg := range tw.state.dictionary {
 		if !msg.wasReceived {
 			missing = append(missing, key)
 		}
 	}
+
 	return missing
 }

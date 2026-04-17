@@ -14,6 +14,7 @@ linters:
     - contextcheck
     - cyclop
     - depguard
+    - dupl
     - dupword
     - embeddedstructfieldcheck
     - err113
@@ -38,6 +39,7 @@ linters:
     - lll
     - mnd
     - nestif
+    - nlreturn
     - noinlineerr
     - nolintlint
     - paralleltest
@@ -64,6 +66,9 @@ linters:
       disabled-checks:
         - commentFormatting
         - assignOp
+
+    gocyclo:
+      min-complexity: 40
 
     errcheck:
       exclude-functions:
@@ -116,10 +121,10 @@ linters:
           exclude: ["_test.go"]
 
         - name: cognitive-complexity
-          arguments: [50]
+          arguments: [30]
 
         - name: cyclomatic
-          arguments: [30]
+          arguments: [29]
 
         - name: max-control-nesting
           arguments: [7]

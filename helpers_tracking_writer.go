@@ -5,16 +5,16 @@ import (
 	"strings"
 )
 
-type TrackingWriter struct {
+type trackingWriter struct {
 	w     io.Writer
 	state *state
 }
 
-func newTrackingWriter(w io.Writer, s *state) *TrackingWriter {
-	return &TrackingWriter{w: w, state: s}
+func newTrackingWriter(w io.Writer, s *state) *trackingWriter {
+	return &trackingWriter{w: w, state: s}
 }
 
-func (tw *TrackingWriter) Write(p []byte) (int, error) {
+func (tw *trackingWriter) Write(p []byte) (int, error) {
 	n, err := tw.w.Write(p)
 	if err != nil {
 		return n, err
@@ -34,7 +34,7 @@ func (tw *TrackingWriter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-func (tw *TrackingWriter) UnreceivedCount() int {
+func (tw *trackingWriter) UnreceivedCount() int {
 	tw.state.muDictionary.Lock()
 	defer tw.state.muDictionary.Unlock()
 
@@ -49,7 +49,7 @@ func (tw *TrackingWriter) UnreceivedCount() int {
 	return count
 }
 
-func (tw *TrackingWriter) UnreceivedMessages() []string {
+func (tw *trackingWriter) UnreceivedMessages() []string {
 	tw.state.muDictionary.Lock()
 	defer tw.state.muDictionary.Unlock()
 

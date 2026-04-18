@@ -1,16 +1,35 @@
 package log
 
+func (Logger) labelTrace() string {
+	return logLevels[LevelTrace]
+}
+
 func (l Logger) Trace(args ...any) {
-	l.Print(args...)
+	if l.logLevel > LevelTrace {
+		return
+	}
+
+	l.logWithLabel(
+		l.labelTrace(), args...,
+	)
 }
 
 func (l Logger) Tracef(format string, args ...any) {
-	l.Printf(format, args...)
+	if l.logLevel > LevelTrace {
+		return
+	}
+
+	l.logfWithLabel(
+		l.labelTrace(), format, args...,
+	)
 }
 
 func (l Logger) Tracew(msg string, keysAndValues ...any) {
-	l.Printw(
-		msg,
-		keysAndValues...,
+	if l.logLevel > LevelTrace {
+		return
+	}
+
+	l.logwWithLabel(
+		l.labelTrace(), msg, keysAndValues...,
 	)
 }

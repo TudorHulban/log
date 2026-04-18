@@ -1,14 +1,82 @@
 package main
 
 import (
-	"log"
+	"context"
+	"fmt"
 
-	fiber "github.com/gofiber/fiber/v3"
+	"os"
+
+	"github.com/gofiber/fiber/v3"
+	fiberlog "github.com/gofiber/fiber/v3/log"
+	"github.com/gofiber/fiber/v3/middleware/logger"
+	"github.com/tudorhulban/bytearena"
+	"github.com/tudorhulban/log"
+	"github.com/tudorhulban/log/timestamp"
 )
 
 func main() {
+	// 1. Writer
+	// os.Stdout
+
+	// 2. Ingestor
+	ingestor, err := bytearena.NewIngestor(
+		bytearena.Size100K(),
+		os.Stdout,
+	)
+	if err != nil {
+		fmt.Println(err)
+
+		os.Exit(1)
+	}
+
+	// 3. Logger
+	l, err := log.NewLogger(
+		&log.ParamsNewLogger{
+			Ingestor:      ingestor,
+			LoggerLevel:   log.LevelTrace,
+			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
+			WithCaller:    true,
+			WithColor:     false,
+			WithJSON:      true,
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+
+		os.Exit(1)
+	}
+
+	fiberLogger := FiberLogger{
+		L: l,
+	}
+
+	// 4. Start ingestion
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	// 5. Register your logger with Fiber
+	fiberlog.SetLogger(&fiberLogger)
+
+	// 6. Create Fiber app
 	app := fiber.New()
 
+	// 4. IMPORTANT: Add the logger middleware
+	app.Use(logger.New(logger.Config{
+		LoggerFunc: func(c fiber.Ctx, data *logger.Data, cfg *logger.Config) error {
+			fiberLogger.L.Info(
+				fmt.Sprintf("%s %s %d %s",
+					c.Method(),                // GET / POST etc
+					c.OriginalURL(),           // full path with query
+					data.Stop.Sub(data.Start), // latency
+					c.IP(),                    // client IP
+				),
+			)
+
+			return nil
+		},
+	}))
+
+	// 6. Routes
 	app.Get(
 		"/",
 		func(c fiber.Ctx) error {
@@ -16,5 +84,12 @@ func main() {
 		},
 	)
 
-	log.Fatal(app.Listen(":3000"))
+	// 7. Start server
+	if err := app.Listen(":3000"); err != nil {
+		l.Fatal(err)
+	}
+
+	// 8. Cleanup
+	cancel()
+	<-chIngestionEnd
 }

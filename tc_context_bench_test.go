@@ -6,11 +6,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
-	"github.com/tudorhulban/log/helpers"
+	"github.com/tudorhulban/bytearena/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkContext_NoJSON_OneField-12    	24259626	        48.80 ns/op	       4 B/op	       0 allocs/op
+// BenchmarkContext_NoJSON_OneField-16    	15807960	        77.93 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -54,7 +54,7 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 // go tool pprof -alloc_objects mem.out
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_MultipleFields-16    	14291360	        83.05 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkContext_NoJSON_MultipleFields-16    	10149478	       114.0 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -99,7 +99,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	}
 }
 
-// BenchmarkContext_WithJSON_OneField-12    	17870000	        67.06 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkContext_WithJSON_OneField-16    	10344246	       116.0 ns/op	      15 B/op	       0 allocs/op
 func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -141,7 +141,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-12    	 9880800	       122.4 ns/op	      12 B/op	       0 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-16    	 6986820	       168.8 ns/op	      18 B/op	       0 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 

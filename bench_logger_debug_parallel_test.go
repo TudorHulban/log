@@ -2,11 +2,12 @@ package log
 
 import (
 	"context"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
-	"github.com/tudorhulban/log/helpers"
+	"github.com/tudorhulban/bytearena/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -18,6 +19,8 @@ import (
 // BenchmarkLogger_Parallel_DebugFast/5.nano_timestamp_-_json-16 	20216437	        59.43 ns/op	       8 B/op	       1 allocs/op
 // BenchmarkLogger_Parallel_DebugFast/6.nano_-_json,_caller-16   	19846812	        60.27 ns/op	       9 B/op	       1 allocs/op
 func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
+	runtime.GOMAXPROCS(1)
+
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
 		description   string

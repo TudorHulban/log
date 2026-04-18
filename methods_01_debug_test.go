@@ -5,11 +5,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
+	"github.com/tudorhulban/bytearena/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -111,11 +113,13 @@ func Benchmark_Debug(b *testing.B) {
 	)
 }
 
-// Benchmark_Debug_Fast-16    	21640418	        57.29 ns/op	       0 B/op	       0 allocs/op
+// Benchmark_Debug_Fast-16    	28874170	        41.44 ns/op	       0 B/op	       0 allocs/op
 func Benchmark_Debug_Fast(b *testing.B) {
+	writer := helpers.CountWriterNoBuffer{}
+
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
-		io.Discard,
+		&writer,
 	)
 	require.NoError(b, errCrIngestor)
 	require.NotNil(b, ingestor)
@@ -132,9 +136,11 @@ func Benchmark_Debug_Fast(b *testing.B) {
 	)
 	require.NoError(b, errCrLogger)
 
-	b.SetParallelism(1)
+	runtime.GOMAXPROCS(1)
+
 	b.ReportAllocs()
 	b.ResetTimer()
+	b.SetParallelism(16)
 
 	b.RunParallel(
 		func(pb *testing.PB) {

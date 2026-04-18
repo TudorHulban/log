@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
-	"github.com/tudorhulban/log/helpers"
+	"github.com/tudorhulban/bytearena/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
 

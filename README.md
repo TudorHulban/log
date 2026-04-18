@@ -1,62 +1,65 @@
-# LogInfo
+# Arenalogger
 
-Simple logger with colors or with JSON.  
-Tested for race conditions.  
+## Benchmark Conditions
 
-Levels:  
-0 - none,  
-1 - info,  
-2 - warn,  
-3 - debug.
+### Why runtime.GOMAXPROCS(1) and b.SetParallelism(16) Are Required
 
-## How to use
+Benchmarking loggers in Go is subtle because testing.B.RunParallel does not measure the latency of a single log call. By default, it measures aggregate throughput across all CPU cores.
 
-See external testing file.
+On a machine with 16 logical CPUs, RunParallel will spawn 16 workers and distribute the work across them.
+This makes any logger appear 10–16× faster, even though the logger itself did not improve.
 
-## Profiling
+To measure true per‑operation latency, not throughput, the benchmark must remove CPU‑level parallelism and exercise the logger under realistic concurrency.
 
-```sh
-go test -bench=. -run=^$ . -cpuprofile profile.out
-go test -bench=Benchmark_Local_Print_Logger -run=^$ . -cpuprofile profile.out
-go test -bench=Benchmark_Local_TimestampNano_Logger -run=^$ . -cpuprofile profile.out
-go test -bench=. -benchmem -cpuprofile profile.out
-go test -bench=. -benchmem -memprofile memprofile.out -cpuprofile profile.out
+#### runtime.GOMAXPROCS(1)
 
-go tool pprof profile.out
-# with option top, web or pdf
-```
+This forces the Go scheduler to run the benchmark on exactly one logical CPU.
 
-## Roadmap (Writer)
+All goroutines created by RunParallel will execute on the same logical CPU.
+This eliminates the throughput illusion caused by multiple cores dividing the work.
 
-### a. New log file at day start
+This setting ensures that the benchmark measures:
 
-### b. New log file when file reaches x Mb
+- the real cost of a log call in a concurrency scenario
+- the real timestamp cost
+- the real JSON cost
+- the real writer cost
+- the real branch and pipeline behavior
 
-### c. Old log file is zipped
+In other words, it reveals true latency.
 
-### d. satisfy Fiber interface below
+#### b.SetParallelism(16)
+
+This instructs the benchmark to spawn 16 worker goroutines, even though they all run on a single logical CPU.
+
+This is important because it:
+
+- keeps the CPU pipeline hot
+- stabilizes branch prediction
+- stabilizes timestamp generation
+- stabilizes JSON formatting paths
+- simulates realistic concurrent logging load
+
+The result is a stable, low‑jitter measurement of the logger’s actual per‑operation cost.
+
+#### Combined Effect
+
+Using both settings:
 
 ```go
-// WithLogger is a logger interface that output logs with a message and key-value pairs.
-type WithLogger interface {
-    Tracew(msg string, keysAndValues ...any)
-    Debugw(msg string, keysAndValues ...any)
-    Infow(msg string, keysAndValues ...any)
-    Warnw(msg string, keysAndValues ...any)
-    Errorw(msg string, keysAndValues ...any)
-    Fatalw(msg string, keysAndValues ...any)
-    Panicw(msg string, keysAndValues ...any)
-}
+runtime.GOMAXPROCS(1)
+b.SetParallelism(16)
 ```
+
+produces the only benchmark configuration that:
+
+- removes multi‑core throughput distortion
+- preserves realistic concurrency
+- reveals true per‑operation latency
+- allows fair comparison between loggers
 
 ## Resources
 
-```html
+```text
 https://dave.cheney.net/2017/01/23/the-package-level-logger-anti-pattern
-
-https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-
-https://unskilled.blog/posts/lets-dive-a-tour-of-sync.pool-internals/
-
-https://medium.com/@felipedutratine/profile-your-benchmark-with-pprof-fb7070ee1a94
 ```

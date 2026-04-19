@@ -12,7 +12,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-func TestLogger_Print(t *testing.T) {
+func TestLogger_PrintFast(t *testing.T) {
 	writer := bytes.Buffer{}
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
@@ -24,9 +24,11 @@ func TestLogger_Print(t *testing.T) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+
 			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
+			WithJSON:      true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -36,7 +38,7 @@ func TestLogger_Print(t *testing.T) {
 
 	payload := "xxx"
 
-	l.PrintFast(payload)
+	l.PrintfFast("payload: %s", payload)
 
 	cancel()
 	<-chIngestionEnd

@@ -111,7 +111,7 @@ func AppendError(destination []byte, err error) []byte {
 // AppendArgs appends each arg to dst without reflection or fmt.
 // Covers the types that appear in practice. Falls back to fmt only for
 // exotic types — still no alloc on the hot path.
-func AppendArgs(destination []byte, args []any) []byte {
+func AppendArgs(destination []byte, args ...any) []byte {
 	for ix, arg := range args {
 		if ix > 0 {
 			destination = append(destination, ' ')

@@ -18,7 +18,7 @@ func (l *Logger) PrintFast(args ...any) {
 			buf = append(buf, ' ')
 		}
 
-		buf = helpers.AppendArgs(buf, args)
+		buf = helpers.AppendArgs(buf, args...)
 		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
@@ -51,7 +51,7 @@ func (l *Logger) PrintWithNoTimestampFast(args ...any) {
 	if errWrite == nil {
 		buf := region.Buf()[:0]
 
-		buf = helpers.AppendArgs(buf, args)
+		buf = helpers.AppendArgs(buf, args...)
 		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
@@ -72,7 +72,7 @@ func (l *Logger) PrintwFast(msg string, args ...any) {
 
 		buf = append(buf, []byte(msg)...)
 		buf = append(buf, '\n')
-		buf = helpers.AppendArgs(buf, args)
+		buf = helpers.AppendArgs(buf, args...)
 		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
@@ -87,7 +87,7 @@ func (l *Logger) PrintfFast(format string, args ...any) {
 		buf := region.Buf()[:0]
 
 		if l.withJSON {
-			msg := helpers.Appendf(nil, format, args)
+			msg := helpers.Appendf(nil, format, args...)
 
 			buf = l.appendJSON(
 				buf,

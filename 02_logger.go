@@ -2,6 +2,7 @@ package log
 
 import (
 	"errors"
+	"io"
 
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/timestamp"
@@ -10,6 +11,7 @@ import (
 type Logger struct {
 	ingestor    *bytearena.Ingestor
 	fnTimestamp timestamp.Timestamp
+	fatalWriter io.Writer
 
 	callerLevel int
 
@@ -28,8 +30,9 @@ type Logger struct {
 }
 
 type ParamsNewLogger struct {
-	Ingestor      *bytearena.Ingestor
-	WithTimestamp timestamp.Timestamp
+	Ingestor        *bytearena.Ingestor
+	WithTimestamp   timestamp.Timestamp
+	WithFatalWriter io.Writer
 
 	EstimatedMessageSizeOverall uint32
 	EstimatedMessageSizeTrace   uint32
@@ -50,6 +53,11 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 	if params.Ingestor == nil {
 		return nil,
 			errors.New("nil ingestor")
+	}
+
+	if params.WithFatalWriter == nil {
+		return nil,
+			errors.New("nil fatal writer")
 	}
 
 	result := Logger{

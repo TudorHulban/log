@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// panic methods are not using ingestor due to the nature of panic.
+// terminal event, should not have dependencies like the ingestor.
 
 func (l *Logger) Panic(args ...any) {
 	if l.withJSON {

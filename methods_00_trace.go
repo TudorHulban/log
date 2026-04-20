@@ -4,7 +4,7 @@ func (Logger) labelTrace() string {
 	return logLevels[LevelTrace]
 }
 
-func (l Logger) Trace(args ...any) {
+func (l *Logger) Trace(args ...any) {
 	if l.logLevel > LevelTrace {
 		return
 	}
@@ -14,7 +14,7 @@ func (l Logger) Trace(args ...any) {
 	)
 }
 
-func (l Logger) Tracef(format string, args ...any) {
+func (l *Logger) Tracef(format string, args ...any) {
 	if l.logLevel > LevelTrace {
 		return
 	}
@@ -24,7 +24,7 @@ func (l Logger) Tracef(format string, args ...any) {
 	)
 }
 
-func (l Logger) Tracew(msg string, keysAndValues ...any) {
+func (l *Logger) Tracew(msg string, keysAndValues ...any) {
 	if l.logLevel > LevelTrace {
 		return
 	}
@@ -35,5 +35,17 @@ func (l Logger) Tracew(msg string, keysAndValues ...any) {
 
 	l.logwWithLabel(
 		l.labelTrace(), msg, keysAndValues...,
+	)
+}
+
+func (l *Logger) TraceFast(args ...any) {
+	if l.logLevel > LevelTrace {
+		return
+	}
+
+	l.logWithLabelFast(
+		l.labelTrace(),
+		l.estimatedMessageSizeTrace,
+		args...,
 	)
 }

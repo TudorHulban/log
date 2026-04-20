@@ -43,7 +43,7 @@ func updateStandardTimeCache() {
 	}
 
 	// update timestamp every millisecond. TTL = 1 millisecond.
-	if !gateStandard.CompareAndSwap(gateStandard.Load(), nowMillisecond) {
+	if !gateStandard.CompareAndSwap(current, nowMillisecond) {
 		return
 	}
 
@@ -144,7 +144,7 @@ func updateYYYYMonthTimeCache() {
 	}
 
 	// update timestamp every millisecond. TTL = 1 millisecond.
-	if !gateYYYYMonth.CompareAndSwap(gateYYYYMonth.Load(), nowMillisecond) {
+	if !gateYYYYMonth.CompareAndSwap(current, nowMillisecond) {
 		return
 	}
 

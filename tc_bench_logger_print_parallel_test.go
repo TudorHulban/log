@@ -144,11 +144,11 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_PrintfFast/1._nil_timestamp-16         	19913192	        62.71 ns/op	      23 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/2._standard_timestamp-16    	19543423	        63.99 ns/op	      23 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/3._yyyy-month_timestamp-16  	18757453	        63.55 ns/op	      23 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/4._nano_timestamp-16        	19242529	        62.84 ns/op	      23 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/5._nano_timestamp_-_json-16 	18990320	        63.49 ns/op	      24 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/1._nil_timestamp-16         	20979643	        59.22 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/2._standard_timestamp-16    	20532301	        58.54 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/3._yyyy-month_timestamp-16  	19990296	        58.81 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/4._nano_timestamp-16        	20258965	        59.54 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/5._nano_timestamp_-_json-16 	19997118	        59.75 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 

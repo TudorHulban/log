@@ -14,9 +14,10 @@ type Logger struct {
 	callerLevel int
 
 	estimatedMessageSizeOverall uint32
+	estimatedMessageSizeTrace   uint32
+	estimatedMessageSizeDebug   uint32
 	estimatedMessageSizeInfo    uint32
 	estimatedMessageSizeWarn    uint32
-	estimatedMessageSizeDebug   uint32
 	estimatedMessageSizeError   uint32
 
 	logLevel Level
@@ -31,9 +32,10 @@ type ParamsNewLogger struct {
 	WithTimestamp timestamp.Timestamp
 
 	EstimatedMessageSizeOverall uint32
+	EstimatedMessageSizeTrace   uint32
+	EstimatedMessageSizeDebug   uint32
 	EstimatedMessageSizeInfo    uint32
 	EstimatedMessageSizeWarn    uint32
-	EstimatedMessageSizeDebug   uint32
 	EstimatedMessageSizeError   uint32
 	LoggerLevel                 Level
 
@@ -63,7 +65,11 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		ingestor: params.Ingestor,
 
 		estimatedMessageSizeOverall: params.EstimatedMessageSizeOverall,
+		estimatedMessageSizeTrace:   params.EstimatedMessageSizeTrace,
 		estimatedMessageSizeDebug:   params.EstimatedMessageSizeDebug,
+		estimatedMessageSizeInfo:    params.EstimatedMessageSizeInfo,
+		estimatedMessageSizeWarn:    params.EstimatedMessageSizeWarn,
+		estimatedMessageSizeError:   params.EstimatedMessageSizeError,
 	}
 
 	if result.estimatedMessageSizeOverall == 0 {
@@ -76,9 +82,10 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		}
 	}
 
+	setEstimatedIfZero(&result.estimatedMessageSizeTrace)
+	setEstimatedIfZero(&result.estimatedMessageSizeDebug)
 	setEstimatedIfZero(&result.estimatedMessageSizeInfo)
 	setEstimatedIfZero(&result.estimatedMessageSizeWarn)
-	setEstimatedIfZero(&result.estimatedMessageSizeDebug)
 	setEstimatedIfZero(&result.estimatedMessageSizeError)
 
 	if result.callerLevel == 0 {

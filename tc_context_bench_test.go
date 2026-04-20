@@ -54,7 +54,7 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 // go tool pprof -alloc_objects mem.out
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_MultipleFields-16    	10149478	       114.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkContext_NoJSON_MultipleFields-16    	 5699068	       209.6 ns/op	      31 B/op	       1 allocs/op
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -99,7 +99,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	}
 }
 
-// BenchmarkContext_WithJSON_OneField-16    	10344246	       116.0 ns/op	      15 B/op	       0 allocs/op
+// BenchmarkContext_WithJSON_OneField-16    	 7922517	       152.2 ns/op	      34 B/op	       1 allocs/op
 func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -141,7 +141,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-16    	 6986820	       168.8 ns/op	      18 B/op	       0 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-16    	 5925392	       206.3 ns/op	      37 B/op	       2 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 

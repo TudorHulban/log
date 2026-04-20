@@ -3,6 +3,7 @@ package log
 import (
 	"errors"
 	"io"
+	"sync/atomic"
 
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/timestamp"
@@ -22,7 +23,7 @@ type Logger struct {
 	estimatedMessageSizeWarn    uint32
 	estimatedMessageSizeError   uint32
 
-	logLevel Level
+	logLevel atomic.Uint32
 
 	withCaller bool // for shorter form in case do not need caller file.
 	withColor  bool
@@ -61,8 +62,6 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 	}
 
 	result := Logger{
-		logLevel: convertLevel(params.LoggerLevel),
-
 		withCaller:  params.WithCaller,
 		callerLevel: int(params.CallerLevel),
 
@@ -79,6 +78,8 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		estimatedMessageSizeWarn:    params.EstimatedMessageSizeWarn,
 		estimatedMessageSizeError:   params.EstimatedMessageSizeError,
 	}
+
+	result.SetLogLevel(params.LoggerLevel)
 
 	if result.estimatedMessageSizeOverall == 0 {
 		result.estimatedMessageSizeOverall = MessageSmallSize

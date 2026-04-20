@@ -9,7 +9,7 @@ func (l Logger) labelWarn() string {
 }
 
 func (l *Logger) Warn(args ...any) {
-	if l.logLevel > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWARN {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Warn(args ...any) {
 }
 
 func (l *Logger) Warnf(format string, args ...any) {
-	if l.logLevel > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWARN {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Warnf(format string, args ...any) {
 }
 
 func (l *Logger) Warnw(msg string, keysAndValues ...any) {
-	if l.logLevel > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWARN {
 		return
 	}
 
@@ -39,7 +39,7 @@ func (l *Logger) Warnw(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) WarnFast(args ...any) {
-	if l.logLevel > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWARN {
 		return
 	}
 

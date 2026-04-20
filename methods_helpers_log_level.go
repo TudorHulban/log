@@ -1,9 +1,11 @@
 package log
 
 func (l *Logger) GetLogLevel() Level {
-	return l.logLevel
+	return Level(l.logLevel.Load())
 }
 
 func (l *Logger) SetLogLevel(level Level) {
-	l.logLevel = level
+	clamped := convertLevel(level)
+
+	l.logLevel.Store(uint32(clamped))
 }

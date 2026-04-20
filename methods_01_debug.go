@@ -1,6 +1,6 @@
 package log
 
-func (l Logger) labelDebug() string {
+func (l *Logger) labelDebug() string {
 	if l.withColor {
 		return colorDebug(logLevels[LevelDEBUG])
 	}
@@ -9,7 +9,7 @@ func (l Logger) labelDebug() string {
 }
 
 func (l *Logger) Debug(args ...any) {
-	if l.logLevel > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDEBUG {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Debug(args ...any) {
 }
 
 func (l *Logger) Debugf(format string, args ...any) {
-	if l.logLevel > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDEBUG {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 }
 
 func (l *Logger) Debugw(msg string, keysAndValues ...any) {
-	if l.logLevel > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDEBUG {
 		return
 	}
 
@@ -43,7 +43,7 @@ func (l *Logger) Debugw(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) DebugFast(args ...any) {
-	if l.logLevel > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDEBUG {
 		return
 	}
 

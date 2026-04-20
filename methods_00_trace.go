@@ -1,11 +1,11 @@
 package log
 
-func (Logger) labelTrace() string {
+func (*Logger) labelTrace() string {
 	return logLevels[LevelTrace]
 }
 
 func (l *Logger) Trace(args ...any) {
-	if l.logLevel > LevelTrace {
+	if Level(l.logLevel.Load()) > LevelTrace {
 		return
 	}
 
@@ -15,7 +15,7 @@ func (l *Logger) Trace(args ...any) {
 }
 
 func (l *Logger) Tracef(format string, args ...any) {
-	if l.logLevel > LevelTrace {
+	if Level(l.logLevel.Load()) > LevelTrace {
 		return
 	}
 
@@ -25,7 +25,7 @@ func (l *Logger) Tracef(format string, args ...any) {
 }
 
 func (l *Logger) Tracew(msg string, keysAndValues ...any) {
-	if l.logLevel > LevelTrace {
+	if Level(l.logLevel.Load()) > LevelTrace {
 		return
 	}
 
@@ -39,7 +39,7 @@ func (l *Logger) Tracew(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) TraceFast(args ...any) {
-	if l.logLevel > LevelTrace {
+	if Level(l.logLevel.Load()) > LevelTrace {
 		return
 	}
 

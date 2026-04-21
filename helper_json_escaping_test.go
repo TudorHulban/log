@@ -134,13 +134,23 @@ func TestDebugBufferGrowth(t *testing.T) {
 
 	expected := "this is a longer string"
 	if string(result) != expected {
-		t.Errorf("Got: %q, Want: %q", string(result), expected)
+		t.Errorf(
+			"Got: %q, Want: %q",
+			string(result),
+			expected,
+		)
 
 		// Find where it diverges
 		for i := 0; i < len(expected) && i < len(result); i++ {
 			if result[i] != expected[i] {
-				t.Errorf("First mismatch at index %d: got %q (%d), want %q (%d)",
-					i, result[i], result[i], expected[i], expected[i])
+				t.Errorf(
+					"First mismatch at index %d: got %q (%d), want %q (%d)",
+					i,
+					result[i],
+					result[i],
+					expected[i],
+					expected[i],
+				)
 
 				break
 			}
@@ -213,7 +223,11 @@ func TestAppendJSONStringBufferGrowth(t *testing.T) {
 
 				// Verify that the result is a valid slice of the underlying array
 				if len(result) > cap(result) {
-					t.Errorf("invalid slice: len(%d) > cap(%d)", len(result), cap(result))
+					t.Errorf(
+						"invalid slice: len(%d) > cap(%d)",
+						len(result),
+						cap(result),
+					)
 				}
 			},
 		)

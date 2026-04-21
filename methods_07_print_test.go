@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -27,8 +28,9 @@ func TestLogger_PrintFast(t *testing.T) {
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
 
-			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-			WithJSON:      true,
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithJSON:        true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -64,6 +66,8 @@ func TestLogger_NoTimestampPrint(t *testing.T) {
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
+
+			WithFatalWriter: os.Stdout,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -95,9 +99,11 @@ func TestLogger_NanoPrint(t *testing.T) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
-			WithTimestamp: timestamp.TimestampNano,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampNano,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -140,9 +146,11 @@ func TestLogger_YYYYPrint(t *testing.T) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
-			WithTimestamp: timestamp.TimestampYYYYMonth,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampYYYYMonth,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -185,12 +193,13 @@ func TestLogger_JSON_Print_With_Timestamp(t *testing.T) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
-			WithTimestamp: timestamp.TimestampNano,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
 
-			WithJSON:  true,
-			WithColor: true,
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampNano,
+			WithJSON:        true,
+			WithColor:       true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -227,8 +236,9 @@ func TestLogger_JSON_Print_No_Timestamp(t *testing.T) {
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
 
-			WithJSON:  true,
-			WithColor: true,
+			WithFatalWriter: os.Stdout,
+			WithJSON:        true,
+			WithColor:       true,
 		},
 	)
 	require.NoError(t, errCrLogger)

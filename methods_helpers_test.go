@@ -1,6 +1,7 @@
 package log
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -20,6 +21,8 @@ func Test_GetLogLevel(t *testing.T) {
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
+
+			WithFatalWriter: os.Stdout,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -42,6 +45,8 @@ func Test_SetLogLevel(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor: ingestor,
+
+			WithFatalWriter: os.Stdout,
 		},
 	)
 	require.NoError(t, errCrLogger)

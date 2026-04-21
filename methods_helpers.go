@@ -26,7 +26,7 @@ func (l *Logger) logWithLabel(label string, args ...any) {
 			label,
 			file,
 			line,
-			helpers.AppendArgs(nil, args),
+			helpers.AppendArgs(nil, args...),
 		)
 
 		buf = append(buf, '\n')
@@ -60,7 +60,7 @@ func (l *Logger) logWithLabel(label string, args ...any) {
 
 	buf = append(buf, label...)
 	buf = append(buf, delim...)
-	buf = helpers.AppendArgs(buf, args)
+	buf = helpers.AppendArgs(buf, args...)
 	buf = append(buf, '\n')
 
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec

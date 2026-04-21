@@ -36,9 +36,10 @@ func TestEmitData(t *testing.T) {
 	require.NoError(t, errCrData)
 	require.NotNil(t, data)
 
+	safeWriter := os.Stdout // io.Discard
+
 	writer := newTrackingWriter(
-		os.Stdout,
-		// io.Discard,
+		safeWriter,
 		data,
 	)
 
@@ -54,8 +55,9 @@ func TestEmitData(t *testing.T) {
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
 
-			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-			WithJSON:      true,
+			WithFatalWriter: safeWriter,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithJSON:        true,
 		},
 	)
 	require.NoError(t, errCrLogger)

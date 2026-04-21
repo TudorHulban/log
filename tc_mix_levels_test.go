@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -123,12 +124,14 @@ func TestLevelsMatrix(t *testing.T) {
 
 				l, errCrLogger := NewLogger(
 					&ParamsNewLogger{
-						Ingestor:      ingestor,
-						LoggerLevel:   tt.level,
-						WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-						WithCaller:    true,
-						WithColor:     false,
-						WithJSON:      true,
+						Ingestor:    ingestor,
+						LoggerLevel: tt.level,
+
+						WithFatalWriter: os.Stdout,
+						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+						WithCaller:      true,
+						WithColor:       false,
+						WithJSON:        true,
 					},
 				)
 				require.NoError(t, errCrLogger)

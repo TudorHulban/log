@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -30,10 +31,11 @@ func TestDebug(t *testing.T) {
 			Ingestor:    ingestor,
 			LoggerLevel: LevelDEBUG,
 
-			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-			WithCaller:    true,
-			WithColor:     false, // JSON + color = messy output
-			WithJSON:      true,
+			WithFatalWriter: &writer,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithCaller:      true,
+			WithColor:       false, // JSON + color = messy output
+			WithJSON:        true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -92,10 +94,12 @@ func Benchmark_Debug(b *testing.B) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
-			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-			WithJSON:      true,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithJSON:        true,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -126,10 +130,12 @@ func Benchmark_Debug_Fast(b *testing.B) {
 
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
-			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-			WithJSON:      true,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDEBUG,
+
+			WithFatalWriter: &writer,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithJSON:        true,
 
 			EstimatedMessageSizeOverall: MessageLargeSize,
 		},

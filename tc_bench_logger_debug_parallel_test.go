@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"os"
 	"runtime"
 	"testing"
 
@@ -74,9 +75,10 @@ func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
 						Ingestor:    ingestor,
 						LoggerLevel: LevelDebug,
 
-						WithTimestamp: tcase.timestampFunc,
-						WithJSON:      tcase.withJSON,
-						WithCaller:    tcase.withCaller,
+						WithFatalWriter: os.Stdout,
+						WithTimestamp:   tcase.timestampFunc,
+						WithJSON:        tcase.withJSON,
+						WithCaller:      tcase.withCaller,
 					},
 				)
 				require.NoError(b, errCrLogger)

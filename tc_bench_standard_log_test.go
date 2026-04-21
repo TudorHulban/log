@@ -9,7 +9,7 @@ import (
 	"github.com/tudorhulban/bytearena/helpers"
 )
 
-// BenchmarkStandardLogger-16    	 5019615	       233.7 ns/op	     168 B/op	       0 allocs/op
+// BenchmarkStandardLogger-16    	 5932288	       201.5 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkStandardLogger(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 
@@ -31,8 +31,7 @@ func BenchmarkStandardLogger(b *testing.B) {
 	)
 }
 
-// and parallel — stdlib log has a global mutex, this exposes it
-// BenchmarkStandardLoggerParallel-16    	 6440850	       191.1 ns/op	     258 B/op	       0 allocs/op
+// BenchmarkStandardLoggerParallel-16    	 8201892	       149.2 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkStandardLoggerParallel(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 

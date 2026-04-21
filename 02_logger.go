@@ -10,24 +10,31 @@ import (
 )
 
 type Logger struct {
-	ingestor    *bytearena.Ingestor
-	fnTimestamp timestamp.Timestamp
-	fatalWriter io.Writer
+	// Cache line 0 (hot, bytes 0..63):
+	// - atomic level and per-level estimated sizes are read on every log call.
+	// - booleans and callerLevel are also hot (formatting + caller decision).
+	// - ingestor and fnTimestamp are hot-ish and placed here so a single cache load
+	//   brings the common hot state into L1.
+	logLevel                    atomic.Uint32 // 4
+	estimatedMessageSizeOverall uint32        // 4
+	estimatedMessageSizeTrace   uint32        // 4
+	estimatedMessageSizeDebug   uint32        // 4
+	estimatedMessageSizeInfo    uint32        // 4
+	estimatedMessageSizeWarn    uint32        // 4
+	estimatedMessageSizeError   uint32        // 4
 
-	callerLevel int
+	withCaller  bool  // 1
+	withColor   bool  // 1
+	withJSON    bool  // 1
+	callerLevel uint8 // 1
 
-	estimatedMessageSizeOverall uint32
-	estimatedMessageSizeTrace   uint32
-	estimatedMessageSizeDebug   uint32
-	estimatedMessageSizeInfo    uint32
-	estimatedMessageSizeWarn    uint32
-	estimatedMessageSizeError   uint32
+	ingestor    *bytearena.Ingestor // 8
+	fnTimestamp timestamp.Timestamp // 8
+	_pad0       [16]byte            // pad to end of 64‑byte cache line
 
-	logLevel atomic.Uint32
-
-	withCaller bool // for shorter form in case do not need caller file.
-	withColor  bool
-	withJSON   bool
+	// Cache line 1 (cold/rare, bytes 64..127):
+	// - fatalWriter is rare (fatal path). Keep it separate so it doesn't evict hot state.
+	fatalWriter io.Writer // 16 (interface: type+data)
 }
 
 type ParamsNewLogger struct {
@@ -63,7 +70,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 
 	result := Logger{
 		withCaller:  params.WithCaller,
-		callerLevel: int(params.CallerLevel),
+		callerLevel: params.CallerLevel,
 
 		fnTimestamp: params.WithTimestamp,
 		withColor:   params.WithColor,

@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"os"
 	"runtime"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkLogger_Parallel_PrintRaw-16    	30823918	        39.41 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintRaw-16    	29596303	        40.74 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 	prev := runtime.GOMAXPROCS(1)
 	defer runtime.GOMAXPROCS(prev)
@@ -29,6 +30,8 @@ func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
 			LoggerLevel: LevelInfo,
+
+			WithFatalWriter: os.Stdout,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -57,11 +60,11 @@ func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 // go test -run '^$' -bench '^BenchmarkLogger_Parallel_Printf$' -benchmem -race
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_Printf/1.nil_timestamp-16         	15992887	        73.25 ns/op	      72 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Printf/2.standard_timestamp-16    	12229276	        96.59 ns/op	     200 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_Printf/3.yyyy-month_timestamp-16  	11682272	        95.85 ns/op	     200 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_Printf/4.nano_timestamp-16        	12004123	        97.34 ns/op	     200 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_Printf/5.nano_timestamp_-_json-16 	 8218069	       139.3 ns/op	     360 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Printf/1.nil_timestamp-16         	16618216	        71.97 ns/op	      72 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Printf/2.standard_timestamp-16    	11958492	        95.49 ns/op	     200 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_Printf/3.yyyy-month_timestamp-16  	12093954	        95.42 ns/op	     200 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_Printf/4.nano_timestamp-16        	11657934	        96.92 ns/op	     200 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_Printf/5.nano_timestamp_-_json-16 	 8336712	       138.6 ns/op	     360 B/op	       3 allocs/op
 func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
@@ -108,10 +111,12 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
-						Ingestor:      ingestor,
-						LoggerLevel:   LevelInfo,
-						WithTimestamp: tcase.timestampFunc,
-						WithJSON:      tcase.withJSON,
+						Ingestor:    ingestor,
+						LoggerLevel: LevelInfo,
+
+						WithFatalWriter: os.Stdout,
+						WithTimestamp:   tcase.timestampFunc,
+						WithJSON:        tcase.withJSON,
 					},
 				)
 				require.NoError(b, errCrLogger)
@@ -144,11 +149,11 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_PrintfFast/1._nil_timestamp-16         	20979643	        59.22 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/2._standard_timestamp-16    	20532301	        58.54 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/3._yyyy-month_timestamp-16  	19990296	        58.81 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/4._nano_timestamp-16        	20258965	        59.54 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/5._nano_timestamp_-_json-16 	19997118	        59.75 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/1._nil_timestamp-16         	21357632	        58.50 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/2._standard_timestamp-16    	20238639	        59.93 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/3._yyyy-month_timestamp-16  	20213245	        59.81 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/4._nano_timestamp-16        	20147722	        59.57 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_PrintfFast/5._nano_timestamp_-_json-16 	19154612	        59.86 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
@@ -195,10 +200,12 @@ func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
-						Ingestor:      ingestor,
-						LoggerLevel:   LevelInfo,
-						WithTimestamp: tcase.timestampFunc,
-						WithJSON:      tcase.withJSON,
+						Ingestor:    ingestor,
+						LoggerLevel: LevelInfo,
+
+						WithFatalWriter: os.Stdout,
+						WithTimestamp:   tcase.timestampFunc,
+						WithJSON:        tcase.withJSON,
 					},
 				)
 				require.NoError(b, errCrLogger)

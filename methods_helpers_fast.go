@@ -21,7 +21,7 @@ func (l *Logger) logWithLabelFast(label string, estimatedMessageSize uint32, arg
 		)
 
 		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
 			file = fileCaller
 			line = lineCaller
 		}
@@ -49,7 +49,7 @@ func (l *Logger) logWithLabelFast(label string, estimatedMessageSize uint32, arg
 	}
 
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(l.callerLevel)
+		_, file, line, _ := runtime.Caller(int(l.callerLevel))
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')

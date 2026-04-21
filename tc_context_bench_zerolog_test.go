@@ -9,7 +9,7 @@ import (
 	"github.com/tudorhulban/bytearena/helpers"
 )
 
-// BenchmarkZerolog_Serial_OneField-16    	 5992557	       207.9 ns/op	     358 B/op	       0 allocs/op
+// BenchmarkZerolog_Serial_OneField-16    	 7467723	       158.3 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkZerolog_Serial_OneField(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 
@@ -29,15 +29,15 @@ func BenchmarkZerolog_Serial_OneField(b *testing.B) {
 	_ = writer.TotalBytesWritten.Load() // force writer to stay live
 }
 
-// BenchmarkZerolog_Parallel_OneField-16    	 7685630	       157.2 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_Parallel_OneField-16    	 7567926	       156.4 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkZerolog_Parallel_OneField(b *testing.B) {
+	runtime.GOMAXPROCS(1)
+
 	writer := helpers.CountWriterNoBuffer{}
 
 	logger := zerolog.New(&writer).With().
 		Timestamp().
 		Logger()
-
-	runtime.GOMAXPROCS(1)
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -58,7 +58,7 @@ func BenchmarkZerolog_Parallel_OneField(b *testing.B) {
 	)
 }
 
-// BenchmarkZerolog_WithFields-16    	 6349648	       189.3 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_WithFields-16    	 5978826	       200.9 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkZerolog_WithFields(b *testing.B) {
 	var writer helpers.NoopWriter
 

@@ -10,7 +10,7 @@ import (
 	"github.com/tudorhulban/bytearena/helpers"
 )
 
-// BenchmarkPhuslu_OneField-12    	 9210207	       129.9 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_OneField-16    	 8937609	       135.2 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkPhuslu_OneField(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 
@@ -34,8 +34,10 @@ func BenchmarkPhuslu_OneField(b *testing.B) {
 	)
 }
 
-// BenchmarkPhuslu_Parallel_OneField-16    	 9290592	       129.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField-16    	 8992526	       134.6 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
+	runtime.GOMAXPROCS(1)
+
 	writer := helpers.CountWriterNoBuffer{}
 
 	logger := log.Logger{
@@ -43,8 +45,6 @@ func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
 		TimeFormat: time.RFC3339,
 		Writer:     &log.IOWriter{Writer: &writer},
 	}
-
-	runtime.GOMAXPROCS(1)
 
 	b.ReportAllocs()
 	b.ResetTimer()

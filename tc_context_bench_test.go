@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,7 +11,8 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// BenchmarkContext_NoJSON_OneField-16    	15807960	        77.93 ns/op	       0 B/op	       0 allocs/op
+// TODO; alloc?
+// BenchmarkContext_NoJSON_OneField-16    	 7723856	       156.4 ns/op	      29 B/op	       1 allocs/op
 func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -21,16 +23,13 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	defer func() {
-		cancel()
-		<-chIngestionEnd
-	}()
-
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDebug,
-			WithTimestamp: timestamp.TimestampRFC3339,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDebug,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -48,13 +47,16 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 		// 2. Print
 		entry.Print("benchmark test")
 	}
+
+	cancel()
+	<-chIngestionEnd
 }
 
 // go test -run=^$ -bench=^BenchmarkContext_NoJSON_MultipleFields$ -benchmem -memprofile=mem.out
 // go tool pprof -alloc_objects mem.out
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_MultipleFields-16    	 5699068	       209.6 ns/op	      31 B/op	       1 allocs/op
+// BenchmarkContext_NoJSON_MultipleFields-16    	 5979236	       201.2 ns/op	      30 B/op	       1 allocs/op
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -72,9 +74,11 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDebug,
-			WithTimestamp: timestamp.TimestampRFC3339,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDebug,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -117,10 +121,12 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDebug,
-			WithTimestamp: timestamp.TimestampRFC3339,
-			WithJSON:      true,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDebug,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithJSON:        true,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -141,7 +147,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-16    	 5925392	       206.3 ns/op	      37 B/op	       2 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-16    	 5964135	       202.6 ns/op	      36 B/op	       2 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -159,10 +165,12 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   LevelDebug,
-			WithTimestamp: timestamp.TimestampRFC3339,
-			WithJSON:      true,
+			Ingestor:    ingestor,
+			LoggerLevel: LevelDebug,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithJSON:        true,
 		},
 	)
 	require.NoError(b, errCrLogger)

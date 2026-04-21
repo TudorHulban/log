@@ -16,7 +16,7 @@ func (l *Logger) logWithLabel(label string, args ...any) {
 		buf := make([]byte, 0, _PreallocationJSON)
 
 		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
 			file = fileCaller
 			line = lineCaller
 		}
@@ -49,7 +49,7 @@ func (l *Logger) logWithLabel(label string, args ...any) {
 	}
 
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(l.callerLevel)
+		_, file, line, _ := runtime.Caller(int(l.callerLevel))
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
@@ -81,7 +81,7 @@ func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 		buf := make([]byte, 0, _PreallocationJSON)
 
 		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
 			file = fileCaller
 			line = lineCaller
 		}
@@ -114,7 +114,7 @@ func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 	}
 
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(l.callerLevel)
+		_, file, line, _ := runtime.Caller(int(l.callerLevel))
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
@@ -146,7 +146,7 @@ func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
 		buf := make([]byte, 0, _PreallocationJSON)
 
 		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(l.callerLevel)
+			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
 			file = fileCaller
 			line = lineCaller
 		}
@@ -182,7 +182,7 @@ func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
 	buf = append(buf, '\n')
 
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(l.callerLevel)
+		_, file, line, _ := runtime.Caller(int(l.callerLevel))
 
 		buf = append(buf, file...)
 		buf = append(buf, ' ')

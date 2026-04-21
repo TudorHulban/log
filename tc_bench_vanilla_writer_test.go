@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// BenchmarkLoggerZeroAlloc-16    	11182754	       109.9 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLoggerZeroAlloc-16    	11793486	       103.0 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLoggerZeroAlloc(b *testing.B) {
 	b.ReportAllocs()
 

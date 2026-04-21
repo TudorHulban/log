@@ -37,7 +37,7 @@ func (l *Logger) PrintMessageFast(msg string) {
 			buf = append(buf, ' ')
 		}
 
-		buf = append(buf, []byte(msg)...)
+		buf = append(buf, msg...)
 		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
@@ -70,7 +70,7 @@ func (l *Logger) PrintwFast(msg string, args ...any) {
 			buf = append(buf, ' ')
 		}
 
-		buf = append(buf, []byte(msg)...)
+		buf = append(buf, msg...)
 		buf = append(buf, '\n')
 		buf = helpers.AppendArgs(buf, args...)
 		buf = append(buf, '\n')

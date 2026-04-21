@@ -29,7 +29,7 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
+			LoggerLevel:   LevelDebug,
 			WithTimestamp: timestamp.TimestampRFC3339,
 		},
 	)
@@ -73,7 +73,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
+			LoggerLevel:   LevelDebug,
 			WithTimestamp: timestamp.TimestampRFC3339,
 		},
 	)
@@ -118,7 +118,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
+			LoggerLevel:   LevelDebug,
 			WithTimestamp: timestamp.TimestampRFC3339,
 			WithJSON:      true,
 		},
@@ -160,7 +160,7 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:      ingestor,
-			LoggerLevel:   LevelDEBUG,
+			LoggerLevel:   LevelDebug,
 			WithTimestamp: timestamp.TimestampRFC3339,
 			WithJSON:      true,
 		},

@@ -2,14 +2,14 @@ package log
 
 func (l *Logger) labelError() string {
 	if l.withColor {
-		return colorError(logLevels[LevelERROR])
+		return colorError(logLevels[LevelError])
 	}
 
-	return logLevels[LevelERROR]
+	return logLevels[LevelError]
 }
 
 func (l *Logger) Error(args ...any) {
-	if Level(l.logLevel.Load()) > LevelERROR {
+	if Level(l.logLevel.Load()) > LevelError {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Error(args ...any) {
 }
 
 func (l *Logger) Errorf(format string, args ...any) {
-	if Level(l.logLevel.Load()) > LevelERROR {
+	if Level(l.logLevel.Load()) > LevelError {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Errorf(format string, args ...any) {
 }
 
 func (l *Logger) Errorw(msg string, keysAndValues ...any) {
-	if Level(l.logLevel.Load()) > LevelERROR {
+	if Level(l.logLevel.Load()) > LevelError {
 		return
 	}
 
@@ -39,7 +39,7 @@ func (l *Logger) Errorw(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) ErrorFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelERROR {
+	if Level(l.logLevel.Load()) > LevelError {
 		return
 	}
 

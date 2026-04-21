@@ -270,7 +270,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 		)
 
 		switch lvl {
-		case LevelDEBUG:
+		case LevelDebug:
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Debug(id); return nil }, "Debug"
@@ -282,7 +282,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 				call, method = func() error { logger.Debugw(id); return nil }, "Debugw"
 			}
 
-		case LevelINFO:
+		case LevelInfo:
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Info(id); return nil }, "Info"
@@ -294,7 +294,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 				call, method = func() error { logger.Infow(id); return nil }, "Infow"
 			}
 
-		case LevelWARN:
+		case LevelWarn:
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Warn(id); return nil }, "Warn"
@@ -306,7 +306,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 				call, method = func() error { logger.Warnw(id); return nil }, "Warnw"
 			}
 
-		case LevelERROR:
+		case LevelError:
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Error(id); return nil }, "Error"

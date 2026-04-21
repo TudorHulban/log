@@ -20,7 +20,7 @@ func Test_GetLogLevel(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: LevelDEBUG,
+			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: os.Stdout,
 		},
@@ -29,7 +29,7 @@ func Test_GetLogLevel(t *testing.T) {
 	require.NotNil(t, l)
 
 	require.EqualValues(t,
-		LevelDEBUG,
+		LevelDebug,
 		l.GetLogLevel(),
 	)
 }
@@ -52,10 +52,10 @@ func Test_SetLogLevel(t *testing.T) {
 	require.NoError(t, errCrLogger)
 	require.NotNil(t, l)
 
-	l.SetLogLevel(LevelINFO)
+	l.SetLogLevel(LevelInfo)
 
 	require.EqualValues(t,
-		LevelINFO,
+		LevelInfo,
 		l.GetLogLevel(),
 	)
 }

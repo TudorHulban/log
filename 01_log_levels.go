@@ -35,10 +35,10 @@ type Level uint8
 
 const (
 	LevelTrace Level = 0 // most verbose: all severity levels emitted
-	LevelDEBUG Level = 1 // suppress TRACE
-	LevelINFO  Level = 2 // suppress TRACE, DEBUG
-	LevelWARN  Level = 3 // suppress TRACE, DEBUG, INFO
-	LevelERROR Level = 4 // suppress TRACE, DEBUG, INFO, WARN
+	LevelDebug Level = 1 // suppress TRACE
+	LevelInfo  Level = 2 // suppress TRACE, DEBUG
+	LevelWarn  Level = 3 // suppress TRACE, DEBUG, INFO
+	LevelError Level = 4 // suppress TRACE, DEBUG, INFO, WARN
 	LevelFatal Level = 5 // suppress TRACE, DEBUG, INFO, WARN, ERROR
 	LevelPanic Level = 6 // only PANIC emitted (PRINT always emitted)
 )
@@ -47,13 +47,13 @@ func (l Level) String() string {
 	switch l {
 	case LevelTrace:
 		return "TRACE"
-	case LevelDEBUG:
+	case LevelDebug:
 		return "DEBUG"
-	case LevelINFO:
+	case LevelInfo:
 		return "INFO"
-	case LevelWARN:
+	case LevelWarn:
 		return "WARN"
-	case LevelERROR:
+	case LevelError:
 		return "ERROR"
 	case LevelFatal:
 		return "FATAL"

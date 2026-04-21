@@ -2,14 +2,14 @@ package log
 
 func (l *Logger) labelInfo() string {
 	if l.withColor {
-		return colorInfo(logLevels[LevelINFO])
+		return colorInfo(logLevels[LevelInfo])
 	}
 
-	return logLevels[LevelINFO]
+	return logLevels[LevelInfo]
 }
 
 func (l *Logger) Info(args ...any) {
-	if Level(l.logLevel.Load()) > LevelINFO {
+	if Level(l.logLevel.Load()) > LevelInfo {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Info(args ...any) {
 }
 
 func (l *Logger) Infof(format string, args ...any) {
-	if Level(l.logLevel.Load()) > LevelINFO {
+	if Level(l.logLevel.Load()) > LevelInfo {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Infof(format string, args ...any) {
 }
 
 func (l *Logger) Infow(msg string, keysAndValues ...any) {
-	if Level(l.logLevel.Load()) > LevelINFO {
+	if Level(l.logLevel.Load()) > LevelInfo {
 		return
 	}
 
@@ -43,7 +43,7 @@ func (l *Logger) Infow(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) InfoFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelINFO {
+	if Level(l.logLevel.Load()) > LevelInfo {
 		return
 	}
 

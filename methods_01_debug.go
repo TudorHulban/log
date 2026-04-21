@@ -2,14 +2,14 @@ package log
 
 func (l *Logger) labelDebug() string {
 	if l.withColor {
-		return colorDebug(logLevels[LevelDEBUG])
+		return colorDebug(logLevels[LevelDebug])
 	}
 
-	return logLevels[LevelDEBUG]
+	return logLevels[LevelDebug]
 }
 
 func (l *Logger) Debug(args ...any) {
-	if Level(l.logLevel.Load()) > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDebug {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Debug(args ...any) {
 }
 
 func (l *Logger) Debugf(format string, args ...any) {
-	if Level(l.logLevel.Load()) > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDebug {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 }
 
 func (l *Logger) Debugw(msg string, keysAndValues ...any) {
-	if Level(l.logLevel.Load()) > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDebug {
 		return
 	}
 
@@ -43,7 +43,7 @@ func (l *Logger) Debugw(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) DebugFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelDEBUG {
+	if Level(l.logLevel.Load()) > LevelDebug {
 		return
 	}
 

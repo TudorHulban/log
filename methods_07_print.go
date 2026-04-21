@@ -31,7 +31,7 @@ func (l *Logger) PrintMessage(msg string) {
 		buf = append(buf, ' ')
 	}
 
-	buf = append(buf, []byte(msg)...)
+	buf = append(buf, msg...)
 	buf = append(buf, '\n')
 
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
@@ -70,7 +70,7 @@ func (l *Logger) Printw(msg string, args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	buf = append(buf, []byte(msg)...)
+	buf = append(buf, msg...)
 	buf = append(buf, '\n')
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')

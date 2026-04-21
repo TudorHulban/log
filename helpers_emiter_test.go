@@ -53,7 +53,7 @@ func TestEmitData(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: LevelDEBUG,
+			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: safeWriter,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,

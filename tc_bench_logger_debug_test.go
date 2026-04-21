@@ -69,7 +69,7 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:    ingestor,
-						LoggerLevel: LevelDEBUG,
+						LoggerLevel: LevelDebug,
 
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,
@@ -155,7 +155,7 @@ func BenchmarkLogger_DebugFast(b *testing.B) {
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:    ingestor,
-						LoggerLevel: LevelDEBUG,
+						LoggerLevel: LevelDebug,
 
 						WithTimestamp: tcase.timestampFunc,
 						WithJSON:      tcase.withJSON,

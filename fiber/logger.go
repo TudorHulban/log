@@ -94,13 +94,13 @@ func (f *FiberLogger) SetLevel(level fiberlog.Level) {
 	case fiberlog.LevelTrace:
 		f.L.SetLogLevel(log.LevelTrace)
 	case fiberlog.LevelDebug:
-		f.L.SetLogLevel(log.LevelDEBUG)
+		f.L.SetLogLevel(log.LevelDebug)
 	case fiberlog.LevelInfo:
-		f.L.SetLogLevel(log.LevelINFO)
+		f.L.SetLogLevel(log.LevelInfo)
 	case fiberlog.LevelWarn:
-		f.L.SetLogLevel(log.LevelWARN)
+		f.L.SetLogLevel(log.LevelWarn)
 	case fiberlog.LevelError:
-		f.L.SetLogLevel(log.LevelERROR)
+		f.L.SetLogLevel(log.LevelError)
 	case fiberlog.LevelFatal:
 		f.L.SetLogLevel(log.LevelFatal)
 	case fiberlog.LevelPanic:
@@ -108,7 +108,7 @@ func (f *FiberLogger) SetLevel(level fiberlog.Level) {
 
 	default:
 		// fallback to Info
-		f.L.SetLogLevel(log.LevelINFO)
+		f.L.SetLogLevel(log.LevelInfo)
 	}
 }
 

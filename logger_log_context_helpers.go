@@ -67,6 +67,8 @@ func appendField(buf []byte, fld *field) []byte {
 // appendJSONEscaped writes s into buf with JSON string escaping but without
 // the surrounding quotes. Used by appendArgsQuotedJSON.
 func appendJSONEscaped(buf []byte, s string) []byte {
+	const hex = "0123456789abcdef"
+
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 
@@ -79,8 +81,17 @@ func appendJSONEscaped(buf []byte, s string) []byte {
 			buf = append(buf, '\\', 'r')
 		case '\t':
 			buf = append(buf, '\\', 't')
+		case '\b':
+			buf = append(buf, '\\', 'b')
+		case '\f':
+			buf = append(buf, '\\', 'f')
+
 		default:
-			buf = append(buf, c)
+			if c < 0x20 {
+				buf = append(buf, '\\', 'u', '0', '0', hex[c>>4], hex[c&0xF])
+			} else {
+				buf = append(buf, c)
+			}
 		}
 	}
 
@@ -89,6 +100,7 @@ func appendJSONEscaped(buf []byte, s string) []byte {
 
 func appendQuotedJSON(buf []byte, s string) []byte {
 	buf = append(buf, '"')
+	const hex = "0123456789abcdef"
 
 	for i := 0; i < len(s); i++ {
 		c := s[i]
@@ -102,14 +114,21 @@ func appendQuotedJSON(buf []byte, s string) []byte {
 			buf = append(buf, '\\', 'r')
 		case '\t':
 			buf = append(buf, '\\', 't')
+		case '\b':
+			buf = append(buf, '\\', 'b')
+		case '\f':
+			buf = append(buf, '\\', 'f')
+
 		default:
-			buf = append(buf, c)
+			if c < 0x20 {
+				buf = append(buf, '\\', 'u', '0', '0', hex[c>>4], hex[c&0xF])
+			} else {
+				buf = append(buf, c)
+			}
 		}
 	}
 
-	buf = append(buf, '"')
-
-	return buf
+	return append(buf, '"')
 }
 
 // appendArgsQuotedJSON writes `"arg0 arg1 …"` directly into buf without any

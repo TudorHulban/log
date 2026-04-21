@@ -2,14 +2,14 @@ package log
 
 func (l *Logger) labelWarn() string {
 	if l.withColor {
-		return colorWarn(logLevels[LevelWARN])
+		return colorWarn(logLevels[LevelWarn])
 	}
 
-	return logLevels[LevelWARN]
+	return logLevels[LevelWarn]
 }
 
 func (l *Logger) Warn(args ...any) {
-	if Level(l.logLevel.Load()) > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWarn {
 		return
 	}
 
@@ -19,7 +19,7 @@ func (l *Logger) Warn(args ...any) {
 }
 
 func (l *Logger) Warnf(format string, args ...any) {
-	if Level(l.logLevel.Load()) > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWarn {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (l *Logger) Warnf(format string, args ...any) {
 }
 
 func (l *Logger) Warnw(msg string, keysAndValues ...any) {
-	if Level(l.logLevel.Load()) > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWarn {
 		return
 	}
 
@@ -39,7 +39,7 @@ func (l *Logger) Warnw(msg string, keysAndValues ...any) {
 }
 
 func (l *Logger) WarnFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelWARN {
+	if Level(l.logLevel.Load()) > LevelWarn {
 		return
 	}
 

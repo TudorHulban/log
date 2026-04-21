@@ -91,6 +91,24 @@ func TestAppendJSONString(t *testing.T) {
 			input:      "test",
 			expected:   []byte("test"),
 		},
+		{
+			name:       "11. NUL character",
+			initialBuf: make([]byte, 0),
+			input:      "\x00",
+			expected:   []byte(`\u0000`),
+		},
+		{
+			name:       "12. BEL character",
+			initialBuf: make([]byte, 0),
+			input:      "\x07",
+			expected:   []byte(`\u0007`),
+		},
+		{
+			name:       "13. Mixed controls",
+			initialBuf: make([]byte, 0),
+			input:      "A\x01\n\x1FZ",
+			expected:   []byte(`A\u0001\n\u001fZ`),
+		},
 	}
 
 	for _, tt := range tests {

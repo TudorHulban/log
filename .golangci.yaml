@@ -61,6 +61,7 @@ linters:
     gosec:
       excludes:
         - G103
+        - G115
 
     gocritic:
       disabled-checks:

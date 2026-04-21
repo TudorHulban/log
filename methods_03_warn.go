@@ -1,6 +1,6 @@
 package log
 
-func (l Logger) labelWarn() string {
+func (l *Logger) labelWarn() string {
 	if l.withColor {
 		return colorWarn(logLevels[LevelWARN])
 	}

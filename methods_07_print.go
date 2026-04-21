@@ -15,7 +15,7 @@ import (
 // PrintRaw is always safe.
 // The caller owns the buffer and the reservation is sized to match.
 
-func (l Logger) labelPrint() string {
+func (l *Logger) labelPrint() string {
 	if l.withColor {
 		return colorDebug(logLevels[l.GetLogLevel()])
 	}

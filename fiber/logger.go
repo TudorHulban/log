@@ -74,13 +74,13 @@ func (f *FiberLogger) Printw(msg string, keysAndValues ...any) {
 }
 
 // --- Fiber-required structured logging ---
-func (f *FiberLogger) With(args ...any) *FiberLogger {
+func (f *FiberLogger) With(args ...any) fiberlog.AllLogger[*log.Logger] {
 	// Your logger does not support structured fields natively.
 	// No-op is acceptable.
 	return f
 }
 
-func (f *FiberLogger) WithGroup(name string) *FiberLogger {
+func (f *FiberLogger) WithGroup(name string) fiberlog.AllLogger[*log.Logger] {
 	// Same: no-op unless you want grouping.
 	return f
 }

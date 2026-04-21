@@ -32,12 +32,14 @@ func main() {
 	// 3. Logger
 	l, err := log.NewLogger(
 		&log.ParamsNewLogger{
-			Ingestor:      ingestor,
-			LoggerLevel:   log.LevelTrace,
-			WithTimestamp: timestamp.TimestampRFC3339Bucharest,
-			WithCaller:    true,
-			WithColor:     false,
-			WithJSON:      true,
+			Ingestor:    ingestor,
+			LoggerLevel: log.LevelTrace,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithCaller:      true,
+			WithColor:       false,
+			WithJSON:        true,
 		},
 	)
 	if err != nil {
@@ -61,20 +63,24 @@ func main() {
 	app := fiber.New()
 
 	// 4. IMPORTANT: Add the logger middleware
-	app.Use(logger.New(logger.Config{
-		LoggerFunc: func(c fiber.Ctx, data *logger.Data, cfg *logger.Config) error {
-			fiberLogger.L.Info(
-				fmt.Sprintf("%s %s %d %s",
-					c.Method(),                // GET / POST etc
-					c.OriginalURL(),           // full path with query
-					data.Stop.Sub(data.Start), // latency
-					c.IP(),                    // client IP
-				),
-			)
+	app.Use(
+		logger.New(
+			logger.Config{
+				LoggerFunc: func(c fiber.Ctx, data *logger.Data, cfg *logger.Config) error {
+					fiberLogger.L.Info(
+						fmt.Sprintf("%s %s %d %s",
+							c.Method(),                // GET / POST etc
+							c.OriginalURL(),           // full path with query
+							data.Stop.Sub(data.Start), // latency
+							c.IP(),                    // client IP
+						),
+					)
 
-			return nil
-		},
-	}))
+					return nil
+				},
+			},
+		),
+	)
 
 	// 6. Routes
 	app.Get(

@@ -9,7 +9,7 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-type Logger struct {
+type Logger struct { //nolint:govet
 	// Cache line 0 (hot, bytes 0..63):
 	// - atomic level and per-level estimated sizes are read on every log call.
 	// - booleans and callerLevel are also hot (formatting + caller decision).
@@ -30,7 +30,9 @@ type Logger struct {
 
 	ingestor    *bytearena.Ingestor // 8
 	fnTimestamp timestamp.Timestamp // 8
-	_pad0       [16]byte            // pad to end of 64‑byte cache line
+
+	// pad to end of 64‑byte cache line
+	_pad0 [16]byte //nolint:unused
 
 	// Cache line 1 (cold/rare, bytes 64..127):
 	// - fatalWriter is rare (fatal path). Keep it separate so it doesn't evict hot state.

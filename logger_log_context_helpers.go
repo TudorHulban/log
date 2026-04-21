@@ -100,6 +100,7 @@ func appendJSONEscaped(buf []byte, s string) []byte {
 
 func appendQuotedJSON(buf []byte, s string) []byte {
 	buf = append(buf, '"')
+
 	const hex = "0123456789abcdef"
 
 	for i := 0; i < len(s); i++ {

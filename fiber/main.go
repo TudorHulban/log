@@ -38,7 +38,7 @@ func main() {
 			WithFatalWriter: os.Stdout,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
-			WithColor:       false,
+			WithColor:       true,
 			WithJSON:        true,
 		},
 	)

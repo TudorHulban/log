@@ -1,6 +1,7 @@
 package log
 
 import (
+	"runtime"
 	"testing"
 
 	"log"
@@ -9,12 +10,14 @@ import (
 	"github.com/tudorhulban/bytearena/helpers"
 )
 
-// BenchmarkStandardLogger-16    	 5932288	       201.5 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkStandardLogger-16    	 5514883	       216.9 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkStandardLogger(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 
 	log.SetOutput(&writer)
 	log.SetFlags(log.LstdFlags)
+
+	runtime.GC()
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -37,6 +40,8 @@ func BenchmarkStandardLoggerParallel(b *testing.B) {
 
 	log.SetOutput(&writer)
 	log.SetFlags(log.LstdFlags)
+
+	runtime.GC()
 
 	b.ReportAllocs()
 	b.ResetTimer()

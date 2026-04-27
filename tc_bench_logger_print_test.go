@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,7 +14,7 @@ import (
 
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
 
-// BenchmarkLogger_Print-16    	21076066	        58.04 ns/op	      64 B/op	       1 allocs/op
+// BenchmarkLogger_Print-16    	21646054	        56.56 ns/op	      64 B/op	       1 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
@@ -36,6 +37,8 @@ func BenchmarkLogger_Print(b *testing.B) {
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
 
+	runtime.GC()
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -47,7 +50,7 @@ func BenchmarkLogger_Print(b *testing.B) {
 	<-chIngestionEnd
 }
 
-// BenchmarkLogger_PrintWithNoTimestamp-16    	30921496	        40.02 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_PrintWithNoTimestamp-16    	39153303	        30.57 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -69,6 +72,8 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
 
+	runtime.GC()
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -80,7 +85,7 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	<-chIngestionEnd
 }
 
-// BenchmarkLogger_PrintRaw-16    	73973916	        16.56 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_PrintRaw-16    	69086016	        17.51 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_PrintRaw(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -102,12 +107,14 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
 
+	runtime.GC()
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
 		logger.PrintRaw(
-			[]byte("xxxxxxxxxxxxxxxxxxx"),
+			[]byte("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"), // 32 bytes
 		)
 	}
 
@@ -116,11 +123,11 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Printf/1.nil_timestamp-16         	 9110398	       130.9 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Printf/2.standard_timestamp-16    	 5543228	       217.1 ns/op	     200 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/3.yyyy-month_timestamp-16  	 5637098	       213.8 ns/op	     200 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/4.nano_timestamp-16        	 4952216	       241.2 ns/op	     200 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/5.nano_timestamp_-_json-16 	 3197422	       377.2 ns/op	     360 B/op	       4 allocs/op
+// BenchmarkLogger_Printf/1.nil_timestamp-16         	 9344631	       129.9 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Printf/2.standard_timestamp-16    	 5545965	       215.4 ns/op	     200 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/3.yyyy-month_timestamp-16  	 5666437	       214.1 ns/op	     200 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/4.nano_timestamp-16        	 5174826	       233.0 ns/op	     200 B/op	       3 allocs/op
+// BenchmarkLogger_Printf/5.nano_timestamp_-_json-16 	 3157383	       380.8 ns/op	     360 B/op	       4 allocs/op
 func BenchmarkLogger_Printf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -178,6 +185,8 @@ func BenchmarkLogger_Printf(b *testing.B) {
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
 
+				runtime.GC()
+
 				b.ReportAllocs()
 				b.ResetTimer()
 
@@ -196,11 +205,11 @@ func BenchmarkLogger_Printf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_PrintFast/1._standard_timestamp-16         	19917823	        61.09 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/2._yyyy-month_timestamp-16       	19838832	        61.52 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/3._nano_timestamp-16             	18381339	        65.52 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/4._nano_timestamp_-_json-16      	18243904	        65.66 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/5._nil_timestamp-16              	23799656	        50.48 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_PrintFast/1._standard_timestamp-16         	25063872	        49.11 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_PrintFast/2._yyyy-month_timestamp-16       	24362606	        49.18 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_PrintFast/3._nano_timestamp-16             	22495556	        53.10 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_PrintFast/4._nano_timestamp_-_json-16      	22512678	        53.10 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_PrintFast/5._nil_timestamp-16              	28439660	        40.96 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger_PrintFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -255,6 +264,8 @@ func BenchmarkLogger_PrintFast(b *testing.B) {
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
+
+				runtime.GC()
 
 				b.ReportAllocs()
 				b.ResetTimer()

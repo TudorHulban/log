@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"runtime"
 	"testing"
 	"time"
@@ -10,7 +11,9 @@ import (
 	"github.com/tudorhulban/bytearena/helpers"
 )
 
-// BenchmarkPhuslu_OneField-16    	 8937609	       135.2 ns/op	       0 B/op	       0 allocs/op
+// go test -run '^$' -bench '^BenchmarkPhuslu_OneField$' -benchmem
+
+// BenchmarkPhuslu_OneField-16    	 9124488	       130.5 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkPhuslu_OneField(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 
@@ -34,9 +37,13 @@ func BenchmarkPhuslu_OneField(b *testing.B) {
 	)
 }
 
-// BenchmarkPhuslu_Parallel_OneField-16    	 8992526	       134.6 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=1-16         	 8888434	       131.1 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=2-16         	16020363	        74.65 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=3-16         	23736805	        50.80 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=4-16         	23618685	        50.08 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
-	runtime.GOMAXPROCS(1)
+	gomaxprocsValues := []int{1, 2, 3, 4}
 
 	writer := helpers.CountWriterNoBuffer{}
 
@@ -50,22 +57,36 @@ func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
 	b.ResetTimer()
 	b.SetParallelism(16)
 
-	b.RunParallel(
-		func(pb *testing.PB) {
-			for pb.Next() {
-				logger.Info().
-					Str("area", "some area").
-					Msg("benchmark test")
-			}
-		},
-	)
+	for _, g := range gomaxprocsValues {
+		inner := g
 
-	require.NotZero(b,
+		b.Run(
+			fmt.Sprintf("gomaxprocs=%d", g),
+			func(b *testing.B) {
+				prev := runtime.GOMAXPROCS(inner)
+				defer runtime.GOMAXPROCS(prev)
+
+				b.RunParallel(
+					func(pb *testing.PB) {
+						for pb.Next() {
+							logger.Info().
+								Str("area", "some area").
+								Msg("benchmark test")
+						}
+					},
+				)
+			},
+		)
+	}
+
+	require.NotZero(
+		b,
 		writer.TotalBytesWritten.Load(),
+		"1. writer must record bytes",
 	)
 }
 
-// BenchmarkPhuslu_WithFields-16    	 6391726	       187.9 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_WithFields-16    	 6631579	       179.0 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkPhuslu_WithFields(b *testing.B) {
 	var writer helpers.NoopWriter
 

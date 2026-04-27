@@ -3,7 +3,9 @@ package log
 import (
 	"context"
 	"os"
+	"runtime"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
@@ -12,12 +14,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Debugf/1.nil_timestamp-16         	19284004	        65.89 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/2.standard_timestamp-16    	10270768	       118.5 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/3.yyyy-month_timestamp-16  	10580866	       115.2 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/4.nano_timestamp-16        	 9146551	       133.0 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/5.nano_timestamp_-_json-16 	 6894847	       179.1 ns/op	     112 B/op	       3 allocs/op
-// BenchmarkLogger_Debugf/6.nano_-_json,_caller-16   	 2191314	       551.9 ns/op	     552 B/op	       6 allocs/op
+// BenchmarkLogger_Debugf/1.nil_timestamp-16         	19058520	        65.01 ns/op	      72 B/op	       1 allocs/op
+// BenchmarkLogger_Debugf/2.standard_timestamp-16    	10527141	       115.8 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Debugf/3.yyyy-month_timestamp-16  	10778720	       112.3 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Debugf/4.nano_timestamp-16        	 9408266	       128.9 ns/op	      72 B/op	       1 allocs/op
+// BenchmarkLogger_Debugf/5.nano_timestamp_-_json-16 	 7244959	       167.2 ns/op	     112 B/op	       2 allocs/op
+// BenchmarkLogger_Debugf/6.nano_-_json,_caller-16   	 2203927	       545.8 ns/op	     552 B/op	       5 allocs/op
 func BenchmarkLogger_Debugf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -67,6 +69,8 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 				ctx, cancel := context.WithCancel(context.Background())
 				chIngestionEnd := ingestor.StartIngestion(ctx)
 
+				time.Sleep(10 * time.Millisecond) // warmup
+
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:    ingestor,
@@ -80,6 +84,8 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
+
+				runtime.GC()
 
 				b.ReportAllocs()
 				b.ResetTimer()
@@ -99,12 +105,12 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_DebugFast/1.nil_timestamp-16         	 8259055	       142.5 ns/op	      52 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/2.standard_timestamp-16    	 7686872	       157.4 ns/op	      52 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/3.yyyy-month_timestamp-16  	 7665985	       154.4 ns/op	      52 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/4.nano_timestamp-16        	 7306746	       163.1 ns/op	      52 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/5.nano_timestamp_-_json-16 	 6636604	       183.7 ns/op	      57 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/6.nano_-_json,_caller-16   	 4004169	       298.9 ns/op	     131 B/op	       3 allocs/op
+// BenchmarkLogger_DebugFast/1.nil_timestamp-16         	10002454	       118.3 ns/op	      50 B/op	       2 allocs/op
+// BenchmarkLogger_DebugFast/2.standard_timestamp-16    	 8879348	       132.0 ns/op	      50 B/op	       2 allocs/op
+// BenchmarkLogger_DebugFast/3.yyyy-month_timestamp-16  	 8820680	       131.8 ns/op	      50 B/op	       2 allocs/op
+// BenchmarkLogger_DebugFast/4.nano_timestamp-16        	 8543960	       138.1 ns/op	      50 B/op	       2 allocs/op
+// BenchmarkLogger_DebugFast/5.nano_timestamp_-_json-16 	 7802482	       153.5 ns/op	      55 B/op	       2 allocs/op
+// BenchmarkLogger_DebugFast/6.nano_-_json,_caller-16   	 4751898	       252.7 ns/op	     121 B/op	       3 allocs/op
 func BenchmarkLogger_DebugFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -167,6 +173,8 @@ func BenchmarkLogger_DebugFast(b *testing.B) {
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
+
+				runtime.GC()
 
 				b.ReportAllocs()
 				b.ResetTimer()

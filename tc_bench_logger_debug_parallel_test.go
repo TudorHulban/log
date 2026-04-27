@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
@@ -13,12 +14,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_DebugFast/1.nil_timestamp-16         	17924839	        64.72 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/2.standard_timestamp-16    	18153364	        66.01 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/3.yyyy-month_timestamp-16  	17773741	        65.52 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/4.nano_timestamp-16        	18171062	        66.12 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/5.nano_timestamp_-_json-16 	18029192	        65.55 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_DebugFast/6.nano_-_json,_caller-16   	18139165	        65.86 ns/op	      40 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/1.nil_timestamp-16         	18869478	        65.65 ns/op	      40 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/2.standard_timestamp-16    	18107064	        64.76 ns/op	      40 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/3.yyyy-month_timestamp-16  	17515292	        65.47 ns/op	      40 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/4.nano_timestamp-16        	17986500	        65.53 ns/op	      40 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/5.nano_timestamp_-_json-16 	17570806	        65.62 ns/op	      40 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_DebugFast/6.nano_-_json,_caller-16   	17852004	        65.50 ns/op	      40 B/op	       2 allocs/op
 func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
@@ -70,6 +71,8 @@ func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
 				ctx, cancel := context.WithCancel(context.Background())
 				chIngestionEnd := ingestor.StartIngestion(ctx)
 
+				time.Sleep(10 * time.Millisecond) // warmup
+
 				logger, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:    ingestor,
@@ -83,6 +86,8 @@ func BenchmarkLogger_Parallel_DebugFast(b *testing.B) {
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
+
+				runtime.GC()
 
 				b.SetParallelism(16)
 				b.ReportAllocs()

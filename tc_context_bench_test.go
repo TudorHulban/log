@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,9 +13,9 @@ import (
 )
 
 // TODO; alloc?
-// BenchmarkContext_NoJSON_OneField-16    	 7723856	       156.4 ns/op	      29 B/op	       1 allocs/op
+// BenchmarkContext_NoJSON_OneField-16    	 9055264	       132.8 ns/op	      27 B/op	       1 allocs/op
 func BenchmarkContext_NoJSON_OneField(b *testing.B) {
-	var writer helpers.NoopWriter
+	writer := helpers.CountWriterNoBuffer{}
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
 	require.NoError(b, errCrIngestor)
@@ -37,6 +38,8 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	logContext := NewLogContext(logger).
 		WithRoot("service", "auth")
 
+	runtime.GC()
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -50,13 +53,17 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 
 	cancel()
 	<-chIngestionEnd
+
+	require.NotZero(b,
+		writer.TotalBytesWritten.Load(),
+	)
 }
 
 // go test -run=^$ -bench=^BenchmarkContext_NoJSON_MultipleFields$ -benchmem -memprofile=mem.out
 // go tool pprof -alloc_objects mem.out
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_MultipleFields-16    	 5979236	       201.2 ns/op	      30 B/op	       1 allocs/op
+// BenchmarkContext_NoJSON_MultipleFields-16    	 6536090	       182.7 ns/op	      29 B/op	       1 allocs/op
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -88,6 +95,8 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 		SetInt("req_id", 12345).
 		SetBool("cache_hit", true)
 
+	runtime.GC()
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -103,7 +112,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	}
 }
 
-// BenchmarkContext_WithJSON_OneField-16    	 7922517	       152.2 ns/op	      34 B/op	       1 allocs/op
+// BenchmarkContext_WithJSON_OneField-16    	 8952406	       134.6 ns/op	      31 B/op	       1 allocs/op
 func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -134,6 +143,8 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 	logContext := NewLogContext(logger).
 		WithRoot("service", "auth")
 
+	runtime.GC()
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -147,7 +158,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-16    	 5964135	       202.6 ns/op	      36 B/op	       2 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-16    	 6506314	       185.1 ns/op	      35 B/op	       2 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -179,6 +190,8 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 		WithRoot("service", "auth").
 		SetInt("req_id", 12345).
 		SetBool("cache_hit", true)
+
+	runtime.GC()
 
 	b.ReportAllocs()
 	b.ResetTimer()

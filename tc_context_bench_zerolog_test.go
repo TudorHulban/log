@@ -1,6 +1,8 @@
 package log
 
 import (
+	"fmt"
+	"os"
 	"runtime"
 	"testing"
 
@@ -9,24 +11,49 @@ import (
 	"github.com/tudorhulban/bytearena/helpers"
 )
 
-// BenchmarkZerolog_Serial_OneField-16    	 7467723	       158.3 ns/op	       0 B/op	       0 allocs/op
-func BenchmarkZerolog_Serial_OneField(b *testing.B) {
-	writer := helpers.CountWriterNoBuffer{}
-
-	logger := zerolog.New(&writer).With().
+func TestZerolog_OneField(t *testing.T) {
+	logger := zerolog.New(os.Stdout).With().
 		Timestamp().
 		Logger()
 
-	b.ReportAllocs()
-	b.ResetTimer()
+	// {"level":"info","area":"some area","time":"2026-04-28T17:33:32+03:00","message":"benchmark test"}
 
-	for i := 0; b.Loop(); i++ {
-		logger.Info().
-			Str("area", "some area").
-			Msg("benchmark test")
+	logger.Info().
+		Str("area", "some area").
+		Msg("benchmark test")
+}
+
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkZerolog_OneField/G1-16 	 7227042	       166.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_OneField/G2-16 	 7211571	       165.2 ns/op	       0 B/op	       0 allocs/op
+func BenchmarkZerolog_OneField(b *testing.B) {
+	gomaxprocsValues := []int{1, 2}
+	writer := helpers.CountWriterNoBuffer{}
+
+	for _, g := range gomaxprocsValues {
+		b.Run(
+			fmt.Sprintf("G%d", g),
+			func(b *testing.B) {
+				prev := runtime.GOMAXPROCS(g)
+				defer runtime.GOMAXPROCS(prev)
+
+				logger := zerolog.New(&writer).With().
+					Timestamp().
+					Logger()
+
+				b.ReportAllocs()
+				b.ResetTimer()
+
+				for b.Loop() {
+					logger.Info().
+						Str("area", "some area").
+						Msg("benchmark test")
+				}
+
+				require.NotZero(b, writer.TotalBytesWritten.Load())
+			},
+		)
 	}
-
-	_ = writer.TotalBytesWritten.Load() // force writer to stay live
 }
 
 // BenchmarkZerolog_Parallel_OneField-16    	 7567926	       156.4 ns/op	       0 B/op	       0 allocs/op

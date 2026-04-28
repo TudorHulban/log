@@ -17,13 +17,17 @@ type formatterConfig struct {
 	fields []field // ephemeral fields
 }
 
+// LogContext acts as the root.
 type LogContext struct {
 	logger *Logger
 	cfg    atomic.Pointer[formatterConfig]
 }
 
 func NewLogContext(logger *Logger) *LogContext {
-	f := LogContext{logger: logger}
+	f := LogContext{
+		logger: logger,
+	}
+
 	f.cfg.Store(&formatterConfig{fields: nil})
 
 	return &f
@@ -45,16 +49,6 @@ func (ctx *LogContext) WithRoot(key string, value any) *LogContext {
 	ctx.cfg.Store(newCfg)
 
 	return ctx
-}
-
-func (ctx *LogContext) With(key string, value any) *Entry {
-	e, _ := entryPool.Get().(*Entry) //nolint:revive
-
-	e.formatter = ctx
-	e.fields = e.fields[:0] // reset slice
-	e.fields = append(e.fields, makeField(key, value))
-
-	return e
 }
 
 func (ctx *LogContext) SetString(key, value string) *LogContext {
@@ -156,4 +150,30 @@ func (ctx *LogContext) Print(args ...any) {
 
 	copy(region.Buf(), buf)
 	ctx.logger.ingestor.EndWrite(region)
+}
+
+func (ctx *LogContext) With(key string, value any) *Entry {
+	e, _ := entryPool.Get().(*Entry) //nolint:revive
+
+	e.formatter = ctx
+	e.fields = e.fields[:0] // reset slice
+	e.fields = append(e.fields, makeField(key, value))
+
+	return e
+}
+
+func (ctx *LogContext) WithString(key, value string) *Entry {
+	e, _ := entryPool.Get().(*Entry) //nolint:revive
+
+	e.formatter = ctx
+	e.fields = e.fields[:0] // reset slice
+	e.fields = append(
+		e.fields,
+		field{
+			key:         key,
+			valueString: value,
+		},
+	)
+
+	return e
 }

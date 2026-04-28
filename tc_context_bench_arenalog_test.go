@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"runtime"
 	"testing"
@@ -12,14 +13,13 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// TODO; alloc?
-// BenchmarkContext_NoJSON_OneField-16    	 9055264	       132.8 ns/op	      27 B/op	       1 allocs/op
-func BenchmarkContext_NoJSON_OneField(b *testing.B) {
-	writer := helpers.CountWriterNoBuffer{}
-
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
-	require.NoError(b, errCrIngestor)
-	require.NotNil(b, ingestor)
+func TestArenalog_OneField(t *testing.T) {
+	ingestor, errCrIngestor := bytearena.NewIngestor(
+		bytearena.Size100K(),
+		os.Stdout,
+	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
@@ -27,36 +27,82 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 	logger, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: LevelDebug,
+			LoggerLevel: LevelInfo,
 
 			WithFatalWriter: os.Stdout,
 			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithJSON:        true,
 		},
 	)
-	require.NoError(b, errCrLogger)
+	require.NoError(t, errCrLogger)
 
-	logContext := NewLogContext(logger).
-		WithRoot("service", "auth")
+	logContext := NewLogContext(logger)
 
-	runtime.GC()
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for i := 0; b.Loop(); i++ {
-		// 1. Create request with 4 attributes
-		entry := logContext.With("area", "some area")
-
-		// 2. Print
-		entry.Print("benchmark test")
-	}
+	entry := logContext.WithString("area", "some area")
+	entry.Info().Msg("benchmark test")
 
 	cancel()
 	<-chIngestionEnd
+}
 
-	require.NotZero(b,
-		writer.TotalBytesWritten.Load(),
-	)
+// TODO; alloc?
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkContext_NoJSON_OneField/G1-16 	18294004	        74.96 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkContext_NoJSON_OneField/G2-16 	 9611584	       121.9 ns/op	      27 B/op	       1 allocs/op
+func BenchmarkContext_NoJSON_OneField(b *testing.B) {
+	gomaxprocsValues := []int{1, 2}
+	writer := helpers.CountWriterNoBuffer{}
+
+	for _, g := range gomaxprocsValues {
+		b.Run(
+			fmt.Sprintf("G%d", g),
+			func(b *testing.B) {
+				prev := runtime.GOMAXPROCS(g)
+				defer runtime.GOMAXPROCS(prev)
+
+				ingestor, errCrIngestor := bytearena.NewIngestor(
+					bytearena.Size100K(),
+					&writer,
+				)
+				require.NoError(b, errCrIngestor)
+				require.NotNil(b, ingestor)
+
+				ctx, cancel := context.WithCancel(context.Background())
+				chIngestionEnd := ingestor.StartIngestion(ctx)
+
+				logger, errCrLogger := NewLogger(
+					&ParamsNewLogger{
+						Ingestor:    ingestor,
+						LoggerLevel: LevelDebug,
+
+						WithFatalWriter: os.Stdout,
+						WithTimestamp:   timestamp.TimestampRFC3339,
+					},
+				)
+				require.NoError(b, errCrLogger)
+
+				logContext := NewLogContext(logger).
+					WithRoot("service", "auth")
+
+				runtime.GC()
+
+				b.ReportAllocs()
+				b.ResetTimer()
+
+				for b.Loop() {
+					entry := logContext.WithString("area", "some area")
+					entry.Info().Msg("benchmark test")
+				}
+
+				cancel()
+				<-chIngestionEnd
+
+				require.NotZero(b,
+					writer.TotalBytesWritten.Load(),
+				)
+			},
+		)
+	}
 }
 
 // go test -run=^$ -bench=^BenchmarkContext_NoJSON_MultipleFields$ -benchmem -memprofile=mem.out
@@ -108,7 +154,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 			WithBool("success", true)
 
 		// 2. Print
-		entry.Print("benchmark test")
+		entry.Msg("benchmark test")
 	}
 }
 
@@ -153,7 +199,7 @@ func BenchmarkContext_WithJSON_OneField(b *testing.B) {
 		entry := logContext.With("area", "some area")
 
 		// 2. Print
-		entry.Print("benchmark test")
+		entry.Msg("benchmark test")
 	}
 }
 
@@ -204,6 +250,6 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 			WithBool("success", true)
 
 		// 2. Print
-		entry.Print("benchmark test")
+		entry.Msg("benchmark test")
 	}
 }

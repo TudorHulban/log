@@ -2,8 +2,6 @@ package log
 
 import (
 	"sync"
-
-	"github.com/tudorhulban/log/helpers"
 )
 
 var entryPool = sync.Pool{
@@ -19,6 +17,7 @@ var entryPool = sync.Pool{
 type Entry struct {
 	formatter *LogContext
 	fields    []field // per-request, owned by this Entry
+	level     Level
 }
 
 // With allocates.
@@ -77,179 +76,44 @@ func (e *Entry) WithBool(key string, value bool) *Entry {
 	return e
 }
 
-func (e *Entry) Print(args ...any) {
-	cfg := e.formatter.cfg.Load()
-	logger := e.formatter.logger
+func (e *Entry) Trace() *Entry {
+	e.level = LevelTrace
 
-	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSizeOverall)
-	if errWrite != nil {
-		entryPool.Put(e)
+	return e
+}
 
-		return
-	}
+func (e *Entry) Debug() *Entry {
+	e.level = LevelDebug
 
-	buf := region.Buf()[:0]
+	return e
+}
 
-	// JSON MODE
-	if logger.withJSON {
-		buf = append(buf, '{')
+func (e *Entry) Info() *Entry {
+	e.level = LevelInfo
 
-		// timestamp
-		if logger.fnTimestamp != nil {
-			buf = append(buf, `"ts":`...)
-			buf = helpers.AppendJSON_Quoted(
-				buf,
-				string(logger.fnTimestamp(nil)),
-			)
-			buf = append(buf, ',')
-		}
+	return e
+}
 
-		// root field
-		if cfg.root != nil {
-			fld := cfg.root
+func (e *Entry) Warn() *Entry {
+	e.level = LevelWarn
 
-			buf = append(buf, '"')
-			buf = append(buf, fld.key...)
-			buf = append(buf, '"', ':')
+	return e
+}
 
-			switch fld.kind {
-			case kindString:
-				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
-			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
-			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
-			}
+func (e *Entry) Error() *Entry {
+	e.level = LevelError
 
-			buf = append(buf, ',')
-		}
+	return e
+}
 
-		// context fields
-		for ix := range cfg.fields {
-			fld := &cfg.fields[ix]
+func (e *Entry) Fatal() *Entry {
+	e.level = LevelFatal
 
-			buf = append(buf, '"')
-			buf = append(buf, fld.key...)
-			buf = append(buf, '"', ':')
+	return e
+}
 
-			switch fld.kind {
-			case kindString:
-				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
-			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
-			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
-			}
+func (e *Entry) Panic() *Entry {
+	e.level = LevelPanic
 
-			buf = append(buf, ',')
-		}
-
-		// entry fields
-		for ix := range e.fields {
-			fld := &e.fields[ix]
-
-			buf = append(buf, '"')
-			buf = append(buf, fld.key...)
-			buf = append(buf, '"', ':')
-
-			switch fld.kind {
-			case kindString:
-				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
-			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
-			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
-			}
-
-			buf = append(buf, ',')
-		}
-
-		// message
-		buf = append(buf, `"msg":`...)
-		buf = helpers.AppendJSON_Arguments(buf, args)
-		buf = append(buf, '}', '\n')
-
-		copy(region.Buf(), buf)
-		logger.ingestor.EndWrite(region)
-		entryPool.Put(e)
-
-		return
-	}
-
-	// TEXT MODE (fast path)
-	if logger.fnTimestamp != nil {
-		buf = logger.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
-
-	// root
-	if cfg.root != nil {
-		fld := cfg.root
-
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
-
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
-
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
-
-		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
-		}
-
-		buf = append(buf, ' ')
-	}
-
-	// context fields
-	for ix := range cfg.fields {
-		fld := &cfg.fields[ix]
-
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
-
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
-
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
-
-		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
-		}
-
-		buf = append(buf, ' ')
-	}
-
-	// entry fields
-	for ix := range e.fields {
-		fld := &e.fields[ix]
-
-		buf = append(buf, fld.key...)
-		buf = append(buf, '=')
-
-		switch fld.kind {
-		case kindString:
-			buf = append(buf, fld.valueString...)
-
-		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
-
-		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
-		}
-
-		buf = append(buf, ' ')
-	}
-
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	copy(region.Buf(), buf)
-	logger.ingestor.EndWrite(region)
-
-	entryPool.Put(e)
+	return e
 }

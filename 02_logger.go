@@ -15,18 +15,19 @@ type Logger struct { //nolint:govet
 	// - booleans and callerLevel are also hot (formatting + caller decision).
 	// - ingestor and fnTimestamp are hot-ish and placed here so a single cache load
 	//   brings the common hot state into L1.
-	logLevel                    atomic.Uint32 // 4
-	estimatedMessageSizeOverall uint32        // 4
-	estimatedMessageSizeTrace   uint32        // 4
-	estimatedMessageSizeDebug   uint32        // 4
-	estimatedMessageSizeInfo    uint32        // 4
-	estimatedMessageSizeWarn    uint32        // 4
-	estimatedMessageSizeError   uint32        // 4
+	logLevel atomic.Uint32 // 4
 
+	estimatedMessageSizeOverall uint32 // 4
+	estimatedMessageSizeTrace   uint32 // 4
+	estimatedMessageSizeDebug   uint32 // 4
+	estimatedMessageSizeInfo    uint32 // 4
+	estimatedMessageSizeWarn    uint32 // 4
+	estimatedMessageSizeError   uint32 // 4
+
+	callerLevel uint8 // 1
 	withCaller  bool  // 1
 	withColor   bool  // 1
 	withJSON    bool  // 1
-	callerLevel uint8 // 1
 
 	ingestor    *bytearena.Ingestor // 8
 	fnTimestamp timestamp.Timestamp // 8

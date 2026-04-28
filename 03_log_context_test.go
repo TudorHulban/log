@@ -46,9 +46,9 @@ func TestContext(t *testing.T) {
 	f.SetString("area", "some area")
 	f.Print("login ok again")
 
-	f.With("xxx", 2).Print()
-	f.With("yyy", 3).Print()
-	f.With("zzzz", 4.3).Print()
+	f.With("xxx", 2).Msg()
+	f.With("yyy", 3).Msg()
+	f.With("zzzz", 4.3).Msg()
 
 	cancel()
 	<-chIngestionEnd
@@ -88,9 +88,9 @@ func Test_With_JSON_Context(t *testing.T) {
 
 	f.SetString("area", "some area")
 
-	f.With("xxx", 2).Print("1")
-	f.With("yyy", 3).Print("2")
-	f.With("zzzz", 4.3).Print("3")
+	f.With("xxx", 2).Msg("1")
+	f.With("yyy", 3).Msg("2")
+	f.With("zzzz", 4.3).Msg("3")
 
 	cancel()
 	<-chIngestionEnd

@@ -30,28 +30,40 @@ func TestPhuslu_OneField(t *testing.T) {
 
 // go test -run '^$' -bench '^BenchmarkPhuslu_OneField$' -benchmem
 
-// BenchmarkPhuslu_OneField-16    	 9124488	       130.5 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkPhuslu_OneField/G1-16 	 8996448	       134.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_OneField/G2-16 	 9046921	       132.7 ns/op	       0 B/op	       0 allocs/op
+
 func BenchmarkPhuslu_OneField(b *testing.B) {
+	gomaxprocsValues := []int{1, 2}
 	writer := helpers.CountWriterNoBuffer{}
 
-	logger := log.Logger{
-		Level:      log.InfoLevel,
-		TimeFormat: time.RFC3339,
-		Writer:     &log.IOWriter{Writer: &writer},
+	for _, g := range gomaxprocsValues {
+		b.Run(
+			fmt.Sprintf("G%d", g),
+			func(b *testing.B) {
+				prev := runtime.GOMAXPROCS(g)
+				defer runtime.GOMAXPROCS(prev)
+
+				logger := log.Logger{
+					Level:      log.InfoLevel,
+					TimeFormat: time.RFC3339,
+					Writer:     &log.IOWriter{Writer: &writer},
+				}
+
+				b.ReportAllocs()
+				b.ResetTimer()
+
+				for b.Loop() {
+					logger.Info().
+						Str("area", "some area").
+						Msg("benchmark test")
+				}
+
+				require.NotZero(b, writer.TotalBytesWritten.Load())
+			},
+		)
 	}
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		logger.Info().
-			Str("area", "some area").
-			Msg("benchmark test")
-	}
-
-	require.NotZero(b,
-		writer.TotalBytesWritten.Load(),
-	)
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics

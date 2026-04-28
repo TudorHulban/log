@@ -5,12 +5,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkAll/Phuslu_OneField/G1-16      	 8965804	       132.7 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Phuslu_OneField/G2-16      	 9009058	       133.2 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Zerolog_OneField/G1-16     	 7107508	       166.9 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Zerolog_OneField/G2-16     	 7181052	       166.4 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Arenalog_OneField/G1-16    	19193390	        73.14 ns/op	      16 B/op	       1 allocs/op
-// BenchmarkAll/Arenalog_OneField/G2-16    	 9027249	       129.3 ns/op	      31 B/op	       1 allocs/op
+// BenchmarkAll/Phuslu_OneField/G1-16      	 9060376	       131.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Phuslu_OneField/G2-16      	 9119248	       131.9 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Zerolog_OneField/G1-16     	 8059534	       149.5 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Zerolog_OneField/G2-16     	 7811768	       151.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Arenalog_OneField/G1-16    	29849972	        40.29 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Arenalog_OneField/G2-16    	12593814	        94.44 ns/op	      11 B/op	       0 allocs/op
 
 func BenchmarkAll(b *testing.B) {
 	b.Run("Phuslu_OneField", BenchmarkPhuslu_OneField)
@@ -19,12 +19,46 @@ func BenchmarkAll(b *testing.B) {
 }
 
 /*
-Arenalog — The Fastest Single‑Core Logger
+Arenalog — The most efficient single‑core logger
 
-Arenalog is a high‑performance structured logger designed for single‑core,
-latency‑critical systems. It delivers ~18 million log messages per second on a
-single AMD Ryzen Zen 3 core, making it the fastest option for:
+Arenalog is a high‑performance structured logger engineered for workloads where
+logging must remain predictable, low‑latency, and never become a burden inside
+constrained environments.
 
+Single‑core timings (G1):
+- Arenalog: 40.29 ns/op  (~24.8M logs/sec)
+- Phuslu:   131.4 ns/op  (~7.6M logs/sec)
+- Zerolog:  149.5 ns/op  (~6.6M logs/sec)
+
+Two‑goroutine timings (G2):
+- Arenalog: 94.44 ns/op  (~10.5M logs/sec)
+- Phuslu:   131.9 ns/op  (~7.5M logs/sec)
+- Zerolog:  151.4 ns/op  (~6.6M logs/sec)
+
+The G1 numbers show that normal applications can rely on Arenalog for all their
+logging without dedicating more than one core. The G2 slowdown reflects
+Arenalog’s design choice: it prioritizes single‑core determinism over
+multi‑core scaling. Multi‑threaded applications can use CPU affinity to pin
+Arenalog to a dedicated core and preserve its single‑core characteristics.
+
+Design goals:
+- deterministic behavior under load
+- minimal branching
+- zero allocations in the hot path
+- minimal GC interaction
+- predictable latency
+- optimized for 1‑core execution
+- simple ingestion pipeline
+- efficient timestamping and field handling
+
+When to choose Arenalog:
+- two threads containers where one thread shares the business logic with arenalog
+and the other thread can run business logic 100%.
+- CPU‑bound or latency‑sensitive systems
+- constrained hardware
+- environments where multi‑core scaling is irrelevant or undesirable
+
+Examples:
 - embedded systems
 - edge devices
 - proxies and gateways
@@ -35,45 +69,6 @@ single AMD Ryzen Zen 3 core, making it the fastest option for:
 - HPC nodes
 - mobile and game engines
 
-If your workload is single‑threaded, Arenalog outperforms every major Go logger.
-If your workload is multi‑threaded, you can use the CPU affinity option to pin Arenalog to
-a single core and keep its single‑core performance characteristics.
-
-Single‑core performance (GOMAXPROCS=1):
-- Arenalog: ~73 ns/op
-- Phuslu:   ~132 ns/op
-- Zerolog:  ~166 ns/op
-
-
-Design goals:
-- deterministic behavior
-- minimal branching
-- minimal GC pressure
-- zero allocations in the hot path
-- predictable latency
-- optimized for 1‑core execution
-- simple ingestion pipeline
-- fast timestamping
-- efficient field handling
-
-When to choose Arenalog:
-- single‑threaded workloads
-- CPU‑bound or latency‑sensitive systems
-- constrained hardware
-- environments where multi‑core scaling is irrelevant
-
-Examples:
-- IoT devices
-- routers
-- proxies
-- WASM modules
-- micro‑VMs
-- embedded Linux
-- mobile apps
-- game engines
-- HPC telemetry
-
 Positioning:
-Arenalog is the most efficient logger for single‑core Go applications.
-If your system runs on one core, nothing is faster.
+If your application runs on bare resources, no logger comes close in terms of efficiency.
 */

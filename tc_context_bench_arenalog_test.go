@@ -45,10 +45,9 @@ func TestArenalog_OneField(t *testing.T) {
 	<-chIngestionEnd
 }
 
-// TODO; alloc?
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_OneField/G1-16 	18294004	        74.96 ns/op	      16 B/op	       1 allocs/op
-// BenchmarkContext_NoJSON_OneField/G2-16 	 9611584	       121.9 ns/op	      27 B/op	       1 allocs/op
+// BenchmarkArenalog_OneField/G1-16 	28270672	        41.42 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G2-16 	12271718	        95.12 ns/op	      11 B/op	       0 allocs/op
 func BenchmarkArenalog_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2}
 	writer := helpers.CountWriterNoBuffer{}

@@ -2,7 +2,7 @@ package log
 
 import "github.com/tudorhulban/log/helpers"
 
-func (e *Entry) Msg(args ...any) {
+func (e *Entry) Msg(msg string) {
 	if Level(e.formatter.logger.logLevel.Load()) > e.level {
 		return
 	}
@@ -100,7 +100,7 @@ func (e *Entry) Msg(args ...any) {
 
 		// message
 		buf = append(buf, `"message":`...)
-		buf = helpers.AppendJSON_Arguments(buf, args)
+		buf = helpers.AppendJSON(buf, []byte(msg))
 		buf = append(buf, '}', '\n')
 
 		copy(region.Buf(), buf)
@@ -179,7 +179,7 @@ func (e *Entry) Msg(args ...any) {
 		buf = append(buf, ' ')
 	}
 
-	buf = helpers.AppendArgs(buf, args)
+	buf = helpers.AppendJSON(buf, []byte(msg))
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)

@@ -97,7 +97,7 @@ func (e *Entry) Print(args ...any) {
 		// timestamp
 		if logger.fnTimestamp != nil {
 			buf = append(buf, `"ts":`...)
-			buf = appendQuotedJSON(
+			buf = appendJSON_Quoted(
 				buf,
 				string(logger.fnTimestamp(nil)),
 			)
@@ -114,7 +114,7 @@ func (e *Entry) Print(args ...any) {
 
 			switch fld.kind {
 			case kindString:
-				buf = appendQuotedJSON(buf, fld.valueString)
+				buf = appendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
 				buf = helpers.AppendInt(buf, fld.valueNumeric)
 			case kindBool:
@@ -134,7 +134,7 @@ func (e *Entry) Print(args ...any) {
 
 			switch fld.kind {
 			case kindString:
-				buf = appendQuotedJSON(buf, fld.valueString)
+				buf = appendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
 				buf = helpers.AppendInt(buf, fld.valueNumeric)
 			case kindBool:
@@ -154,7 +154,7 @@ func (e *Entry) Print(args ...any) {
 
 			switch fld.kind {
 			case kindString:
-				buf = appendQuotedJSON(buf, fld.valueString)
+				buf = appendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
 				buf = helpers.AppendInt(buf, fld.valueNumeric)
 			case kindBool:
@@ -166,7 +166,7 @@ func (e *Entry) Print(args ...any) {
 
 		// message
 		buf = append(buf, `"msg":`...)
-		buf = appendArgsQuotedJSON(buf, args)
+		buf = appendJSON_Arguments(buf, args)
 		buf = append(buf, '}', '\n')
 
 		copy(region.Buf(), buf)

@@ -4,27 +4,6 @@ import (
 	"github.com/tudorhulban/log/helpers"
 )
 
-func appendEscapedJSON(buf []byte, b []byte) []byte {
-	for ix := range b {
-		switch c := b[ix]; c {
-		case '\\':
-			buf = append(buf, '\\', '\\')
-		case '"':
-			buf = append(buf, '\\', '"')
-		case '\n':
-			buf = append(buf, '\\', 'n')
-		case '\r':
-			buf = append(buf, '\\', 'r')
-		case '\t':
-			buf = append(buf, '\\', 't')
-		default:
-			buf = append(buf, c)
-		}
-	}
-
-	return buf
-}
-
 // appendJSON builds a JSON log entry.
 // `msg` must already be a fully formatted string.
 // Caller info is included only when file != "" and line > 0.
@@ -54,7 +33,7 @@ func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []b
 
 	// message
 	buffer = append(buffer, `"msg":"`...)
-	buffer = appendEscapedJSON(buffer, msg)
+	buffer = appendJSON_Escaped(buffer, msg)
 	buffer = append(buffer, `"}`...)
 
 	return buffer

@@ -64,41 +64,7 @@ func appendField(buf []byte, fld *field) []byte {
 	return append(buf, ' ')
 }
 
-// appendJSONEscaped writes s into buf with JSON string escaping but without
-// the surrounding quotes. Used by appendArgsQuotedJSON.
-func appendJSONEscaped(buf []byte, s string) []byte {
-	const hex = "0123456789abcdef"
-
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-
-		switch c {
-		case '\\', '"':
-			buf = append(buf, '\\', c)
-		case '\n':
-			buf = append(buf, '\\', 'n')
-		case '\r':
-			buf = append(buf, '\\', 'r')
-		case '\t':
-			buf = append(buf, '\\', 't')
-		case '\b':
-			buf = append(buf, '\\', 'b')
-		case '\f':
-			buf = append(buf, '\\', 'f')
-
-		default:
-			if c < 0x20 {
-				buf = append(buf, '\\', 'u', '0', '0', hex[c>>4], hex[c&0xF])
-			} else {
-				buf = append(buf, c)
-			}
-		}
-	}
-
-	return buf
-}
-
-func appendQuotedJSON(buf []byte, s string) []byte {
+func appendJSON_Quoted(buf []byte, s string) []byte {
 	buf = append(buf, '"')
 
 	const hex = "0123456789abcdef"
@@ -132,10 +98,44 @@ func appendQuotedJSON(buf []byte, s string) []byte {
 	return append(buf, '"')
 }
 
-// appendArgsQuotedJSON writes `"arg0 arg1 …"` directly into buf without any
+// appendJSON_Escaped writes s into buf with JSON string escaping but without
+// the surrounding quotes. Used by appendArgsQuotedJSON.
+func appendJSON_Escaped(buf []byte, b []byte) []byte {
+	const hex = "0123456789abcdef"
+
+	for ix := 0; ix < len(b); ix++ {
+		char := b[ix]
+
+		switch char {
+		case '\\', '"':
+			buf = append(buf, '\\', char)
+		case '\n':
+			buf = append(buf, '\\', 'n')
+		case '\r':
+			buf = append(buf, '\\', 'r')
+		case '\t':
+			buf = append(buf, '\\', 't')
+		case '\b':
+			buf = append(buf, '\\', 'b')
+		case '\f':
+			buf = append(buf, '\\', 'f')
+
+		default:
+			if char < 0x20 {
+				buf = append(buf, '\\', 'u', '0', '0', hex[char>>4], hex[char&0xF])
+			} else {
+				buf = append(buf, char)
+			}
+		}
+	}
+
+	return buf
+}
+
+// appendJSON_Arguments writes `"arg0 arg1 …"` directly into buf without any
 // intermediate string allocation. It replaces the ArgsToString(args) +
 // appendQuotedJSON pattern in the JSON hot path.
-func appendArgsQuotedJSON(buf []byte, args []any) []byte {
+func appendJSON_Arguments(buf []byte, args []any) []byte {
 	buf = append(buf, '"')
 
 	for i, arg := range args {
@@ -145,9 +145,9 @@ func appendArgsQuotedJSON(buf []byte, args []any) []byte {
 
 		switch v := arg.(type) {
 		case string:
-			buf = appendJSONEscaped(buf, v)
+			buf = appendJSON_Escaped(buf, []byte(v))
 		case []byte:
-			buf = appendJSONEscaped(buf, string(v)) // string([]byte) is stack-alloc'd by the compiler for small slices
+			buf = appendJSON_Escaped(buf, v)
 		case int:
 			buf = helpers.AppendInt(buf, v)
 		case int64:
@@ -165,11 +165,12 @@ func appendArgsQuotedJSON(buf []byte, args []any) []byte {
 		case bool:
 			buf = helpers.AppendBool(buf, v)
 		case error:
-			buf = appendJSONEscaped(buf, v.Error())
+			buf = appendJSON_Escaped(buf, []byte(v.Error()))
 		case nil:
 			buf = append(buf, 'n', 'u', 'l', 'l')
+
 		default:
-			buf = appendJSONEscaped(buf, fmt.Sprint(v))
+			buf = appendJSON_Escaped(buf, []byte(fmt.Sprint(v)))
 		}
 	}
 

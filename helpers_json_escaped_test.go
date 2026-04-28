@@ -115,7 +115,7 @@ func TestAppendJSONString(t *testing.T) {
 		t.Run(
 			tt.name,
 			func(t *testing.T) {
-				result := appendJSONString(tt.initialBuf, tt.input)
+				result := appendJSON_Escaped(tt.initialBuf, []byte(tt.input))
 
 				require.Equal(t,
 					len(result),
@@ -145,7 +145,7 @@ func TestAppendJSONString(t *testing.T) {
 
 func TestDebugBufferGrowth(t *testing.T) {
 	buf := make([]byte, 0, 5)
-	result := appendJSONString(buf, "this is a longer string")
+	result := appendJSON_Escaped(buf, []byte("this is a longer string"))
 
 	t.Logf("Result: %q", string(result))
 	t.Logf("Result bytes: %v", result)
@@ -215,7 +215,7 @@ func TestAppendJSONStringBufferGrowth(t *testing.T) {
 			tt.name,
 			func(t *testing.T) {
 				initialBuf := make([]byte, 0, tt.initialCap)
-				result := appendJSONString(initialBuf, tt.input)
+				result := appendJSON_Escaped(initialBuf, []byte(tt.input))
 
 				require.Equal(t,
 					len(result),
@@ -307,7 +307,7 @@ func TestAppendJSONStringEdgeCases(t *testing.T) {
 		t.Run(
 			tt.name,
 			func(t *testing.T) {
-				result := appendJSONString(tt.initialBuf, tt.input)
+				result := appendJSON_Escaped(tt.initialBuf, []byte(tt.input))
 
 				require.Equal(t,
 					len(result),
@@ -351,7 +351,7 @@ func TestAppendJSONStringPerformance(t *testing.T) {
 	}
 
 	buf := make([]byte, 0)
-	result := appendJSONString(buf, string(largeInput))
+	result := appendJSON_Escaped(buf, (largeInput))
 
 	expectedLen := 0
 
@@ -383,7 +383,7 @@ func TestAppendJSONStringPerformance(t *testing.T) {
 func TestAppendJSONStringNilBuffer(t *testing.T) {
 	var buf []byte
 
-	result := appendJSONString(buf, "test")
+	result := appendJSON_Escaped(buf, []byte("test"))
 
 	expected := []byte("test")
 	require.Equal(t,
@@ -421,6 +421,14 @@ func makeLongString(length int, includeEscapes bool) string {
 	return string(result)
 }
 
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkAppendJSONString/ShortNoEscape-16         	96213393	        12.22 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAppendJSONString/ShortWithEscapes-16      	43420896	        27.38 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAppendJSONString/MediumNoEscape-16        	22103844	        53.55 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAppendJSONString/MediumWithEscapes-16     	30883579	        38.97 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAppendJSONString/LongNoEscape-16          	  650764	      1837 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAppendJSONString/LongWithEscapes-16       	  542268	      2151 ns/op	    1536 B/op	       1 allocs/op
+
 // Benchmark to test performance
 func BenchmarkAppendJSONString(b *testing.B) {
 	benchmarks := []struct {
@@ -444,7 +452,7 @@ func BenchmarkAppendJSONString(b *testing.B) {
 				b.ResetTimer()
 
 				for b.Loop() {
-					_ = appendJSONString(buf, bm.input)
+					_ = appendJSON_Escaped(buf, []byte(bm.input))
 				}
 			},
 		)

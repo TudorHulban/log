@@ -17,6 +17,8 @@ type FiberLogger struct {
 	L *log.Logger
 }
 
+// TODO: inline code for more performance instead of function call.
+
 // --- Trace ---
 func (f *FiberLogger) Trace(args ...any)                 { f.L.Trace(args...) }
 func (f *FiberLogger) Tracef(format string, args ...any) { f.L.Tracef(format, args...) }

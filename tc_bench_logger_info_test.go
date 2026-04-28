@@ -14,13 +14,14 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Debugf/1.nil_timestamp-16         	19058520	        65.01 ns/op	      72 B/op	       1 allocs/op
-// BenchmarkLogger_Debugf/2.standard_timestamp-16    	10527141	       115.8 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/3.yyyy-month_timestamp-16  	10778720	       112.3 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/4.nano_timestamp-16        	 9408266	       128.9 ns/op	      72 B/op	       1 allocs/op
-// BenchmarkLogger_Debugf/5.nano_timestamp_-_json-16 	 7244959	       167.2 ns/op	     112 B/op	       2 allocs/op
-// BenchmarkLogger_Debugf/6.nano_-_json,_caller-16   	 2203927	       545.8 ns/op	     552 B/op	       5 allocs/op
-func BenchmarkLogger_Debugf(b *testing.B) {
+// BenchmarkLogger_Infof/1.nil_timestamp-16         	19970173	        65.86 ns/op	      72 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/2.standard_timestamp-16    	10616149	       115.2 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Infof/3.yyyy-month_timestamp-16  	10707333	       111.9 ns/op	      72 B/op	       2 allocs/op
+// BenchmarkLogger_Infof/4.nano_timestamp-16        	 9295443	       129.0 ns/op	      72 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/5.json_-_rfc3339-16        	 7130263	       170.9 ns/op	     112 B/op	       2 allocs/op
+// BenchmarkLogger_Infof/6.nano_timestamp_-_json-16 	 7112310	       167.7 ns/op	     112 B/op	       2 allocs/op
+// BenchmarkLogger_Infof/7.nano_-_json,_caller-16   	 2206111	       545.0 ns/op	     552 B/op	       5 allocs/op
+func BenchmarkLogger_Infof(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
 		description   string
@@ -43,12 +44,17 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 			timestampFunc: timestamp.TimestampNano,
 		},
 		{
-			description:   "5.nano timestamp - json",
+			description:   "5.json - rfc3339",
+			timestampFunc: timestamp.TimestampRFC3339,
+			withJSON:      true,
+		},
+		{
+			description:   "6.nano timestamp - json",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
 		},
 		{
-			description:   "6.nano - json, caller",
+			description:   "7.nano - json, caller",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
 			withCaller:    true,
@@ -91,7 +97,7 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 				b.ResetTimer()
 
 				for i := 0; b.Loop(); i++ {
-					logger.Debugf(
+					logger.Infof(
 						"%d",
 						i,
 					)
@@ -105,13 +111,14 @@ func BenchmarkLogger_Debugf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_DebugFast/1.nil_timestamp-16         	10002454	       118.3 ns/op	      50 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/2.standard_timestamp-16    	 8879348	       132.0 ns/op	      50 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/3.yyyy-month_timestamp-16  	 8820680	       131.8 ns/op	      50 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/4.nano_timestamp-16        	 8543960	       138.1 ns/op	      50 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/5.nano_timestamp_-_json-16 	 7802482	       153.5 ns/op	      55 B/op	       2 allocs/op
-// BenchmarkLogger_DebugFast/6.nano_-_json,_caller-16   	 4751898	       252.7 ns/op	     121 B/op	       3 allocs/op
-func BenchmarkLogger_DebugFast(b *testing.B) {
+// BenchmarkLogger_InfoFast/1.nil_timestamp-16         	12252991	        97.87 ns/op	      46 B/op	       2 allocs/op
+// BenchmarkLogger_InfoFast/2.standard_timestamp-16    	11375336	       104.6 ns/op	      46 B/op	       2 allocs/op
+// BenchmarkLogger_InfoFast/3.yyyy-month_timestamp-16  	11259042	       105.0 ns/op	      46 B/op	       2 allocs/op
+// BenchmarkLogger_InfoFast/4.nano_timestamp-16        	10979743	       108.9 ns/op	      46 B/op	       2 allocs/op
+// BenchmarkLogger_InfoFast/5.json_-_rfc3339-16        	 9975960	       119.6 ns/op	      48 B/op	       2 allocs/op
+// BenchmarkLogger_InfoFast/6.nano_timestamp_-_json-16 	10051143	       118.9 ns/op	      48 B/op	       2 allocs/op
+// BenchmarkLogger_InfoFast/7.nano_-_json,_caller-16   	 6654192	       179.3 ns/op	      88 B/op	       2 allocs/op
+func BenchmarkLogger_InfoFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
 		description   string
@@ -134,12 +141,17 @@ func BenchmarkLogger_DebugFast(b *testing.B) {
 			timestampFunc: timestamp.TimestampNano,
 		},
 		{
-			description:   "5.nano timestamp - json",
+			description:   "5.json - rfc3339",
+			timestampFunc: timestamp.TimestampRFC3339,
+			withJSON:      true,
+		},
+		{
+			description:   "6.nano timestamp - json",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
 		},
 		{
-			description:   "6.nano - json, caller",
+			description:   "7.nano - json, caller",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
 			withCaller:    true,
@@ -165,6 +177,8 @@ func BenchmarkLogger_DebugFast(b *testing.B) {
 						Ingestor:    ingestor,
 						LoggerLevel: LevelDebug,
 
+						EstimatedMessageSizeInfo: 512,
+
 						WithFatalWriter: os.Stdout,
 						WithTimestamp:   tcase.timestampFunc,
 						WithJSON:        tcase.withJSON,
@@ -180,7 +194,7 @@ func BenchmarkLogger_DebugFast(b *testing.B) {
 				b.ResetTimer()
 
 				for i := 0; b.Loop(); i++ {
-					logger.DebugFast(
+					logger.InfoFast(
 						"%d",
 						i,
 					)

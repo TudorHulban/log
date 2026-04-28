@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"testing"
 	"time"
@@ -10,6 +11,22 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena/helpers"
 )
+
+func TestPhuslu_OneField(t *testing.T) {
+	logger := log.Logger{
+		Level:      log.InfoLevel,
+		TimeFormat: time.RFC3339,
+		Writer: &log.IOWriter{
+			Writer: os.Stdout,
+		},
+	}
+
+	// {"time":"2026-04-28T12:09:35+03:00","level":"info","area":"some area","message":"benchmark test"}
+
+	logger.Info().
+		Str("area", "some area").
+		Msg("benchmark test")
+}
 
 // go test -run '^$' -bench '^BenchmarkPhuslu_OneField$' -benchmem
 

@@ -35,7 +35,7 @@ func TestPhuslu_OneField(t *testing.T) {
 // BenchmarkPhuslu_OneField/G2-16 	 9046921	       132.7 ns/op	       0 B/op	       0 allocs/op
 
 func BenchmarkPhuslu_OneField(b *testing.B) {
-	gomaxprocsValues := []int{1, 2}
+	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}
 
 	for _, g := range gomaxprocsValues {

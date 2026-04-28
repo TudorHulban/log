@@ -49,7 +49,7 @@ func TestArenalog_OneField(t *testing.T) {
 // BenchmarkArenalog_OneField/G1-16 	28270672	        41.42 ns/op	       0 B/op	       0 allocs/op
 // BenchmarkArenalog_OneField/G2-16 	12271718	        95.12 ns/op	      11 B/op	       0 allocs/op
 func BenchmarkArenalog_OneField(b *testing.B) {
-	gomaxprocsValues := []int{1, 2}
+	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}
 
 	for _, g := range gomaxprocsValues {

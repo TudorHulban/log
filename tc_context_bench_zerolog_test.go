@@ -27,7 +27,7 @@ func TestZerolog_OneField(t *testing.T) {
 // BenchmarkZerolog_OneField/G1-16 	 7227042	       166.4 ns/op	       0 B/op	       0 allocs/op
 // BenchmarkZerolog_OneField/G2-16 	 7211571	       165.2 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkZerolog_OneField(b *testing.B) {
-	gomaxprocsValues := []int{1, 2}
+	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}
 
 	for _, g := range gomaxprocsValues {

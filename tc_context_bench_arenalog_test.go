@@ -49,7 +49,7 @@ func TestArenalog_OneField(t *testing.T) {
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
 // BenchmarkContext_NoJSON_OneField/G1-16 	18294004	        74.96 ns/op	      16 B/op	       1 allocs/op
 // BenchmarkContext_NoJSON_OneField/G2-16 	 9611584	       121.9 ns/op	      27 B/op	       1 allocs/op
-func BenchmarkContext_NoJSON_OneField(b *testing.B) {
+func BenchmarkArenalog_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2}
 	writer := helpers.CountWriterNoBuffer{}
 
@@ -77,6 +77,7 @@ func BenchmarkContext_NoJSON_OneField(b *testing.B) {
 
 						WithFatalWriter: os.Stdout,
 						WithTimestamp:   timestamp.TimestampRFC3339,
+						WithJSON:        true,
 					},
 				)
 				require.NoError(b, errCrLogger)
@@ -152,51 +153,6 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 			WithString("user", "tudor").
 			WithInt("attempt", i).
 			WithBool("success", true)
-
-		// 2. Print
-		entry.Msg("benchmark test")
-	}
-}
-
-// BenchmarkContext_WithJSON_OneField-16    	 8952406	       134.6 ns/op	      31 B/op	       1 allocs/op
-func BenchmarkContext_WithJSON_OneField(b *testing.B) {
-	var writer helpers.NoopWriter
-
-	ingestor, errCrIngestor := bytearena.NewIngestor(bytearena.Size100K(), &writer)
-	require.NoError(b, errCrIngestor)
-	require.NotNil(b, ingestor)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	chIngestionEnd := ingestor.StartIngestion(ctx)
-
-	defer func() {
-		cancel()
-		<-chIngestionEnd
-	}()
-
-	logger, errCrLogger := NewLogger(
-		&ParamsNewLogger{
-			Ingestor:    ingestor,
-			LoggerLevel: LevelDebug,
-
-			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339,
-			WithJSON:        true,
-		},
-	)
-	require.NoError(b, errCrLogger)
-
-	logContext := NewLogContext(logger).
-		WithRoot("service", "auth")
-
-	runtime.GC()
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for i := 0; b.Loop(); i++ {
-		// 1. Create request with 4 attributes
-		entry := logContext.With("area", "some area")
 
 		// 2. Print
 		entry.Msg("benchmark test")

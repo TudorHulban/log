@@ -6,23 +6,11 @@ import (
 	"github.com/tudorhulban/log/helpers"
 )
 
-type fieldKind uint8
-
 const (
 	kindString fieldKind = iota
 	kindInt
 	kindBool
 )
-
-type field struct {
-	key          string
-	valueString  string
-	valueNumeric int
-
-	kind fieldKind
-
-	valueBool bool
-}
 
 type formatterConfig struct {
 	root   *field  // nil if no root
@@ -39,12 +27,6 @@ func NewLogContext(logger *Logger) *LogContext {
 	f.cfg.Store(&formatterConfig{fields: nil})
 
 	return &f
-}
-
-func makeFieldPtr(key string, value any) *field {
-	fld := makeField(key, value)
-
-	return &fld
 }
 
 func (ctx *LogContext) WithRoot(key string, value any) *LogContext {

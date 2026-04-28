@@ -33,7 +33,7 @@ func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []b
 
 	// message
 	buffer = append(buffer, `"msg":"`...)
-	buffer = appendJSON_Escaped(buffer, msg)
+	buffer = helpers.AppendJSON(buffer, msg)
 	buffer = append(buffer, `"}`...)
 
 	return buffer

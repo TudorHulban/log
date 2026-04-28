@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tudorhulban/log/helpers"
 )
 
 // These tests cover:
@@ -115,7 +116,7 @@ func TestAppendJSONString(t *testing.T) {
 		t.Run(
 			tt.name,
 			func(t *testing.T) {
-				result := appendJSON_Escaped(tt.initialBuf, []byte(tt.input))
+				result := helpers.AppendJSON(tt.initialBuf, []byte(tt.input))
 
 				require.Equal(t,
 					len(result),
@@ -145,7 +146,7 @@ func TestAppendJSONString(t *testing.T) {
 
 func TestDebugBufferGrowth(t *testing.T) {
 	buf := make([]byte, 0, 5)
-	result := appendJSON_Escaped(buf, []byte("this is a longer string"))
+	result := helpers.AppendJSON(buf, []byte("this is a longer string"))
 
 	t.Logf("Result: %q", string(result))
 	t.Logf("Result bytes: %v", result)
@@ -215,7 +216,7 @@ func TestAppendJSONStringBufferGrowth(t *testing.T) {
 			tt.name,
 			func(t *testing.T) {
 				initialBuf := make([]byte, 0, tt.initialCap)
-				result := appendJSON_Escaped(initialBuf, []byte(tt.input))
+				result := helpers.AppendJSON(initialBuf, []byte(tt.input))
 
 				require.Equal(t,
 					len(result),
@@ -307,7 +308,7 @@ func TestAppendJSONStringEdgeCases(t *testing.T) {
 		t.Run(
 			tt.name,
 			func(t *testing.T) {
-				result := appendJSON_Escaped(tt.initialBuf, []byte(tt.input))
+				result := helpers.AppendJSON(tt.initialBuf, []byte(tt.input))
 
 				require.Equal(t,
 					len(result),
@@ -351,7 +352,7 @@ func TestAppendJSONStringPerformance(t *testing.T) {
 	}
 
 	buf := make([]byte, 0)
-	result := appendJSON_Escaped(buf, (largeInput))
+	result := helpers.AppendJSON(buf, (largeInput))
 
 	expectedLen := 0
 
@@ -383,7 +384,7 @@ func TestAppendJSONStringPerformance(t *testing.T) {
 func TestAppendJSONStringNilBuffer(t *testing.T) {
 	var buf []byte
 
-	result := appendJSON_Escaped(buf, []byte("test"))
+	result := helpers.AppendJSON(buf, []byte("test"))
 
 	expected := []byte("test")
 	require.Equal(t,
@@ -452,7 +453,7 @@ func BenchmarkAppendJSONString(b *testing.B) {
 				b.ResetTimer()
 
 				for b.Loop() {
-					_ = appendJSON_Escaped(buf, []byte(bm.input))
+					_ = helpers.AppendJSON(buf, []byte(bm.input))
 				}
 			},
 		)

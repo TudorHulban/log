@@ -1,8 +1,6 @@
 package log
 
-import (
-	"sync"
-)
+import "sync"
 
 var entryPool = sync.Pool{
 	New: func() any {

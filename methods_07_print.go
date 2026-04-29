@@ -24,6 +24,26 @@ func (l *Logger) labelPrint() string {
 }
 
 func (l *Logger) PrintMessage(msg string) {
+	if l.withJSON {
+		buf := make([]byte, 0, _PreallocationJSON)
+
+		buf = l.appendJSON(
+			buf,
+			l.labelInfo(),
+			"",
+			0,
+			[]byte(msg),
+		)
+
+		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
+		if errWrite == nil {
+			copy(region.Buf(), buf)
+			l.ingestor.EndWrite(region)
+		}
+
+		return
+	}
+
 	var buf []byte
 
 	if l.fnTimestamp != nil {
@@ -37,7 +57,6 @@ func (l *Logger) PrintMessage(msg string) {
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
 	if errWrite == nil {
 		copy(region.Buf(), buf)
-
 		l.ingestor.EndWrite(region)
 	}
 }

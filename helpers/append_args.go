@@ -269,8 +269,34 @@ func Appendf(dst []byte, format string, args ...any) []byte {
 			}
 
 		case 'v':
-			// direct passthrough to your existing fast path
-			dst = AppendArgs(dst, []any{arg})
+			switch v := arg.(type) {
+			case string:
+				dst = append(dst, v...)
+			case []byte:
+				dst = append(dst, v...)
+			case int:
+				dst = AppendInt(dst, v)
+			case int64:
+				dst = strconv.AppendInt(dst, v, 10)
+			case int32:
+				dst = strconv.AppendInt(dst, int64(v), 10)
+			case uint:
+				dst = strconv.AppendUint(dst, uint64(v), 10)
+			case uint64:
+				dst = AppendUint64(dst, v)
+			case float64:
+				dst = strconv.AppendFloat(dst, v, 'f', -1, 64)
+			case float32:
+				dst = strconv.AppendFloat(dst, float64(v), 'f', -1, 32)
+			case bool:
+				dst = AppendBool(dst, v)
+			case error:
+				dst = AppendError(dst, v)
+			case nil:
+				dst = append(dst, "null"...)
+			default:
+				dst = append(dst, fmt.Sprint(v)...)
+			}
 
 		case 't':
 			switch v := arg.(type) {

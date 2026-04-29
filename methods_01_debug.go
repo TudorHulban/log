@@ -1,5 +1,7 @@
 package log
 
+import "github.com/tudorhulban/log/helpers"
+
 func (l *Logger) labelDebug() string {
 	if l.withColor {
 		return colorDebug(logLevels[LevelDebug])
@@ -13,8 +15,12 @@ func (l *Logger) Debug(args ...any) {
 		return
 	}
 
-	l.logWithLabel(
-		l.labelDebug(), args...,
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
+
+	l.logWithLabelFast(
+		l.labelDebug(),
+		uint32(estimatedMessageSizeInfo+_DeltaEstimation),
+		args,
 	)
 }
 
@@ -23,8 +29,12 @@ func (l *Logger) Debugf(format string, args ...any) {
 		return
 	}
 
-	l.logfWithLabel(
-		l.labelDebug(), format, args,
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize(format, args)
+
+	l.logWithLabelFast(
+		l.labelDebug(),
+		uint32(estimatedMessageSizeInfo+_DeltaEstimation),
+		args,
 	)
 }
 

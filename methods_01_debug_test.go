@@ -56,7 +56,7 @@ func TestDebug(t *testing.T) {
 
 	// JSON mode → each log entry is a JSON object on its own line
 	lines := strings.Split(strings.TrimSpace(out), "\n")
-	require.Len(t, lines, 3)
+	require.Len(t, lines, 4)
 
 	require.Contains(t,
 		lines[1],
@@ -83,7 +83,7 @@ func TestDebug(t *testing.T) {
 	require.Contains(t, lines[2], `"caller":`)
 }
 
-// Benchmark_Debug-16    	  741261	      1905 ns/op	    5256 B/op	      19 allocs/op
+// Benchmark_Debug-16    	20158742	        60.41 ns/op	      16 B/op	       1 allocs/op
 func Benchmark_Debug(b *testing.B) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
@@ -117,7 +117,7 @@ func Benchmark_Debug(b *testing.B) {
 	)
 }
 
-// Benchmark_Debug_Fast-16    	28874170	        41.44 ns/op	       0 B/op	       0 allocs/op
+// Benchmark_Debug_Fast-16    	38939557	        29.85 ns/op	       0 B/op	       0 allocs/op
 func Benchmark_Debug_Fast(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 

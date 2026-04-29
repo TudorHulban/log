@@ -31,7 +31,7 @@ func (l *Logger) logWithLabelFast(label string, estimatedMessageSize uint32, arg
 			label,
 			file,
 			line,
-			helpers.AppendArgs(nil, args),
+			helpers.AppendArgs(nil, args...),
 		)
 
 		buf = append(buf, '\n')
@@ -60,7 +60,7 @@ func (l *Logger) logWithLabelFast(label string, estimatedMessageSize uint32, arg
 
 	buf = append(buf, label...)
 	buf = append(buf, delim...)
-	buf = helpers.AppendArgs(buf, args)
+	buf = helpers.AppendArgs(buf, args...)
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)

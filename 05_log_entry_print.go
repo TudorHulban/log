@@ -7,18 +7,12 @@ func (e *Entry) Msg(msg string) {
 		return
 	}
 
-	e.formatter.logger.PrintMessage(msg)
-}
-
-func (e *Entry) MsgFast(msg string) {
-	if Level(e.formatter.logger.logLevel.Load()) > e.level {
-		return
-	}
-
 	cfg := e.formatter.cfg.Load()
 	logger := e.formatter.logger
 
-	region, errWrite := logger.ingestor.TryWrite(logger.estimatedMessageSizeOverall)
+	region, errWrite := logger.ingestor.TryWrite(
+		uint32(len(msg) + e.estimateFieldsSize() + 128),
+	)
 	if errWrite != nil {
 		entryPool.Put(e)
 

@@ -71,7 +71,7 @@ func (l *Logger) logWithLabel(label string, args ...any) {
 	}
 }
 
-func (l *Logger) logfWithLabel(label string, format string, args ...any) {
+func (l *Logger) logfWithLabel(label string, format string, args []any) {
 	if l.withJSON {
 		var (
 			file string
@@ -91,7 +91,7 @@ func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 			label,
 			file,
 			line,
-			helpers.Appendf(nil, format, args...),
+			helpers.Appendf(nil, format, args),
 		)
 
 		buf = append(buf, '\n')
@@ -125,7 +125,7 @@ func (l *Logger) logfWithLabel(label string, format string, args ...any) {
 
 	buf = append(buf, label...)
 	buf = append(buf, delim...)
-	buf = helpers.Appendf(buf, format, args...)
+	buf = helpers.Appendf(buf, format, args)
 	buf = append(buf, '\n')
 
 	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec

@@ -1,6 +1,10 @@
 package log
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/tudorhulban/log/helpers"
+)
 
 var entryPool = sync.Pool{
 	New: func() any {
@@ -114,4 +118,30 @@ func (e *Entry) Panic() *Entry {
 	e.level = LevelPanic
 
 	return e
+}
+
+func (e *Entry) estimateFieldsSize() int {
+	result := 0
+
+	for _, f := range e.fields {
+		// key
+		result = result + len(`{"key":"`) + len(f.key) + len(`","value":""}`)
+
+		switch f.kind {
+		case fieldKindString:
+			result = result + len(f.valueString)
+
+		case fieldKindBool:
+			if f.valueBool {
+				result = result + 4 // true
+			} else {
+				result = result + 5 // false
+			}
+
+		case fieldKindNumeric:
+			result = result + helpers.DigitsInt(f.valueNumeric)
+		}
+	}
+
+	return result
 }

@@ -23,9 +23,17 @@ func (l *Logger) Infof(format string, args ...any) {
 		return
 	}
 
+	// estimatedMessageSizeInfo := helpers.AppendfSize(format, args...)
+
 	l.logfWithLabel(
-		l.labelInfo(), format, args...,
+		l.labelInfo(), format, args,
 	)
+
+	// l.logWithLabelFast(
+	// 	l.labelInfo(),
+	// 	uint32(estimatedMessageSizeInfo),
+	// 	args,
+	// )
 }
 
 func (l *Logger) Infow(msg string, keysAndValues ...any) {
@@ -50,6 +58,6 @@ func (l *Logger) InfoFast(args ...any) {
 	l.logWithLabelFast(
 		l.labelInfo(),
 		l.estimatedMessageSizeInfo,
-		args...,
+		args,
 	)
 }

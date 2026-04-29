@@ -119,3 +119,66 @@ func AppendJSON_Arguments(buf []byte, args []any) []byte {
 
 	return buf
 }
+
+func AppendJSON_Formatted(dst []byte, format string, args ...any) []byte {
+	dst = append(dst, '"')
+
+	ai := 0
+	flen := len(format)
+
+	for i := 0; i < flen; i++ {
+		c := format[i]
+
+		if c != '%' {
+			dst = append(dst, c)
+			continue
+		}
+
+		if i+1 < flen && format[i+1] == '%' {
+			dst = append(dst, '%')
+			i++
+
+			continue
+		}
+
+		i++
+		if i >= flen || ai >= len(args) {
+			dst = append(dst, '%')
+			if i < flen {
+				dst = append(dst, format[i])
+			}
+
+			continue
+		}
+
+		arg := args[ai]
+		ai++
+
+		switch format[i] {
+		case 's':
+			switch v := arg.(type) {
+			case string:
+				dst = append(dst, v...)
+			case []byte:
+				dst = append(dst, v...)
+			default:
+				dst = append(dst, fmt.Sprint(v)...)
+			}
+
+		case 'd':
+			switch v := arg.(type) {
+			case int:
+				dst = AppendInt(dst, v)
+			case int64:
+				dst = strconv.AppendInt(dst, v, 10)
+			default:
+				dst = append(dst, fmt.Sprint(v)...)
+			}
+
+		default:
+			dst = append(dst, '%', format[i])
+		}
+	}
+
+	return append(dst, '"')
+}

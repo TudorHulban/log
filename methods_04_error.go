@@ -24,7 +24,7 @@ func (l *Logger) Errorf(format string, args ...any) {
 	}
 
 	l.logfWithLabel(
-		l.labelError(), format, args...,
+		l.labelError(), format, args,
 	)
 }
 
@@ -46,6 +46,6 @@ func (l *Logger) ErrorFast(args ...any) {
 	l.logWithLabelFast(
 		l.labelError(),
 		l.estimatedMessageSizeError,
-		args...,
+		args,
 	)
 }

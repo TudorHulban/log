@@ -24,7 +24,7 @@ func (l *Logger) Warnf(format string, args ...any) {
 	}
 
 	l.logfWithLabel(
-		l.labelWarn(), format, args...,
+		l.labelWarn(), format, args,
 	)
 }
 
@@ -46,6 +46,6 @@ func (l *Logger) WarnFast(args ...any) {
 	l.logWithLabelFast(
 		l.labelWarn(),
 		l.estimatedMessageSizeWarn,
-		args...,
+		args,
 	)
 }

@@ -8,6 +8,12 @@ import (
 
 type fieldKind uint8
 
+const (
+	fieldKindString fieldKind = iota
+	fieldKindNumeric
+	fieldKindBool
+)
+
 type field struct {
 	key          string
 	valueString  string

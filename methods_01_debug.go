@@ -24,7 +24,7 @@ func (l *Logger) Debugf(format string, args ...any) {
 	}
 
 	l.logfWithLabel(
-		l.labelDebug(), format, args...,
+		l.labelDebug(), format, args,
 	)
 }
 
@@ -50,6 +50,6 @@ func (l *Logger) DebugFast(args ...any) {
 	l.logWithLabelFast(
 		l.labelDebug(),
 		l.estimatedMessageSizeDebug,
-		args...,
+		args,
 	)
 }

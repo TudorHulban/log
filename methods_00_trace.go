@@ -20,7 +20,7 @@ func (l *Logger) Tracef(format string, args ...any) {
 	}
 
 	l.logfWithLabel(
-		l.labelTrace(), format, args...,
+		l.labelTrace(), format, args,
 	)
 }
 
@@ -46,6 +46,6 @@ func (l *Logger) TraceFast(args ...any) {
 	l.logWithLabelFast(
 		l.labelTrace(),
 		l.estimatedMessageSizeTrace,
-		args...,
+		args,
 	)
 }

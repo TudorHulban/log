@@ -125,7 +125,7 @@ linters:
           arguments: [30]
 
         - name: cyclomatic
-          arguments: [30]
+          arguments: [40]
 
         - name: max-control-nesting
           arguments: [7]

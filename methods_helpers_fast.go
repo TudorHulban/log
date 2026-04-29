@@ -6,7 +6,7 @@ import (
 	"github.com/tudorhulban/log/helpers"
 )
 
-func (l *Logger) logWithLabelFast(label string, estimatedMessageSize uint32, args ...any) {
+func (l *Logger) logWithLabelFast(label string, estimatedMessageSize uint32, args []any) {
 	region, errWrite := l.ingestor.TryWrite(estimatedMessageSize)
 	if errWrite != nil {
 		return

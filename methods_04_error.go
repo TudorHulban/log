@@ -15,11 +15,11 @@ func (l *Logger) Error(args ...any) {
 		return
 	}
 
-	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
-
 	l.logWithLabel(
 		l.labelError(),
-		uint32(estimatedMessageSizeInfo),
+		uint32(
+			helpers.GetEstimatedMessageSize("", args),
+		),
 		args,
 	)
 }
@@ -29,12 +29,12 @@ func (l *Logger) Errorf(format string, args ...any) {
 		return
 	}
 
-	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize(format, args)
-
 	l.logfWithLabel(
 		l.labelError(),
 		format,
-		uint32(estimatedMessageSizeInfo),
+		uint32(
+			helpers.GetEstimatedMessageSize(format, args),
+		),
 		args,
 	)
 }
@@ -45,7 +45,12 @@ func (l *Logger) Errorw(msg string, keysAndValues ...any) {
 	}
 
 	l.logwWithLabel(
-		l.labelError(), msg, keysAndValues...,
+		l.labelError(),
+		msg,
+		uint32(
+			len(msg)+helpers.GetEstimatedMessageSize("", keysAndValues),
+		),
+		keysAndValues,
 	)
 }
 

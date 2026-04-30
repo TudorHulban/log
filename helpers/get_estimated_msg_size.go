@@ -33,7 +33,7 @@ func GetEstimatedMessageSize(format string, args []any) int {
 		}
 
 		if ai >= len(args) {
-			size += 2 // "%x"
+			size = size + 2 // "%x"
 
 			continue
 		}
@@ -45,47 +45,47 @@ func GetEstimatedMessageSize(format string, args []any) int {
 		case 's':
 			switch v := arg.(type) {
 			case string:
-				size += len(v)
+				size = size + len(v)
 			case []byte:
-				size += len(v)
+				size = size + len(v)
 			default:
-				size += len(fmt.Sprint(v))
+				size = size + len(fmt.Sprint(v))
 			}
 
 		case 'd':
 			switch v := arg.(type) {
 			case int:
-				size += DigitsInt(v)
+				size = size + DigitsInt(v)
 			case int64:
-				size += digitsInt64(v)
+				size = size + digitsInt64(v)
 			case int32:
-				size += digitsInt64(int64(v))
+				size = size + digitsInt64(int64(v))
 			case uint:
-				size += digitsUint64(uint64(v))
+				size = size + digitsUint64(uint64(v))
 			case uint64:
-				size += digitsUint64(v)
+				size = size + digitsUint64(v)
 			default:
-				size += len(fmt.Sprint(v))
+				size = size + len(fmt.Sprint(v))
 			}
 
 		case 't':
-			size += 5 // true/false worst case
+			size = size + 5 // true/false worst case
 
 		case 'f':
 			switch v := arg.(type) {
 			case float64:
-				size += float64Len(v)
+				size = size + float64Len(v)
 			case float32:
-				size += float64Len(float64(v))
+				size = size + float64Len(float64(v))
 			default:
-				size += len(fmt.Sprint(v))
+				size = size + len(fmt.Sprint(v))
 			}
 
 		case 'v':
-			size += len(fmt.Sprint(arg))
+			size = size + len(fmt.Sprint(arg))
 
 		default:
-			size += 2 // "%x"
+			size = size + 2 // "%x"
 		}
 	}
 

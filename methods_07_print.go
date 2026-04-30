@@ -24,27 +24,27 @@ func (l *Logger) labelPrint() string {
 }
 
 func (l *Logger) PrintMessage(msg string) {
-	if l.withJSON {
-		buf := make([]byte, 0, _PreallocationJSON)
+	region, errWrite := l.ingestor.TryWrite(uint32(len(msg)))
+	if errWrite != nil {
+		return
+	}
 
+	buf := region.Buf()[:0]
+
+	if l.withJSON {
 		buf = l.appendJSON(
 			buf,
-			l.labelInfo(),
+			l.labelPrint(),
 			"",
 			0,
 			[]byte(msg),
 		)
 
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-		if errWrite == nil {
-			copy(region.Buf(), buf)
-			l.ingestor.EndWrite(region)
-		}
+		copy(region.Buf(), buf)
+		l.ingestor.EndWrite(region)
 
 		return
 	}
-
-	var buf []byte
 
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
@@ -54,39 +54,44 @@ func (l *Logger) PrintMessage(msg string) {
 	buf = append(buf, msg...)
 	buf = append(buf, '\n')
 
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-	if errWrite == nil {
-		copy(region.Buf(), buf)
-		l.ingestor.EndWrite(region)
-	}
+	copy(region.Buf(), buf)
+	l.ingestor.EndWrite(region)
 }
 
 func (l *Logger) Print(args ...any) {
-	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
-
 	l.logWithLabel(
 		l.labelPrint(),
-		uint32(estimatedMessageSizeInfo),
+		uint32(helpers.GetEstimatedMessageSize("", args)),
 		args,
 	)
 }
 
 func (l *Logger) PrintWithNoTimestamp(args ...any) {
-	var buf []byte
+	region, errWrite := l.ingestor.TryWrite(
+		uint32(helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation),
+	)
+	if errWrite != nil {
+		return
+	}
+
+	buf := region.Buf()[:0]
 
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-	if errWrite == nil {
-		copy(region.Buf(), buf)
-
-		l.ingestor.EndWrite(region)
-	}
+	copy(region.Buf(), buf)
+	l.ingestor.EndWrite(region)
 }
 
 func (l *Logger) Printw(msg string, args ...any) {
-	var buf []byte
+	region, errWrite := l.ingestor.TryWrite(
+		uint32(len(msg) + helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation),
+	)
+	if errWrite != nil {
+		return
+	}
+
+	buf := region.Buf()[:0]
 
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
@@ -98,35 +103,32 @@ func (l *Logger) Printw(msg string, args ...any) {
 	buf = helpers.AppendArgs(buf, args)
 	buf = append(buf, '\n')
 
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-	if errWrite == nil {
-		copy(region.Buf(), buf)
-
-		l.ingestor.EndWrite(region)
-	}
+	copy(region.Buf(), buf)
+	l.ingestor.EndWrite(region)
 }
 
 func (l *Logger) Printf(format string, args ...any) {
-	if l.withJSON {
-		buf := make([]byte, 0, _PreallocationJSON)
+	region, errWrite := l.ingestor.TryWrite(
+		uint32(helpers.GetEstimatedMessageSize(format, args) + _DeltaEstimation),
+	)
+	if errWrite != nil {
+		return
+	}
 
+	buf := region.Buf()[:0]
+
+	if l.withJSON {
 		buf = l.appendJSON(
 			buf,
-			l.labelInfo(),
+			l.labelPrint(),
 			"",
 			0,
 			fmt.Appendf(nil, format, args...),
 		)
 
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-		if errWrite == nil {
-			copy(region.Buf(), buf)
-
-			l.ingestor.EndWrite(region)
-		}
+		copy(region.Buf(), buf)
+		l.ingestor.EndWrite(region)
 	} else {
-		buf := make([]byte, 0, _PreallocationBuffer)
-
 		if l.fnTimestamp != nil {
 			buf = l.fnTimestamp(buf)
 			buf = append(buf, ' ')
@@ -135,12 +137,9 @@ func (l *Logger) Printf(format string, args ...any) {
 		buf = fmt.Appendf(buf, format, args...)
 		buf = append(buf, '\n')
 
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-		if errWrite == nil {
-			copy(region.Buf(), buf)
+		copy(region.Buf(), buf)
 
-			l.ingestor.EndWrite(region)
-		}
+		l.ingestor.EndWrite(region)
 	}
 }
 

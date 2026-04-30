@@ -1,9 +1,7 @@
 package log
 
 const (
-	_PreallocationBuffer = 64
-	_PreallocationJSON   = 96
-	_DeltaEstimation     = 128
+	_DeltaEstimation = 128
 )
 
 const (

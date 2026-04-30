@@ -11,11 +11,11 @@ func (l *Logger) Trace(args ...any) {
 		return
 	}
 
-	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
-
 	l.logWithLabel(
 		l.labelTrace(),
-		uint32(estimatedMessageSizeInfo),
+		uint32(
+			helpers.GetEstimatedMessageSize("", args),
+		),
 		args,
 	)
 }
@@ -25,12 +25,12 @@ func (l *Logger) Tracef(format string, args ...any) {
 		return
 	}
 
-	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize(format, args)
-
 	l.logfWithLabel(
 		l.labelTrace(),
 		format,
-		uint32(estimatedMessageSizeInfo),
+		uint32(
+			helpers.GetEstimatedMessageSize(format, args),
+		),
 		args,
 	)
 }
@@ -45,7 +45,12 @@ func (l *Logger) Tracew(msg string, keysAndValues ...any) {
 	}
 
 	l.logwWithLabel(
-		l.labelTrace(), msg, keysAndValues...,
+		l.labelTrace(),
+		msg,
+		uint32(
+			len(msg)+helpers.GetEstimatedMessageSize("", keysAndValues),
+		),
+		keysAndValues,
 	)
 }
 

@@ -130,14 +130,19 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 	l.ingestor.EndWrite(region)
 }
 
-func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
+func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, keysAndValues ...any) {
+	region, errWrite := l.ingestor.TryWrite(estimatedMessageSize + _DeltaEstimation)
+	if errWrite != nil {
+		return
+	}
+
+	buf := region.Buf()[:0]
+
 	if l.withJSON {
 		var (
 			file string
 			line int
 		)
-
-		buf := make([]byte, 0, _PreallocationJSON)
 
 		if l.withCaller {
 			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
@@ -155,18 +160,13 @@ func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
 
 		buf = append(buf, '\n')
 
-		region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-		if errWrite == nil {
-			copy(region.Buf(), buf)
-			l.ingestor.EndWrite(region)
-		}
+		copy(region.Buf(), buf)
+		l.ingestor.EndWrite(region)
 
 		return
 	}
 
 	// Non‑JSON path
-	buf := make([]byte, 0, _PreallocationBuffer)
-
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
@@ -191,10 +191,7 @@ func (l *Logger) logwWithLabel(label string, msg string, keysAndValues ...any) {
 	buf = helpers.AppendArgs(buf, keysAndValues)
 	buf = append(buf, '\n')
 
-	region, errWrite := l.ingestor.TryWrite(uint32(len(buf))) //nolint:gosec
-	if errWrite == nil {
-		copy(region.Buf(), buf)
+	copy(region.Buf(), buf)
 
-		l.ingestor.EndWrite(region)
-	}
+	l.ingestor.EndWrite(region)
 }

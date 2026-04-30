@@ -17,7 +17,7 @@ func (l *Logger) Debug(args ...any) {
 
 	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
 
-	l.logWithLabelFast(
+	l.logWithLabel(
 		l.labelDebug(),
 		uint32(estimatedMessageSizeInfo+_DeltaEstimation),
 		args,
@@ -31,9 +31,10 @@ func (l *Logger) Debugf(format string, args ...any) {
 
 	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize(format, args)
 
-	l.logWithLabelFast(
+	l.logfWithLabel(
 		l.labelDebug(),
-		uint32(estimatedMessageSizeInfo+_DeltaEstimation),
+		format,
+		uint32(estimatedMessageSizeInfo),
 		args,
 	)
 }
@@ -57,7 +58,7 @@ func (l *Logger) DebugFast(args ...any) {
 		return
 	}
 
-	l.logWithLabelFast(
+	l.logWithLabel(
 		l.labelDebug(),
 		l.estimatedMessageSizeDebug,
 		args,

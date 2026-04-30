@@ -83,7 +83,7 @@ func TestDebug(t *testing.T) {
 	require.Contains(t, lines[2], `"caller":`)
 }
 
-// Benchmark_Debug-16    	20158742	        60.41 ns/op	      16 B/op	       1 allocs/op
+// Benchmark_Debug-16    	20773839	        58.77 ns/op	       0 B/op	       0 allocs/op
 func Benchmark_Debug(b *testing.B) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),

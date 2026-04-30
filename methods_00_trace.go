@@ -1,5 +1,7 @@
 package log
 
+import "github.com/tudorhulban/log/helpers"
+
 func (*Logger) labelTrace() string {
 	return logLevels[LevelTrace]
 }
@@ -9,8 +11,12 @@ func (l *Logger) Trace(args ...any) {
 		return
 	}
 
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
+
 	l.logWithLabel(
-		l.labelTrace(), args...,
+		l.labelTrace(),
+		uint32(estimatedMessageSizeInfo),
+		args,
 	)
 }
 
@@ -19,8 +25,13 @@ func (l *Logger) Tracef(format string, args ...any) {
 		return
 	}
 
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize(format, args)
+
 	l.logfWithLabel(
-		l.labelTrace(), format, args,
+		l.labelTrace(),
+		format,
+		uint32(estimatedMessageSizeInfo),
+		args,
 	)
 }
 
@@ -43,7 +54,7 @@ func (l *Logger) TraceFast(args ...any) {
 		return
 	}
 
-	l.logWithLabelFast(
+	l.logWithLabel(
 		l.labelTrace(),
 		l.estimatedMessageSizeTrace,
 		args,

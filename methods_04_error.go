@@ -1,5 +1,7 @@
 package log
 
+import "github.com/tudorhulban/log/helpers"
+
 func (l *Logger) labelError() string {
 	if l.withColor {
 		return colorError(logLevels[LevelError])
@@ -13,8 +15,12 @@ func (l *Logger) Error(args ...any) {
 		return
 	}
 
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
+
 	l.logWithLabel(
-		l.labelError(), args...,
+		l.labelError(),
+		uint32(estimatedMessageSizeInfo),
+		args,
 	)
 }
 
@@ -23,8 +29,13 @@ func (l *Logger) Errorf(format string, args ...any) {
 		return
 	}
 
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize(format, args)
+
 	l.logfWithLabel(
-		l.labelError(), format, args,
+		l.labelError(),
+		format,
+		uint32(estimatedMessageSizeInfo),
+		args,
 	)
 }
 
@@ -43,7 +54,7 @@ func (l *Logger) ErrorFast(args ...any) {
 		return
 	}
 
-	l.logWithLabelFast(
+	l.logWithLabel(
 		l.labelError(),
 		l.estimatedMessageSizeError,
 		args,

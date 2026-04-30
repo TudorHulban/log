@@ -62,8 +62,12 @@ func (l *Logger) PrintMessage(msg string) {
 }
 
 func (l *Logger) Print(args ...any) {
+	estimatedMessageSizeInfo := helpers.GetEstimatedMessageSize("", args)
+
 	l.logWithLabel(
-		l.labelPrint(), args...,
+		l.labelPrint(),
+		uint32(estimatedMessageSizeInfo),
+		args,
 	)
 }
 

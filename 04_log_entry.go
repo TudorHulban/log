@@ -128,17 +128,17 @@ func (e *Entry) estimateFieldsSize() int {
 		result = result + len(`{"key":"`) + len(f.key) + len(`","value":""}`)
 
 		switch f.kind {
-		case fieldKindString:
+		case kindString:
 			result = result + len(f.valueString)
 
-		case fieldKindBool:
+		case kindBool:
 			if f.valueBool {
 				result = result + 4 // true
 			} else {
 				result = result + 5 // false
 			}
 
-		case fieldKindNumeric:
+		case kindInt:
 			result = result + helpers.DigitsInt(f.valueNumeric)
 		}
 	}

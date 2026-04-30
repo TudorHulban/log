@@ -28,7 +28,7 @@ func AppendInt(destination []byte, value int) []byte {
 	return append(destination, buf[i:]...)
 }
 
-func AppendUint64(destination []byte, value uint64) []byte {
+func appendUint64(destination []byte, value uint64) []byte {
 	var buf [20]byte
 
 	i := len(buf)
@@ -46,7 +46,7 @@ func AppendUint64(destination []byte, value uint64) []byte {
 	return append(destination, buf[i:]...)
 }
 
-func AppendFloat(destination []byte, value float64, prec int) []byte {
+func appendFloat(destination []byte, value float64, precision int) []byte {
 	// Handle NaN and Inf explicitly
 	if value != value {
 		return append(destination, 'n', 'a', 'n')
@@ -68,14 +68,14 @@ func AppendFloat(destination []byte, value float64, prec int) []byte {
 
 	// Integer part
 	intPart := uint64(value)
-	destination = AppendUint64(destination, intPart)
+	destination = appendUint64(destination, intPart)
 
 	// Fractional part
-	if prec > 0 {
+	if precision > 0 {
 		destination = append(destination, '.')
 		fractional := value - float64(intPart)
 
-		for range prec {
+		for range precision {
 			fractional *= 10
 			digit := uint64(fractional)
 			destination = append(destination, byte('0'+digit))

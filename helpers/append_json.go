@@ -98,7 +98,7 @@ func AppendJSON_Arguments(buf []byte, args []any) []byte {
 		case uint:
 			buf = strconv.AppendUint(buf, uint64(argument), 10)
 		case uint64:
-			buf = AppendUint64(buf, argument)
+			buf = appendUint64(buf, argument)
 		case float64:
 			buf = strconv.AppendFloat(buf, argument, 'f', -1, 64)
 		case float32:
@@ -120,8 +120,8 @@ func AppendJSON_Arguments(buf []byte, args []any) []byte {
 	return buf
 }
 
-func AppendJSON_Formatted(dst []byte, format string, args ...any) []byte {
-	dst = append(dst, '"')
+func AppendJSON_Formatted(destination []byte, format string, args ...any) []byte {
+	destination = append(destination, '"')
 
 	ai := 0
 	flen := len(format)
@@ -130,12 +130,13 @@ func AppendJSON_Formatted(dst []byte, format string, args ...any) []byte {
 		c := format[i]
 
 		if c != '%' {
-			dst = append(dst, c)
+			destination = append(destination, c)
+
 			continue
 		}
 
 		if i+1 < flen && format[i+1] == '%' {
-			dst = append(dst, '%')
+			destination = append(destination, '%')
 			i++
 
 			continue
@@ -143,9 +144,9 @@ func AppendJSON_Formatted(dst []byte, format string, args ...any) []byte {
 
 		i++
 		if i >= flen || ai >= len(args) {
-			dst = append(dst, '%')
+			destination = append(destination, '%')
 			if i < flen {
-				dst = append(dst, format[i])
+				destination = append(destination, format[i])
 			}
 
 			continue
@@ -158,27 +159,27 @@ func AppendJSON_Formatted(dst []byte, format string, args ...any) []byte {
 		case 's':
 			switch v := arg.(type) {
 			case string:
-				dst = append(dst, v...)
+				destination = append(destination, v...)
 			case []byte:
-				dst = append(dst, v...)
+				destination = append(destination, v...)
 			default:
-				dst = append(dst, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(v)...)
 			}
 
 		case 'd':
 			switch v := arg.(type) {
 			case int:
-				dst = AppendInt(dst, v)
+				destination = AppendInt(destination, v)
 			case int64:
-				dst = strconv.AppendInt(dst, v, 10)
+				destination = strconv.AppendInt(destination, v, 10)
 			default:
-				dst = append(dst, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(v)...)
 			}
 
 		default:
-			dst = append(dst, '%', format[i])
+			destination = append(destination, '%', format[i])
 		}
 	}
 
-	return append(dst, '"')
+	return append(destination, '"')
 }

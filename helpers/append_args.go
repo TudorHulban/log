@@ -28,11 +28,13 @@ func AppendArgs(destination []byte, args ...any) []byte {
 		case uint:
 			destination = strconv.AppendUint(destination, uint64(value), 10)
 		case uint64:
-			destination = AppendUint64(destination, value)
+			destination = appendUint64(destination, value)
+
 		case float64:
-			destination = strconv.AppendFloat(destination, value, 'f', -1, 64)
+			destination = appendFloat(destination, value, 12)
 		case float32:
-			destination = strconv.AppendFloat(destination, float64(value), 'f', -1, 32)
+			destination = appendFloat(destination, float64(value), 6)
+
 		case bool:
 			destination = AppendBool(destination, value)
 		case error:
@@ -50,7 +52,7 @@ func AppendArgs(destination []byte, args ...any) []byte {
 }
 
 // Appendf produces a []byte message without allocations.
-func Appendf(dst []byte, format string, args []any) []byte {
+func Appendf(destination []byte, format string, args []any) []byte {
 	ai := 0
 	flen := len(format)
 
@@ -58,14 +60,14 @@ func Appendf(dst []byte, format string, args []any) []byte {
 		c := format[i]
 
 		if c != '%' {
-			dst = append(dst, c)
+			destination = append(destination, c)
 
 			continue
 		}
 
 		// Handle "%%"
 		if i+1 < flen && format[i+1] == '%' {
-			dst = append(dst, '%')
+			destination = append(destination, '%')
 			i++
 
 			continue
@@ -75,14 +77,14 @@ func Appendf(dst []byte, format string, args []any) []byte {
 		i++
 		if i >= flen {
 			// malformed trailing '%'
-			dst = append(dst, '%')
+			destination = append(destination, '%')
 
 			break
 		}
 
 		if ai >= len(args) {
 			// no argument provided
-			dst = append(dst, '%', format[i])
+			destination = append(destination, '%', format[i])
 
 			continue
 		}
@@ -94,82 +96,82 @@ func Appendf(dst []byte, format string, args []any) []byte {
 		case 's':
 			switch v := arg.(type) {
 			case string:
-				dst = append(dst, v...)
+				destination = append(destination, v...)
 			case []byte:
-				dst = append(dst, v...)
+				destination = append(destination, v...)
 			default:
-				dst = append(dst, fmt.Sprint(v)...) // exotic fallback
+				destination = append(destination, fmt.Sprint(v)...) // exotic fallback
 			}
 
 		case 'd':
 			switch v := arg.(type) {
 			case int:
-				dst = AppendInt(dst, v)
+				destination = AppendInt(destination, v)
 			case int64:
-				dst = AppendInt(dst, int(v))
+				destination = AppendInt(destination, int(v))
 			case int32:
-				dst = AppendInt(dst, int(v))
+				destination = AppendInt(destination, int(v))
 			case uint:
-				dst = AppendUint64(dst, uint64(v))
+				destination = appendUint64(destination, uint64(v))
 			case uint64:
-				dst = AppendUint64(dst, v)
+				destination = appendUint64(destination, v)
 			default:
-				dst = append(dst, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(v)...)
 			}
 
 		case 'v':
 			switch v := arg.(type) {
 			case string:
-				dst = append(dst, v...)
+				destination = append(destination, v...)
 			case []byte:
-				dst = append(dst, v...)
+				destination = append(destination, v...)
 			case int:
-				dst = AppendInt(dst, v)
+				destination = AppendInt(destination, v)
 			case int64:
-				dst = strconv.AppendInt(dst, v, 10)
+				destination = strconv.AppendInt(destination, v, 10)
 			case int32:
-				dst = strconv.AppendInt(dst, int64(v), 10)
+				destination = strconv.AppendInt(destination, int64(v), 10)
 			case uint:
-				dst = strconv.AppendUint(dst, uint64(v), 10)
+				destination = strconv.AppendUint(destination, uint64(v), 10)
 			case uint64:
-				dst = AppendUint64(dst, v)
+				destination = appendUint64(destination, v)
 			case float64:
-				dst = strconv.AppendFloat(dst, v, 'f', -1, 64)
+				destination = strconv.AppendFloat(destination, v, 'f', -1, 64)
 			case float32:
-				dst = strconv.AppendFloat(dst, float64(v), 'f', -1, 32)
+				destination = strconv.AppendFloat(destination, float64(v), 'f', -1, 32)
 			case bool:
-				dst = AppendBool(dst, v)
+				destination = AppendBool(destination, v)
 			case error:
-				dst = AppendError(dst, v)
+				destination = AppendError(destination, v)
 			case nil:
-				dst = append(dst, "null"...)
+				destination = append(destination, "null"...)
 			default:
-				dst = append(dst, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(v)...)
 			}
 
 		case 't':
 			switch v := arg.(type) {
 			case bool:
-				dst = AppendBool(dst, v)
+				destination = AppendBool(destination, v)
 			default:
-				dst = append(dst, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(v)...)
 			}
 
 		case 'f':
 			switch v := arg.(type) {
 			case float64:
-				dst = strconv.AppendFloat(dst, v, 'f', -1, 64)
+				destination = strconv.AppendFloat(destination, v, 'f', -1, 64)
 			case float32:
-				dst = strconv.AppendFloat(dst, float64(v), 'f', -1, 32)
+				destination = strconv.AppendFloat(destination, float64(v), 'f', -1, 32)
 			default:
-				dst = append(dst, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(v)...)
 			}
 
 		default:
 			// unsupported verb → literal fallback
-			dst = append(dst, '%', format[i])
+			destination = append(destination, '%', format[i])
 		}
 	}
 
-	return dst
+	return destination
 }

@@ -6,12 +6,6 @@ import (
 	"github.com/tudorhulban/log/helpers"
 )
 
-const (
-	kindString fieldKind = iota
-	kindInt
-	kindBool
-)
-
 type formatterConfig struct {
 	root   *field  // nil if no root
 	fields []field // ephemeral fields

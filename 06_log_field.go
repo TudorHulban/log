@@ -9,9 +9,9 @@ import (
 type fieldKind uint8
 
 const (
-	fieldKindString fieldKind = iota
-	fieldKindNumeric
-	fieldKindBool
+	kindString fieldKind = iota
+	kindInt
+	kindBool
 )
 
 type field struct {
@@ -47,7 +47,7 @@ func makeField(key string, value any) field {
 			valueBool: v,
 		}
 
-	// You can add more typed cases here:
+	// TODO: add more typed cases here?
 	// case uint:
 	// case float64:
 	// case error:

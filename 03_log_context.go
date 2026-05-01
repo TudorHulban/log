@@ -67,7 +67,7 @@ func (ctx *LogContext) SetString(key, value string) *LogContext {
 	return ctx
 }
 
-func (ctx *LogContext) SetInt(key string, value int) *LogContext {
+func (ctx *LogContext) SetInt(key string, value int64) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)

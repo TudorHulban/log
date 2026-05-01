@@ -17,9 +17,7 @@ func (l *Logger) Warn(args ...any) {
 
 	l.logWithLabel(
 		l.labelWarn(),
-		uint32(
-			helpers.GetEstimatedMessageSize("", args),
-		),
+		helpers.GetEstimatedMessageSize("", args),
 		args,
 	)
 }
@@ -32,9 +30,7 @@ func (l *Logger) Warnf(format string, args ...any) {
 	l.logfWithLabel(
 		l.labelWarn(),
 		format,
-		uint32(
-			helpers.GetEstimatedMessageSize(format, args),
-		),
+		helpers.GetEstimatedMessageSize(format, args),
 		args,
 	)
 }
@@ -47,9 +43,7 @@ func (l *Logger) Warnw(msg string, keysAndValues ...any) {
 	l.logwWithLabel(
 		l.labelWarn(),
 		msg,
-		uint32(
-			len(msg)+helpers.GetEstimatedMessageSize("", keysAndValues),
-		),
+		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
 		keysAndValues,
 	)
 }

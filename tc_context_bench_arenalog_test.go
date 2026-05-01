@@ -152,7 +152,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 		// 1. Create request with 4 attributes
 		entry := logContext.With("area", "some area").
 			WithString("user", "tudor").
-			WithInt("attempt", i).
+			WithInt("attempt", int64(i)).
 			WithBool("success", true)
 
 		// 2. Print
@@ -203,7 +203,7 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 		// 1. Create request with 4 attributes
 		entry := logContext.With("area", "some area").
 			WithString("user", "tudor").
-			WithInt("attempt", i).
+			WithInt("attempt", int64(i)).
 			WithBool("success", true)
 
 		// 2. Print

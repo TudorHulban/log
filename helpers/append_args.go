@@ -20,7 +20,7 @@ func AppendArgs(destination []byte, args ...any) []byte {
 		case []byte:
 			destination = append(destination, value...)
 		case int:
-			destination = AppendInt(destination, value)
+			destination = strconv.AppendInt(destination, int64(value), 10)
 		case int64:
 			destination = strconv.AppendInt(destination, value, 10)
 		case int32:
@@ -106,11 +106,11 @@ func Appendf(destination []byte, format string, args []any) []byte {
 		case 'd':
 			switch v := arg.(type) {
 			case int:
-				destination = AppendInt(destination, v)
+				destination = strconv.AppendInt(destination, int64(v), 10)
 			case int64:
-				destination = AppendInt(destination, int(v))
+				destination = strconv.AppendInt(destination, v, 10)
 			case int32:
-				destination = AppendInt(destination, int(v))
+				destination = strconv.AppendInt(destination, int64(v), 10)
 			case uint:
 				destination = appendUint64(destination, uint64(v))
 			case uint64:
@@ -126,7 +126,7 @@ func Appendf(destination []byte, format string, args []any) []byte {
 			case []byte:
 				destination = append(destination, v...)
 			case int:
-				destination = AppendInt(destination, v)
+				destination = strconv.AppendInt(destination, int64(v), 10)
 			case int64:
 				destination = strconv.AppendInt(destination, v, 10)
 			case int32:

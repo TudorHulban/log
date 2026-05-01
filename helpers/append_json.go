@@ -90,7 +90,7 @@ func AppendJSON_Arguments(buf []byte, args []any) []byte {
 		case []byte:
 			buf = AppendJSON(buf, argument)
 		case int:
-			buf = AppendInt(buf, argument)
+			buf = strconv.AppendInt(buf, int64(argument), 10)
 		case int64:
 			buf = strconv.AppendInt(buf, argument, 10)
 		case int32:
@@ -157,23 +157,23 @@ func AppendJSON_Formatted(destination []byte, format string, args ...any) []byte
 
 		switch format[i] {
 		case 's':
-			switch v := arg.(type) {
+			switch word := arg.(type) {
 			case string:
-				destination = append(destination, v...)
+				destination = append(destination, word...)
 			case []byte:
-				destination = append(destination, v...)
+				destination = append(destination, word...)
 			default:
-				destination = append(destination, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(word)...)
 			}
 
 		case 'd':
-			switch v := arg.(type) {
+			switch value := arg.(type) {
 			case int:
-				destination = AppendInt(destination, v)
+				destination = strconv.AppendInt(destination, int64(value), 10)
 			case int64:
-				destination = strconv.AppendInt(destination, v, 10)
+				destination = strconv.AppendInt(destination, value, 10)
 			default:
-				destination = append(destination, fmt.Sprint(v)...)
+				destination = append(destination, fmt.Sprint(value)...)
 			}
 
 		default:

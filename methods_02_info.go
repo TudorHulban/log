@@ -17,9 +17,7 @@ func (l *Logger) Info(args ...any) {
 
 	l.logWithLabel(
 		l.labelInfo(),
-		uint32(
-			helpers.GetEstimatedMessageSize("", args),
-		),
+		helpers.GetEstimatedMessageSize("", args),
 		args,
 	)
 }
@@ -32,9 +30,7 @@ func (l *Logger) Infof(format string, args ...any) {
 	l.logfWithLabel(
 		l.labelInfo(),
 		format,
-		uint32(
-			helpers.GetEstimatedMessageSize(format, args),
-		),
+		helpers.GetEstimatedMessageSize(format, args),
 		args,
 	)
 }
@@ -51,9 +47,7 @@ func (l *Logger) Infow(msg string, keysAndValues ...any) {
 	l.logwWithLabel(
 		l.labelInfo(),
 		msg,
-		uint32(
-			len(msg)+helpers.GetEstimatedMessageSize("", keysAndValues),
-		),
+		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
 		keysAndValues,
 	)
 }

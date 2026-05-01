@@ -4,8 +4,9 @@ import (
 	"fmt"
 )
 
-func GetEstimatedMessageSize(format string, args []any) int {
-	size := 0
+func GetEstimatedMessageSize(format string, args []any) uint32 {
+	var size uint32
+
 	ai := 0
 	flen := len(format)
 
@@ -45,17 +46,17 @@ func GetEstimatedMessageSize(format string, args []any) int {
 		case 's':
 			switch v := arg.(type) {
 			case string:
-				size = size + len(v)
+				size = size + uint32(len(v))
 			case []byte:
-				size = size + len(v)
+				size = size + uint32(len(v))
 			default:
-				size = size + len(fmt.Sprint(v))
+				size = size + uint32(len(fmt.Sprint(v)))
 			}
 
 		case 'd':
 			switch v := arg.(type) {
 			case int:
-				size = size + DigitsInt(v)
+				size = size + DigitsInt(int64(v))
 			case int64:
 				size = size + digitsInt64(v)
 			case int32:
@@ -65,7 +66,7 @@ func GetEstimatedMessageSize(format string, args []any) int {
 			case uint64:
 				size = size + digitsUint64(v)
 			default:
-				size = size + len(fmt.Sprint(v))
+				size = size + uint32(len(fmt.Sprint(v)))
 			}
 
 		case 't':
@@ -78,11 +79,11 @@ func GetEstimatedMessageSize(format string, args []any) int {
 			case float32:
 				size = size + float64Len(float64(v))
 			default:
-				size = size + len(fmt.Sprint(v))
+				size = size + uint32(len(fmt.Sprint(v)))
 			}
 
 		case 'v':
-			size = size + len(fmt.Sprint(arg))
+			size = size + uint32(len(fmt.Sprint(arg)))
 
 		default:
 			size = size + 2 // "%x"
@@ -92,72 +93,75 @@ func GetEstimatedMessageSize(format string, args []any) int {
 	return size
 }
 
-func DigitsInt(v int) int {
+func DigitsInt(value int64) uint32 {
+	if value == 0 {
+		return 1
+	}
+
+	var result uint32
+
+	if value < 0 {
+		result = 1
+		value = -value
+	}
+
+	for value > 0 {
+		value = value / 10
+		result++
+	}
+
+	return result
+}
+
+func digitsInt64(value int64) uint32 {
+	if value == 0 {
+		return 1
+	}
+
+	var result uint32
+
+	if value < 0 {
+		result = 1
+		value = -value
+	}
+
+	for value > 0 {
+		value = value / 10
+		result++
+	}
+
+	return result
+}
+
+func digitsUint64(v uint64) uint32 {
 	if v == 0 {
 		return 1
 	}
 
-	n := 0
-	if v < 0 {
-		n = 1
-		v = -v
-	}
+	var result uint32
 
 	for v > 0 {
 		v /= 10
-		n++
+		result++
 	}
 
-	return n
+	return result
 }
 
-func digitsInt64(v int64) int {
-	if v == 0 {
-		return 1
-	}
-
-	n := 0
-	if v < 0 {
-		n = 1
-		v = -v
-	}
-
-	for v > 0 {
-		v /= 10
-		n++
-	}
-
-	return n
-}
-
-func digitsUint64(v uint64) int {
-	if v == 0 {
-		return 1
-	}
-
-	n := 0
-
-	for v > 0 {
-		v /= 10
-		n++
-	}
-
-	return n
-}
-
-func float64Len(v float64) int {
+func float64Len(v float64) uint32 {
 	// conservative upper bound (cheap + safe for sizing)
 	// "-12345.6789"
-	n := 0
+	var result uint32
+
 	if v < 0 {
-		n = 1
+		result = 1
 		v = -v
 	}
 
 	// integer part
 	i := uint64(v)
-	n += digitsUint64(i)
+	result = result + digitsUint64(i)
 
 	// decimal part (assume ".+" even if not always present)
-	return n + 6
+	return result + 6
 }

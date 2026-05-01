@@ -1,6 +1,8 @@
 package log
 
 import (
+	"strconv"
+
 	"github.com/tudorhulban/log/helpers"
 )
 
@@ -27,7 +29,7 @@ func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []b
 		buffer = append(buffer, `"caller":"`...)
 		buffer = append(buffer, file...)
 		buffer = append(buffer, `","line":`...)
-		buffer = helpers.AppendInt(buffer, line)
+		buffer = strconv.AppendInt(buffer, int64(line), 10)
 		buffer = append(buffer, ',')
 	}
 

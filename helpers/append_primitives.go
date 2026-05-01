@@ -1,33 +1,5 @@
 package helpers
 
-func AppendInt(destination []byte, value int) []byte {
-	var buf [20]byte // Enough space for int64 decimal representation
-
-	i := len(buf)
-
-	neg := value < 0
-	if neg {
-		value = -value
-	}
-
-	for {
-		i--
-		buf[i] = byte('0' + value%10)
-
-		value = value / 10
-		if value == 0 {
-			break
-		}
-	}
-
-	if neg {
-		i--
-		buf[i] = '-'
-	}
-
-	return append(destination, buf[i:]...)
-}
-
 func appendUint64(destination []byte, value uint64) []byte {
 	var buf [20]byte
 

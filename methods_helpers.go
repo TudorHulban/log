@@ -2,6 +2,7 @@ package log
 
 import (
 	"runtime"
+	"strconv"
 
 	"github.com/tudorhulban/log/helpers"
 )
@@ -54,7 +55,7 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
 		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = helpers.AppendInt(buf, line)
+		buf = strconv.AppendInt(buf, int64(line), 10)
 		buf = append(buf, ' ')
 	}
 
@@ -116,7 +117,7 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
 		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = helpers.AppendInt(buf, line)
+		buf = strconv.AppendInt(buf, int64(line), 10)
 		buf = append(buf, ' ')
 	}
 
@@ -181,7 +182,7 @@ func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, k
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
 		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = helpers.AppendInt(buf, line)
+		buf = strconv.AppendInt(buf, int64(line), 10)
 		buf = append(buf, ' ')
 	}
 

@@ -1,6 +1,10 @@
 package log
 
-import "github.com/tudorhulban/log/helpers"
+import (
+	"strconv"
+
+	"github.com/tudorhulban/log/helpers"
+)
 
 func (e *Entry) Msg(msg string) {
 	if Level(e.formatter.logger.logLevel.Load()) > e.level {
@@ -11,7 +15,7 @@ func (e *Entry) Msg(msg string) {
 	logger := e.formatter.logger
 
 	region, errWrite := logger.ingestor.TryWrite(
-		uint32(len(msg) + e.estimateFieldsSize() + 128),
+		uint32(len(msg)) + e.estimateFieldsSize() + _DeltaEstimation,
 	)
 	if errWrite != nil {
 		entryPool.Put(e)
@@ -52,7 +56,7 @@ func (e *Entry) Msg(msg string) {
 			case kindString:
 				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
+				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 			case kindBool:
 				buf = helpers.AppendBool(buf, fld.valueBool)
 			}
@@ -72,7 +76,7 @@ func (e *Entry) Msg(msg string) {
 			case kindString:
 				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
+				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 			case kindBool:
 				buf = helpers.AppendBool(buf, fld.valueBool)
 			}
@@ -92,7 +96,7 @@ func (e *Entry) Msg(msg string) {
 			case kindString:
 				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
-				buf = helpers.AppendInt(buf, fld.valueNumeric)
+				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 			case kindBool:
 				buf = helpers.AppendBool(buf, fld.valueBool)
 			}
@@ -130,7 +134,7 @@ func (e *Entry) Msg(msg string) {
 			buf = append(buf, fld.valueString...)
 
 		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
+			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 		case kindBool:
 			buf = helpers.AppendBool(buf, fld.valueBool)
@@ -151,7 +155,7 @@ func (e *Entry) Msg(msg string) {
 			buf = append(buf, fld.valueString...)
 
 		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
+			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 		case kindBool:
 			buf = helpers.AppendBool(buf, fld.valueBool)
@@ -172,7 +176,7 @@ func (e *Entry) Msg(msg string) {
 			buf = append(buf, fld.valueString...)
 
 		case kindInt:
-			buf = helpers.AppendInt(buf, fld.valueNumeric)
+			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 		case kindBool:
 			buf = helpers.AppendBool(buf, fld.valueBool)

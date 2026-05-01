@@ -85,8 +85,10 @@ func BenchmarkAppendFloat(b *testing.B) {
 				b.ResetTimer()
 
 				var dst []byte
-				for i := 0; i < b.N; i++ {
+
+				for b.Loop() {
 					dst = dst[:0]
+
 					out := appendFloat(dst, tc.value, tc.prec)
 					require.NotNil(b, out)
 				}
@@ -100,8 +102,10 @@ func BenchmarkAppendFloat(b *testing.B) {
 				b.ResetTimer()
 
 				var dst []byte
-				for i := 0; i < b.N; i++ {
+
+				for b.Loop() {
 					dst = dst[:0]
+
 					out := strconv.AppendFloat(dst, tc.value, 'f', tc.prec, 64)
 					require.NotNil(b, out)
 				}

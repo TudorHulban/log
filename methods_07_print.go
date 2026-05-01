@@ -61,14 +61,14 @@ func (l *Logger) PrintMessage(msg string) {
 func (l *Logger) Print(args ...any) {
 	l.logWithLabel(
 		l.labelPrint(),
-		uint32(helpers.GetEstimatedMessageSize("", args)),
+		helpers.GetEstimatedMessageSize("", args),
 		args,
 	)
 }
 
 func (l *Logger) PrintWithNoTimestamp(args ...any) {
 	region, errWrite := l.ingestor.TryWrite(
-		uint32(helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation),
+		helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation,
 	)
 	if errWrite != nil {
 		return
@@ -85,7 +85,7 @@ func (l *Logger) PrintWithNoTimestamp(args ...any) {
 
 func (l *Logger) Printw(msg string, args ...any) {
 	region, errWrite := l.ingestor.TryWrite(
-		uint32(len(msg) + helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation),
+		uint32(len(msg)) + helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation,
 	)
 	if errWrite != nil {
 		return
@@ -109,7 +109,7 @@ func (l *Logger) Printw(msg string, args ...any) {
 
 func (l *Logger) Printf(format string, args ...any) {
 	region, errWrite := l.ingestor.TryWrite(
-		uint32(helpers.GetEstimatedMessageSize(format, args) + _DeltaEstimation),
+		helpers.GetEstimatedMessageSize(format, args) + _DeltaEstimation,
 	)
 	if errWrite != nil {
 		return

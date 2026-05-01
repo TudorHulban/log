@@ -51,7 +51,7 @@ func (e *Entry) WithString(key, value string) *Entry {
 }
 
 // WithInt appends an int field without boxing value into any.
-func (e *Entry) WithInt(key string, value int) *Entry {
+func (e *Entry) WithInt(key string, value int64) *Entry {
 	e.fields = append(
 		e.fields,
 		field{
@@ -120,16 +120,16 @@ func (e *Entry) Panic() *Entry {
 	return e
 }
 
-func (e *Entry) estimateFieldsSize() int {
-	result := 0
+func (e *Entry) estimateFieldsSize() uint32 {
+	var result uint32
 
 	for _, f := range e.fields {
 		// key
-		result = result + len(`{"key":"`) + len(f.key) + len(`","value":""}`)
+		result = result + uint32(len(`{"key":"`)+len(f.key)+len(`","value":""}`))
 
 		switch f.kind {
 		case kindString:
-			result = result + len(f.valueString)
+			result = result + uint32(len(f.valueString))
 
 		case kindBool:
 			if f.valueBool {

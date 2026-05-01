@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/tudorhulban/log/helpers"
 )
@@ -17,7 +18,7 @@ const (
 type field struct {
 	key          string
 	valueString  string
-	valueNumeric int
+	valueNumeric int64
 
 	kind fieldKind
 
@@ -33,7 +34,7 @@ func makeField(key string, value any) field {
 			valueString: v,
 		}
 
-	case int:
+	case int64:
 		return field{
 			key:          key,
 			kind:         kindInt,
@@ -78,7 +79,7 @@ func appendField(buf []byte, fld *field) []byte {
 		buf = append(buf, fld.valueString...)
 
 	case kindInt:
-		buf = helpers.AppendInt(buf, fld.valueNumeric)
+		buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 	case kindBool:
 		buf = helpers.AppendBool(buf, fld.valueBool)

@@ -17,9 +17,7 @@ func (l *Logger) Error(args ...any) {
 
 	l.logWithLabel(
 		l.labelError(),
-		uint32(
-			helpers.GetEstimatedMessageSize("", args),
-		),
+		helpers.GetEstimatedMessageSize("", args),
 		args,
 	)
 }
@@ -32,9 +30,7 @@ func (l *Logger) Errorf(format string, args ...any) {
 	l.logfWithLabel(
 		l.labelError(),
 		format,
-		uint32(
-			helpers.GetEstimatedMessageSize(format, args),
-		),
+		helpers.GetEstimatedMessageSize(format, args),
 		args,
 	)
 }
@@ -47,9 +43,7 @@ func (l *Logger) Errorw(msg string, keysAndValues ...any) {
 	l.logwWithLabel(
 		l.labelError(),
 		msg,
-		uint32(
-			len(msg)+helpers.GetEstimatedMessageSize("", keysAndValues),
-		),
+		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
 		keysAndValues,
 	)
 }

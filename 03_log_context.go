@@ -73,9 +73,9 @@ func (ctx *LogContext) SetInt(key string, value int64) *LogContext {
 	newFields := make([]field, len(old.fields)+1)
 	copy(newFields, old.fields)
 	newFields[len(old.fields)] = field{
-		key:          key,
-		kind:         kindInt,
-		valueNumeric: value,
+		key:      key,
+		kind:     kindInt,
+		valueInt: value,
 	}
 
 	ctx.cfg.Store(&formatterConfig{root: old.root, fields: newFields})

@@ -115,7 +115,7 @@ func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
 	)
 }
 
-// BenchmarkPhuslu_WithFields-16    	 6631579	       179.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_WithFields-16    	 4626322	       259.0 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkPhuslu_WithFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -136,7 +136,68 @@ func BenchmarkPhuslu_WithFields(b *testing.B) {
 			Str("area", "some area").
 			Str("user", "tudor").
 			Int("attempt", i).
+			Float64("some float", 1.1137).
 			Bool("success", true).
 			Msg("benchmark test")
 	}
+}
+
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkPhuslu_WithFields_Parallel/gomaxprocs=1-16         	 4837551	       244.7 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_WithFields_Parallel/gomaxprocs=2-16         	 8898666	       136.2 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_WithFields_Parallel/gomaxprocs=3-16         	12984573	        92.34 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_WithFields_Parallel/gomaxprocs=4-16         	17022438	        70.46 ns/op	       0 B/op	       0 allocs/op
+func BenchmarkPhuslu_WithFields_Parallel(b *testing.B) {
+	gomaxprocsValues := []int{1, 2, 3, 4}
+
+	writer := helpers.CountWriterNoBuffer{}
+
+	logger := log.Logger{
+		Level:      log.InfoLevel,
+		TimeField:  "ts",
+		TimeFormat: time.RFC3339,
+		Writer:     &log.IOWriter{Writer: &writer},
+	}
+
+	b.SetParallelism(16)
+
+	for _, g := range gomaxprocsValues {
+		inner := g
+
+		b.Run(
+			fmt.Sprintf("gomaxprocs=%d", inner),
+			func(b *testing.B) {
+				prev := runtime.GOMAXPROCS(inner)
+				defer runtime.GOMAXPROCS(prev)
+
+				b.ReportAllocs()
+				b.ResetTimer()
+
+				b.RunParallel(
+					func(pb *testing.PB) {
+						i := 0
+						for pb.Next() {
+							logger.Info().
+								Str("service", "auth").
+								Int("req_id", 12345).
+								Str("area", "some area").
+								Str("user", "tudor").
+								Int("attempt", i).
+								Float64("some float", 1.1137).
+								Bool("success", true).
+								Msg("benchmark test")
+
+							i++
+						}
+					},
+				)
+			},
+		)
+	}
+
+	require.NotZero(
+		b,
+		writer.TotalBytesWritten.Load(),
+		"1. writer must record bytes",
+	)
 }

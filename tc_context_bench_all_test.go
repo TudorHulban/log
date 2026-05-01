@@ -18,10 +18,30 @@ import (
 // BenchmarkAll/Arenalog_OneField/G3-16    	 9858770	       119.5 ns/op	      16 B/op	       0 allocs/op
 // BenchmarkAll/Arenalog_OneField/G4-16    	 9946056	       119.9 ns/op	      16 B/op	       0 allocs/op
 
-func BenchmarkAll(b *testing.B) {
+func BenchmarkAll_OneField(b *testing.B) {
 	b.Run("Phuslu_OneField", BenchmarkPhuslu_OneField)
 	b.Run("Zerolog_OneField", BenchmarkZerolog_OneField)
 	b.Run("Arenalog_OneField", BenchmarkArenalog_OneField)
+}
+
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkAll_SeveralFields/Phuslu_SeveralFields/gomaxprocs=1-16         	 4808542	       245.7 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Phuslu_SeveralFields/gomaxprocs=2-16         	 8943956	       134.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Phuslu_SeveralFields/gomaxprocs=3-16         	12895024	        91.04 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Phuslu_SeveralFields/gomaxprocs=4-16         	17156780	        69.52 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Zerolog_SeveralFields/gomaxprocs=1-16        	 4426041	       272.3 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Zerolog_SeveralFields/gomaxprocs=2-16        	 8178019	       145.9 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Zerolog_SeveralFields/gomaxprocs=3-16        	11727318	       103.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Zerolog_SeveralFields/gomaxprocs=4-16        	15629107	        76.12 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll_SeveralFields/Arenalog_SeveralFields/gomaxprocs=1-16       	 7099611	       165.4 ns/op	     496 B/op	       2 allocs/op
+// BenchmarkAll_SeveralFields/Arenalog_SeveralFields/gomaxprocs=2-16       	 9830338	       119.5 ns/op	     496 B/op	       2 allocs/op
+// BenchmarkAll_SeveralFields/Arenalog_SeveralFields/gomaxprocs=3-16       	10277814	       115.0 ns/op	     496 B/op	       2 allocs/op
+// BenchmarkAll_SeveralFields/Arenalog_SeveralFields/gomaxprocs=4-16       	11038903	       105.9 ns/op	     496 B/op	       2 allocs/op
+
+func BenchmarkAll_SeveralFields(b *testing.B) {
+	b.Run("Phuslu_SeveralFields", BenchmarkPhuslu_WithFields_Parallel)
+	b.Run("Zerolog_SeveralFields", BenchmarkZerolog_WithFields_Parallel)
+	b.Run("Arenalog_SeveralFields", BenchmarkArenalog_SeveralFields_Parallel)
 }
 
 /*

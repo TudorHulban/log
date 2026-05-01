@@ -2,7 +2,7 @@ package helpers
 
 import "strconv"
 
-func appendFloat(destination []byte, value float64, precision int) []byte {
+func AppendFloat(destination []byte, value float64, precision int) []byte {
 	// Handle NaN and Inf explicitly
 	if value != value {
 		return append(destination, 'n', 'a', 'n')

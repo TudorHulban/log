@@ -31,9 +31,9 @@ func AppendArgs(destination []byte, args ...any) []byte {
 			destination = strconv.AppendUint(destination, value, 10)
 
 		case float64:
-			destination = appendFloat(destination, value, 12)
+			destination = AppendFloat(destination, value, 12)
 		case float32:
-			destination = appendFloat(destination, float64(value), 6)
+			destination = AppendFloat(destination, float64(value), 6)
 
 		case bool:
 			destination = strconv.AppendBool(destination, value)

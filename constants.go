@@ -1,8 +1,7 @@
 package log
 
-const (
-	_DeltaEstimation = 128
-)
+const _DeltaEstimation = 128
+const _PrecisionFloat = 12
 
 const (
 	MessageSmallSize  uint32 = 256

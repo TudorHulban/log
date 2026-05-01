@@ -56,9 +56,11 @@ func (e *Entry) Msg(msg string) {
 			case kindString:
 				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
-				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
+				buf = strconv.AppendInt(buf, fld.valueInt, 10)
 			case kindBool:
 				buf = strconv.AppendBool(buf, fld.valueBool)
+			case kindFloat:
+				buf = helpers.AppendFloat(buf, fld.valueFloat, _PrecisionFloat)
 			}
 
 			buf = append(buf, ',')
@@ -76,9 +78,11 @@ func (e *Entry) Msg(msg string) {
 			case kindString:
 				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
-				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
+				buf = strconv.AppendInt(buf, fld.valueInt, 10)
 			case kindBool:
 				buf = strconv.AppendBool(buf, fld.valueBool)
+			case kindFloat:
+				buf = helpers.AppendFloat(buf, fld.valueFloat, _PrecisionFloat)
 			}
 
 			buf = append(buf, ',')
@@ -96,9 +100,11 @@ func (e *Entry) Msg(msg string) {
 			case kindString:
 				buf = helpers.AppendJSON_Quoted(buf, fld.valueString)
 			case kindInt:
-				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
+				buf = strconv.AppendInt(buf, fld.valueInt, 10)
 			case kindBool:
 				buf = strconv.AppendBool(buf, fld.valueBool)
+			case kindFloat:
+				buf = helpers.AppendFloat(buf, fld.valueFloat, _PrecisionFloat)
 			}
 
 			buf = append(buf, ',')
@@ -132,12 +138,12 @@ func (e *Entry) Msg(msg string) {
 		switch fld.kind {
 		case kindString:
 			buf = append(buf, fld.valueString...)
-
 		case kindInt:
-			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
-
+			buf = strconv.AppendInt(buf, fld.valueInt, 10)
 		case kindBool:
 			buf = strconv.AppendBool(buf, fld.valueBool)
+		case kindFloat:
+			buf = helpers.AppendFloat(buf, fld.valueFloat, _PrecisionFloat)
 		}
 
 		buf = append(buf, ' ')
@@ -155,7 +161,7 @@ func (e *Entry) Msg(msg string) {
 			buf = append(buf, fld.valueString...)
 
 		case kindInt:
-			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
+			buf = strconv.AppendInt(buf, fld.valueInt, 10)
 
 		case kindBool:
 			buf = strconv.AppendBool(buf, fld.valueBool)
@@ -176,7 +182,7 @@ func (e *Entry) Msg(msg string) {
 			buf = append(buf, fld.valueString...)
 
 		case kindInt:
-			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
+			buf = strconv.AppendInt(buf, fld.valueInt, 10)
 
 		case kindBool:
 			buf = strconv.AppendBool(buf, fld.valueBool)

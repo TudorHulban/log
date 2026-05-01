@@ -37,7 +37,7 @@ func TestAppendFloat(t *testing.T) {
 			func(t *testing.T) {
 				var dst []byte
 
-				out := appendFloat(dst, tc.value, tc.prec)
+				out := AppendFloat(dst, tc.value, tc.prec)
 
 				// Normalize to lowercase for safety
 				actual := strings.ToLower(string(out))
@@ -117,7 +117,7 @@ func BenchmarkAppendFloat(b *testing.B) {
 				for b.Loop() {
 					dst = dst[:0]
 
-					out := appendFloat(dst, tc.value, tc.prec)
+					out := AppendFloat(dst, tc.value, tc.prec)
 					require.NotNil(b, out)
 				}
 			},

@@ -85,7 +85,7 @@ func BenchmarkZerolog_Parallel_OneField(b *testing.B) {
 	)
 }
 
-// BenchmarkZerolog_WithFields-16    	 5978826	       200.9 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_WithFields-16    	 4206484	       285.4 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkZerolog_WithFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -104,6 +104,66 @@ func BenchmarkZerolog_WithFields(b *testing.B) {
 			Str("area", "some area").
 			Str("user", "tudor").
 			Int("attempt", i).
+			Float64("some float", 1.1137).
+			Bool("success", true).
 			Msg("benchmark test")
 	}
+}
+
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkZerolog_WithFields_Parallel/gomaxprocs=1-16         	 4390494	       272.3 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_WithFields_Parallel/gomaxprocs=2-16         	 8307152	       145.7 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_WithFields_Parallel/gomaxprocs=3-16         	12156778	       100.5 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_WithFields_Parallel/gomaxprocs=4-16         	15548028	        76.10 ns/op	       0 B/op	       0 allocs/op
+func BenchmarkZerolog_WithFields_Parallel(b *testing.B) {
+	gomaxprocsValues := []int{1, 2, 3, 4}
+
+	writer := helpers.CountWriterNoBuffer{}
+
+	logger := zerolog.New(&writer).With().
+		Timestamp().
+		Str("service", "auth").
+		Int("req_id", 12345).
+		Bool("cache_hit", true).
+		Logger()
+
+	b.SetParallelism(16)
+
+	for _, g := range gomaxprocsValues {
+		inner := g
+
+		b.Run(
+			fmt.Sprintf("gomaxprocs=%d", inner),
+			func(b *testing.B) {
+				prev := runtime.GOMAXPROCS(inner)
+				defer runtime.GOMAXPROCS(prev)
+
+				b.ReportAllocs()
+				b.ResetTimer()
+
+				b.RunParallel(
+					func(pb *testing.PB) {
+						i := 0
+						for pb.Next() {
+							logger.Info().
+								Str("area", "some area").
+								Str("user", "tudor").
+								Int("attempt", i).
+								Float64("some float", 1.1137).
+								Bool("success", true).
+								Msg("benchmark test")
+
+							i++
+						}
+					},
+				)
+			},
+		)
+	}
+
+	require.NotZero(
+		b,
+		writer.TotalBytesWritten.Load(),
+		"1. writer must record bytes",
+	)
 }

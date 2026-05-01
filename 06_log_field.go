@@ -11,12 +11,14 @@ const (
 	kindString fieldKind = iota
 	kindInt
 	kindBool
+	kindFloat
 )
 
 type field struct {
-	key          string
-	valueString  string
-	valueNumeric int64
+	key         string
+	valueString string
+	valueInt    int64
+	valueFloat  float64
 
 	kind fieldKind
 
@@ -34,9 +36,9 @@ func makeField(key string, value any) field {
 
 	case int64:
 		return field{
-			key:          key,
-			kind:         kindInt,
-			valueNumeric: v,
+			key:      key,
+			kind:     kindInt,
+			valueInt: v,
 		}
 
 	case bool:
@@ -46,9 +48,15 @@ func makeField(key string, value any) field {
 			valueBool: v,
 		}
 
+	case float64:
+		return field{
+			key:        key,
+			kind:       kindFloat,
+			valueFloat: v,
+		}
+
 	// TODO: add more typed cases here?
 	// case uint:
-	// case float64:
 	// case error:
 	// etc.
 
@@ -77,7 +85,7 @@ func appendField(buf []byte, fld *field) []byte {
 		buf = append(buf, fld.valueString...)
 
 	case kindInt:
-		buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
+		buf = strconv.AppendInt(buf, fld.valueInt, 10)
 
 	case kindBool:
 		buf = strconv.AppendBool(buf, fld.valueBool)

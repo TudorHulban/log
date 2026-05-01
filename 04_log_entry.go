@@ -55,9 +55,9 @@ func (e *Entry) WithInt(key string, value int64) *Entry {
 	e.fields = append(
 		e.fields,
 		field{
-			key:          key,
-			kind:         kindInt,
-			valueNumeric: value,
+			key:      key,
+			kind:     kindInt,
+			valueInt: value,
 		},
 	)
 
@@ -72,6 +72,19 @@ func (e *Entry) WithBool(key string, value bool) *Entry {
 			key:       key,
 			kind:      kindBool,
 			valueBool: value,
+		},
+	)
+
+	return e
+}
+
+func (e *Entry) WithFloat(key string, value float64) *Entry {
+	e.fields = append(
+		e.fields,
+		field{
+			key:        key,
+			kind:       kindFloat,
+			valueFloat: value,
 		},
 	)
 
@@ -139,7 +152,7 @@ func (e *Entry) estimateFieldsSize() uint32 {
 			}
 
 		case kindInt:
-			result = result + helpers.DigitsInt(f.valueNumeric)
+			result = result + helpers.DigitsInt(f.valueInt)
 		}
 	}
 

@@ -65,11 +65,11 @@ func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 // go test -run '^$' -bench '^BenchmarkLogger_Parallel_Printf$' -benchmem -race
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_Printf/1.nil_timestamp-16         	17226682	        66.27 ns/op	      72 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Printf/2.standard_timestamp-16    	12871534	        87.27 ns/op	     200 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_Printf/3.yyyy-month_timestamp-16  	13099887	        86.89 ns/op	     200 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_Printf/4.nano_timestamp-16        	12536958	        87.87 ns/op	     200 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_Printf/5.nano_timestamp_-_json-16 	 8507154	       136.4 ns/op	     360 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Printf/1.nil_timestamp-16         	20686093	        60.59 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/2.standard_timestamp-16    	20122062	        60.64 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/3.yyyy-month_timestamp-16  	20306156	        60.52 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/4.nano_timestamp-16        	20453836	        59.92 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/5.nano_timestamp_-_json-16 	20047094	        59.86 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
@@ -100,9 +100,9 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 		},
 	}
 
-	for _, tcase := range tests {
+	for _, tc := range tests {
 		b.Run(
-			tcase.description,
+			tc.description,
 			func(b *testing.B) {
 				ingestor, errCrIngestor := bytearena.NewIngestor(
 					bytearena.Size100K(),
@@ -122,8 +122,8 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tcase.timestampFunc,
-						WithJSON:        tcase.withJSON,
+						WithTimestamp:   tc.timestampFunc,
+						WithJSON:        tc.withJSON,
 					},
 				)
 				require.NoError(b, errCrLogger)
@@ -193,9 +193,9 @@ func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 		},
 	}
 
-	for _, tcase := range tests {
+	for _, tc := range tests {
 		b.Run(
-			tcase.description,
+			tc.description,
 			func(b *testing.B) {
 				ingestor, errCrIngestor := bytearena.NewIngestor(
 					bytearena.Size100K(),
@@ -215,8 +215,8 @@ func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tcase.timestampFunc,
-						WithJSON:        tcase.withJSON,
+						WithTimestamp:   tc.timestampFunc,
+						WithJSON:        tc.withJSON,
 					},
 				)
 				require.NoError(b, errCrLogger)

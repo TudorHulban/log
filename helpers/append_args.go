@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// AppendArgs appends each arg to dst without reflection or fmt.
+// AppendArgs appends each arg to destination without reflection or fmt.
 // Covers the types that appear in practice. Falls back to fmt only for
 // exotic types — still no alloc on the hot path.
 func AppendArgs(destination []byte, args ...any) []byte {
@@ -36,9 +36,9 @@ func AppendArgs(destination []byte, args ...any) []byte {
 			destination = appendFloat(destination, float64(value), 6)
 
 		case bool:
-			destination = AppendBool(destination, value)
+			destination = strconv.AppendBool(destination, value)
 		case error:
-			destination = AppendError(destination, value)
+			destination = append(destination, []byte(value.Error())...)
 		case nil:
 			destination = append(destination, "null"...)
 
@@ -140,9 +140,9 @@ func Appendf(destination []byte, format string, args []any) []byte {
 			case float32:
 				destination = strconv.AppendFloat(destination, float64(v), 'f', -1, 32)
 			case bool:
-				destination = AppendBool(destination, v)
+				destination = strconv.AppendBool(destination, v)
 			case error:
-				destination = AppendError(destination, v)
+				destination = append(destination, []byte(v.Error())...)
 			case nil:
 				destination = append(destination, "null"...)
 			default:
@@ -152,7 +152,7 @@ func Appendf(destination []byte, format string, args []any) []byte {
 		case 't':
 			switch v := arg.(type) {
 			case bool:
-				destination = AppendBool(destination, v)
+				destination = strconv.AppendBool(destination, v)
 			default:
 				destination = append(destination, fmt.Sprint(v)...)
 			}

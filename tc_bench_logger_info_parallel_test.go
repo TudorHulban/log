@@ -14,12 +14,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_InfoFast/1.nil_timestamp-16         	18154875	        64.59 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/2.standard_timestamp-16    	18154195	        65.50 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/3.yyyy-month_timestamp-16  	17863452	        64.84 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/4.nano_timestamp-16        	18026060	        65.76 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/5.nano_timestamp_-_json-16 	17942744	        65.57 ns/op	      40 B/op	       2 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/6.nano_-_json,_caller-16   	18451617	        65.09 ns/op	      40 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_InfoFast/1.nil_timestamp-16         	20668786	        60.14 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_InfoFast/2.standard_timestamp-16    	20675044	        60.50 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_InfoFast/3.yyyy-month_timestamp-16  	20658718	        59.32 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_InfoFast/4.nano_timestamp-16        	19913436	        59.86 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_InfoFast/5.nano_timestamp_-_json-16 	20303058	        59.72 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_InfoFast/6.nano_-_json,_caller-16   	19948575	        60.53 ns/op	       8 B/op	       0 allocs/op
 func BenchmarkLogger_Parallel_InfoFast(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
@@ -57,9 +57,9 @@ func BenchmarkLogger_Parallel_InfoFast(b *testing.B) {
 		},
 	}
 
-	for _, tcase := range tests {
+	for _, tc := range tests {
 		b.Run(
-			tcase.description,
+			tc.description,
 			func(b *testing.B) {
 				ingestor, errCrIngestor := bytearena.NewIngestor(
 					bytearena.Size100K(),
@@ -79,9 +79,9 @@ func BenchmarkLogger_Parallel_InfoFast(b *testing.B) {
 						LoggerLevel: LevelDebug,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tcase.timestampFunc,
-						WithJSON:        tcase.withJSON,
-						WithCaller:      tcase.withCaller,
+						WithTimestamp:   tc.timestampFunc,
+						WithJSON:        tc.withJSON,
+						WithCaller:      tc.withCaller,
 					},
 				)
 				require.NoError(b, errCrLogger)

@@ -109,9 +109,9 @@ func TestLevelsMatrix(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tc := range tests {
 		t.Run(
-			tt.description,
+			tc.description,
 			func(t *testing.T) {
 				var writer bytes.Buffer
 
@@ -125,7 +125,7 @@ func TestLevelsMatrix(t *testing.T) {
 				l, errCrLogger := NewLogger(
 					&ParamsNewLogger{
 						Ingestor:    ingestor,
-						LoggerLevel: tt.level,
+						LoggerLevel: tc.level,
 
 						WithFatalWriter: os.Stdout,
 						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
@@ -162,7 +162,7 @@ func TestLevelsMatrix(t *testing.T) {
 				require.NotEmpty(t, lines)
 
 				// Verify expected entries appear with correct level label
-				for msg, expectedLevelJSON := range tt.shouldSee {
+				for msg, expectedLevelJSON := range tc.shouldSee {
 					found := false
 
 					for _, ln := range lines {
@@ -182,11 +182,11 @@ func TestLevelsMatrix(t *testing.T) {
 				}
 
 				// Verify suppressed entries do not appear
-				for _, msg := range tt.shouldSkip {
+				for _, msg := range tc.shouldSkip {
 					for _, ln := range lines {
 						require.NotContains(t, ln, `"msg":"`+msg+`"`,
 							"msg=%q must be suppressed at threshold=%s, output:\n%s",
-							msg, tt.level.String(), out)
+							msg, tc.level.String(), out)
 					}
 				}
 			},

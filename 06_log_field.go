@@ -3,8 +3,6 @@ package log
 import (
 	"fmt"
 	"strconv"
-
-	"github.com/tudorhulban/log/helpers"
 )
 
 type fieldKind uint8
@@ -82,7 +80,7 @@ func appendField(buf []byte, fld *field) []byte {
 		buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 	case kindBool:
-		buf = helpers.AppendBool(buf, fld.valueBool)
+		buf = strconv.AppendBool(buf, fld.valueBool)
 	}
 
 	return append(buf, ' ')

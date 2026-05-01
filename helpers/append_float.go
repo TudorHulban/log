@@ -41,19 +41,3 @@ func appendFloat(destination []byte, value float64, precision int) []byte {
 
 	return destination
 }
-
-func AppendBool(destination []byte, value bool) []byte {
-	if value {
-		return append(destination, 't', 'r', 'u', 'e')
-	}
-
-	return append(destination, 'f', 'a', 'l', 's', 'e')
-}
-
-func AppendError(destination []byte, err error) []byte {
-	if err == nil {
-		return append(destination, 'n', 'i', 'l')
-	}
-
-	return append(destination, err.Error()...)
-}

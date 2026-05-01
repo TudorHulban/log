@@ -5,12 +5,18 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkAll/Phuslu_OneField/G1-16      	 9060376	       131.4 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Phuslu_OneField/G2-16      	 9119248	       131.9 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Zerolog_OneField/G1-16     	 8059534	       149.5 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Zerolog_OneField/G2-16     	 7811768	       151.4 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Arenalog_OneField/G1-16    	29849972	        40.29 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkAll/Arenalog_OneField/G2-16    	12593814	        94.44 ns/op	      11 B/op	       0 allocs/op
+// BenchmarkAll/Phuslu_OneField/G1-16      	 8446026	       139.3 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Phuslu_OneField/G2-16      	 8747697	       137.5 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Phuslu_OneField/G3-16      	 8812435	       136.5 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Phuslu_OneField/G4-16      	 8776798	       136.8 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Zerolog_OneField/G1-16     	 7776097	       156.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Zerolog_OneField/G2-16     	 7622167	       156.8 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Zerolog_OneField/G3-16     	 7718179	       155.1 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Zerolog_OneField/G4-16     	 7615564	       158.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Arenalog_OneField/G1-16    	26785467	        43.44 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkAll/Arenalog_OneField/G2-16    	10256448	       118.0 ns/op	      16 B/op	       0 allocs/op
+// BenchmarkAll/Arenalog_OneField/G3-16    	 9858770	       119.5 ns/op	      16 B/op	       0 allocs/op
+// BenchmarkAll/Arenalog_OneField/G4-16    	 9946056	       119.9 ns/op	      16 B/op	       0 allocs/op
 
 func BenchmarkAll(b *testing.B) {
 	b.Run("Phuslu_OneField", BenchmarkPhuslu_OneField)

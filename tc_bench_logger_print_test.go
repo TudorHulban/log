@@ -14,7 +14,7 @@ import (
 
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
 
-// BenchmarkLogger_Print-16    	21646054	        56.56 ns/op	      64 B/op	       1 allocs/op
+// BenchmarkLogger_Print-16    	32919981	        36.53 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
@@ -123,11 +123,11 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Printf/1.nil_timestamp-16         	 9344631	       129.9 ns/op	      72 B/op	       2 allocs/op
-// BenchmarkLogger_Printf/2.standard_timestamp-16    	 5545965	       215.4 ns/op	     200 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/3.yyyy-month_timestamp-16  	 5666437	       214.1 ns/op	     200 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/4.nano_timestamp-16        	 5174826	       233.0 ns/op	     200 B/op	       3 allocs/op
-// BenchmarkLogger_Printf/5.nano_timestamp_-_json-16 	 3157383	       380.8 ns/op	     360 B/op	       4 allocs/op
+// BenchmarkLogger_Printf/1.nil_timestamp-16         	12283927	        99.22 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Printf/2.standard_timestamp-16    	10164178	       117.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/3.yyyy-month_timestamp-16  	10367665	       116.6 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/4.nano_timestamp-16        	 9150955	       130.7 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Printf/5.nano_timestamp_-_json-16 	 6316914	       185.7 ns/op	      33 B/op	       1 allocs/op
 func BenchmarkLogger_Printf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -157,9 +157,9 @@ func BenchmarkLogger_Printf(b *testing.B) {
 		},
 	}
 
-	for _, tcase := range tests {
+	for _, tc := range tests {
 		b.Run(
-			tcase.description,
+			tc.description,
 			func(b *testing.B) {
 				ingestor, errCrIngestor := bytearena.NewIngestor(
 					bytearena.Size100K(),
@@ -177,9 +177,9 @@ func BenchmarkLogger_Printf(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tcase.timestampFunc,
-						WithJSON:        tcase.withJSON,
-						WithCaller:      tcase.withCaller,
+						WithTimestamp:   tc.timestampFunc,
+						WithJSON:        tc.withJSON,
+						WithCaller:      tc.withCaller,
 					},
 				)
 				require.NoError(b, errCrLogger)
@@ -238,9 +238,9 @@ func BenchmarkLogger_PrintFast(b *testing.B) {
 		},
 	}
 
-	for _, tcase := range tests {
+	for _, tc := range tests {
 		b.Run(
-			tcase.description,
+			tc.description,
 			func(b *testing.B) {
 				ingestor, errCrIngestor := bytearena.NewIngestor(
 					bytearena.Size100K(),
@@ -258,8 +258,8 @@ func BenchmarkLogger_PrintFast(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tcase.timestampFunc,
-						WithJSON:        tcase.withJSON,
+						WithTimestamp:   tc.timestampFunc,
+						WithJSON:        tc.withJSON,
 					},
 				)
 				require.NoError(b, errCrLogger)

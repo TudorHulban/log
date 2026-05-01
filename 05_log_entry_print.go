@@ -58,7 +58,7 @@ func (e *Entry) Msg(msg string) {
 			case kindInt:
 				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
+				buf = strconv.AppendBool(buf, fld.valueBool)
 			}
 
 			buf = append(buf, ',')
@@ -78,7 +78,7 @@ func (e *Entry) Msg(msg string) {
 			case kindInt:
 				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
+				buf = strconv.AppendBool(buf, fld.valueBool)
 			}
 
 			buf = append(buf, ',')
@@ -98,7 +98,7 @@ func (e *Entry) Msg(msg string) {
 			case kindInt:
 				buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 			case kindBool:
-				buf = helpers.AppendBool(buf, fld.valueBool)
+				buf = strconv.AppendBool(buf, fld.valueBool)
 			}
 
 			buf = append(buf, ',')
@@ -137,7 +137,7 @@ func (e *Entry) Msg(msg string) {
 			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
+			buf = strconv.AppendBool(buf, fld.valueBool)
 		}
 
 		buf = append(buf, ' ')
@@ -158,7 +158,7 @@ func (e *Entry) Msg(msg string) {
 			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
+			buf = strconv.AppendBool(buf, fld.valueBool)
 		}
 
 		buf = append(buf, ' ')
@@ -179,7 +179,7 @@ func (e *Entry) Msg(msg string) {
 			buf = strconv.AppendInt(buf, fld.valueNumeric, 10)
 
 		case kindBool:
-			buf = helpers.AppendBool(buf, fld.valueBool)
+			buf = strconv.AppendBool(buf, fld.valueBool)
 		}
 
 		buf = append(buf, ' ')

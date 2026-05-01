@@ -28,7 +28,7 @@ func AppendArgs(destination []byte, args ...any) []byte {
 		case uint:
 			destination = strconv.AppendUint(destination, uint64(value), 10)
 		case uint64:
-			destination = appendUint64(destination, value)
+			destination = strconv.AppendUint(destination, value, 10)
 
 		case float64:
 			destination = appendFloat(destination, value, 12)
@@ -94,13 +94,13 @@ func Appendf(destination []byte, format string, args []any) []byte {
 
 		switch format[i] {
 		case 's':
-			switch v := arg.(type) {
+			switch word := arg.(type) {
 			case string:
-				destination = append(destination, v...)
+				destination = append(destination, word...)
 			case []byte:
-				destination = append(destination, v...)
+				destination = append(destination, word...)
 			default:
-				destination = append(destination, fmt.Sprint(v)...) // exotic fallback
+				destination = append(destination, fmt.Sprint(word)...) // exotic fallback
 			}
 
 		case 'd':
@@ -112,9 +112,9 @@ func Appendf(destination []byte, format string, args []any) []byte {
 			case int32:
 				destination = strconv.AppendInt(destination, int64(v), 10)
 			case uint:
-				destination = appendUint64(destination, uint64(v))
+				destination = strconv.AppendUint(destination, uint64(v), 10)
 			case uint64:
-				destination = appendUint64(destination, v)
+				destination = strconv.AppendUint(destination, v, 10)
 			default:
 				destination = append(destination, fmt.Sprint(v)...)
 			}
@@ -134,7 +134,7 @@ func Appendf(destination []byte, format string, args []any) []byte {
 			case uint:
 				destination = strconv.AppendUint(destination, uint64(v), 10)
 			case uint64:
-				destination = appendUint64(destination, v)
+				destination = strconv.AppendUint(destination, v, 10)
 			case float64:
 				destination = strconv.AppendFloat(destination, v, 'f', -1, 64)
 			case float32:

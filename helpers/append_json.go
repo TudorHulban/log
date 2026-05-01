@@ -98,7 +98,7 @@ func AppendJSON_Arguments(buf []byte, args []any) []byte {
 		case uint:
 			buf = strconv.AppendUint(buf, uint64(argument), 10)
 		case uint64:
-			buf = appendUint64(buf, argument)
+			buf = strconv.AppendUint(buf, argument, 10)
 		case float64:
 			buf = strconv.AppendFloat(buf, argument, 'f', -1, 64)
 		case float32:

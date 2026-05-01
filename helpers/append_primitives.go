@@ -1,22 +1,6 @@
 package helpers
 
-func appendUint64(destination []byte, value uint64) []byte {
-	var buf [20]byte
-
-	i := len(buf)
-
-	for {
-		i--
-		buf[i] = byte('0' + value%10)
-
-		value = value / 10
-		if value == 0 {
-			break
-		}
-	}
-
-	return append(destination, buf[i:]...)
-}
+import "strconv"
 
 func appendFloat(destination []byte, value float64, precision int) []byte {
 	// Handle NaN and Inf explicitly
@@ -40,7 +24,7 @@ func appendFloat(destination []byte, value float64, precision int) []byte {
 
 	// Integer part
 	intPart := uint64(value)
-	destination = appendUint64(destination, intPart)
+	destination = strconv.AppendUint(destination, intPart, 10)
 
 	// Fractional part
 	if precision > 0 {

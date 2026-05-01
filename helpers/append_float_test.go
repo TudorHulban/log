@@ -55,6 +55,34 @@ func TestAppendFloat(t *testing.T) {
 	}
 }
 
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkAppendFloat/1_custom_nan-16         	 8092822	       149.7 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_nan-16         	 7834503	       151.4 ns/op	       8 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_pos_inf-16     	 8180378	       145.6 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_pos_inf-16     	 7891600	       151.6 ns/op	       8 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_neg_inf-16     	 8386286	       144.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_neg_inf-16     	 7895463	       150.8 ns/op	       8 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_small_int-16   	 8076417	       148.8 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_small_int-16   	 7080556	       169.2 ns/op	       8 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_small_frac-16  	 7612082	       157.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_small_frac-16  	 6586550	       180.5 ns/op	       8 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_large_int-16   	 7126051	       167.4 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_large_int-16   	 6664712	       179.5 ns/op	      16 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_large_frac-16  	 6707352	       178.5 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_large_frac-16  	 6325773	       189.5 ns/op	      16 B/op	       1 allocs/op
+
+// BenchmarkAppendFloat/1_custom_tiny-16        	 6114620	       195.9 ns/op	      24 B/op	       2 allocs/op
+// BenchmarkAppendFloat/2_stdlib_tiny-16        	 5817366	       205.4 ns/op	      24 B/op	       2 allocs/op
+
+// BenchmarkAppendFloat/1_custom_negative-16    	 7627508	       156.9 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_negative-16    	 6720366	       177.7 ns/op	       8 B/op	       1 allocs/op
+
 func BenchmarkAppendFloat(b *testing.B) {
 	tests := []struct {
 		description string

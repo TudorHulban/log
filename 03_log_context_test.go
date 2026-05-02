@@ -30,8 +30,8 @@ func TestContext(t *testing.T) {
 
 			WithFatalWriter: writer,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
-			WithJSON:        true,
-			// WithColor: true,
+			// WithJSON:        true,
+			WithColor: true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -42,7 +42,8 @@ func TestContext(t *testing.T) {
 	f := NewLogContext(serviceLogging).
 		WithRoot("service", "auth").
 		SetInt("req_id", 12345).
-		SetBool("cache_hit", true)
+		SetBool("cache_hit", true).
+		SetString("root ends", "here")
 
 	require.NotNil(t, f.cfg.Load().root)
 

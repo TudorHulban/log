@@ -46,10 +46,10 @@ func TestArenalog_OneField(t *testing.T) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArenalog_OneField/G1-16 	26578858	        44.99 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G2-16 	10342124	       116.2 ns/op	      16 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G3-16 	10018720	       118.7 ns/op	      16 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G4-16 	10008793	       118.3 ns/op	      16 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G1-16 	24744356	        44.83 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G2-16 	 9803336	       126.5 ns/op	      16 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G3-16 	 9544459	       124.4 ns/op	      16 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G4-16 	 9686191	       125.5 ns/op	      16 B/op	       0 allocs/op
 func BenchmarkArenalog_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}

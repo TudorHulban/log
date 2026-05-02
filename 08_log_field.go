@@ -2,7 +2,6 @@ package log
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type fieldKind uint8
@@ -74,22 +73,4 @@ func makeFieldPtr(key string, value any) *field {
 	fld := makeField(key, value)
 
 	return &fld
-}
-
-func appendField(buf []byte, fld *field) []byte {
-	buf = append(buf, fld.key...)
-	buf = append(buf, '=')
-
-	switch fld.kind {
-	case kindString:
-		buf = append(buf, fld.valueString...)
-
-	case kindInt:
-		buf = strconv.AppendInt(buf, fld.valueInt, 10)
-
-	case kindBool:
-		buf = strconv.AppendBool(buf, fld.valueBool)
-	}
-
-	return append(buf, ' ')
 }

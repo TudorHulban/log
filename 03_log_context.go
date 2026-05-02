@@ -2,8 +2,6 @@ package log
 
 import (
 	"sync/atomic"
-
-	"github.com/tudorhulban/log/helpers"
 )
 
 type formatterConfig struct {
@@ -49,6 +47,7 @@ func (ctx *LogContext) SetString(key, value string) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
+
 	copy(newFields, old.fields)
 
 	newFields[len(old.fields)] = field{
@@ -71,6 +70,7 @@ func (ctx *LogContext) SetInt(key string, value int64) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
+
 	copy(newFields, old.fields)
 	newFields[len(old.fields)] = field{
 		key:      key,
@@ -87,6 +87,7 @@ func (ctx *LogContext) SetBool(key string, value bool) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
+
 	copy(newFields, old.fields)
 	newFields[len(old.fields)] = field{
 		key:       key,
@@ -112,38 +113,6 @@ func (ctx *LogContext) Clear() {
 
 func (ctx *LogContext) Reset() {
 	ctx.cfg.Store(&formatterConfig{})
-}
-
-func (ctx *LogContext) Print(args ...any) {
-	cfg := ctx.cfg.Load() // atomic read
-
-	region, err := ctx.logger.ingestor.TryWrite(ctx.logger.estimatedMessageSizeOverall)
-	if err != nil {
-		return
-	}
-
-	buf := region.Buf()[:0]
-
-	if ctx.logger.fnTimestamp != nil {
-		buf = ctx.logger.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
-
-	// encode root field first (if present)
-	if cfg.root != nil {
-		buf = appendField(buf, cfg.root)
-	}
-
-	// encode ephemeral fields
-	for i := range cfg.fields {
-		buf = appendField(buf, &cfg.fields[i])
-	}
-
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	copy(region.Buf(), buf)
-	ctx.logger.ingestor.EndWrite(region)
 }
 
 func (ctx *LogContext) With(key string, value any) *Entry {

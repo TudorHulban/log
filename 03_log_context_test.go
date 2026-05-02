@@ -46,9 +46,14 @@ func TestContext(t *testing.T) {
 	f.SetString("area", "some area")
 	f.Print("login ok again")
 
-	f.With("xxx", 2).Msg("")
+	f.With("xxx", 2).
+		Error().
+		Msg("")
 	f.With("yyy", 3).Msg("")
-	f.With("zzzz", 4.3).Msg("")
+	f.With("zzzz", 4.3).
+		Info().
+		WithGoroutineID().
+		Msg("")
 
 	cancel()
 	<-chIngestionEnd

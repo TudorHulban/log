@@ -19,14 +19,20 @@ func TestGoidOffset(t *testing.T) {
 		ch <- GoroutineID()
 	}()
 
+	go func() {
+		ch <- GoroutineID()
+	}()
+
 	id2 := <-ch
 	require.NotZero(t, id2)
+
+	id3 := <-ch
 
 	// 1. Error case: IDs must differ
 	require.NotEqual(t, id1, id2, "goroutine IDs must differ")
 
 	// 2. Success case: print for manual inspection
-	fmt.Println(id1, id2)
+	fmt.Println(id1, id2, id3)
 }
 
 // BenchmarkGoid-16    	732586599	         1.640 ns/op	       0 B/op	       0 allocs/op

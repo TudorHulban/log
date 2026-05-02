@@ -29,11 +29,11 @@ Colour Styles
 	Strikeout = 9
 */
 
-func colorWarn(word string) string {
+func colorTrace(word string) string {
 	return fmt.Sprintf(
 		"%s%v\x1b[0m",
 
-		"\x1b[1;33m",
+		"\x1b[38;5;135m",
 		word,
 	)
 }
@@ -47,20 +47,29 @@ func colorDebug(word string) string {
 	)
 }
 
-func colorError(word string) string {
-	return fmt.Sprintf(
-		"%s%v\x1b[0m",
-
-		"\x1b[1;31m",
-		word,
-	)
-}
-
 func colorInfo(word string) string {
 	return fmt.Sprintf(
 		"%s%v\x1b[0m",
 
 		"\x1b[1;32m",
+		word,
+	)
+}
+
+func colorWarn(word string) string {
+	return fmt.Sprintf(
+		"%s%v\x1b[0m",
+
+		"\x1b[1;33m",
+		word,
+	)
+}
+
+func colorError(word string) string {
+	return fmt.Sprintf(
+		"%s%v\x1b[0m",
+
+		"\x1b[1;31m",
 		word,
 	)
 }

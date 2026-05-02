@@ -128,6 +128,16 @@ func (e *Entry) Msg(msg string) {
 		buf = append(buf, ' ')
 	}
 
+	// level
+	buf = append(buf, `level=`...)
+	if e.formatter.logger.withColor {
+		buf = append(buf, []byte(e.formatter.logger.labelTrace())...)
+	} else {
+		buf = append(buf, []byte(e.level.String())...)
+	}
+
+	buf = append(buf, ' ')
+
 	// root
 	if cfg.root != nil {
 		fld := cfg.root

@@ -65,6 +65,34 @@ func (l Level) String() string {
 	}
 }
 
+func (l Level) StringColored() string {
+	switch l {
+	case LevelTrace:
+		return colorTrace("TRACE")
+
+	case LevelDebug:
+		return colorDebug("DEBUG")
+
+	case LevelInfo:
+		return colorInfo("INFO")
+
+	case LevelWarn:
+		return colorWarn("WARN")
+
+	case LevelError:
+		return colorError("ERROR")
+
+	case LevelFatal:
+		return "FATAL"
+
+	case LevelPanic:
+		return "PANIC"
+
+	default:
+		return fmt.Sprintf("Level(%d)", l)
+	}
+}
+
 var logLevels = [7]string{
 	"TRACE", // 0
 	"DEBUG", // 1

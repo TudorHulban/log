@@ -2,7 +2,11 @@ package log
 
 import "github.com/tudorhulban/log/helpers"
 
-func (*Logger) labelTrace() string {
+func (l *Logger) labelTrace() string {
+	if l.withColor {
+		return colorTrace(logLevels[LevelTrace])
+	}
+
 	return logLevels[LevelTrace]
 }
 

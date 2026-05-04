@@ -147,7 +147,7 @@ func TestAppendJSON_Quoted(t *testing.T) {
 			func(t *testing.T) {
 				var buf []byte
 
-				buf = AppendJSON_Quoted(buf, tc.input)
+				buf = AppendJSON_Quoted(buf, []byte(tc.input))
 				require.Equal(t, tc.expected, string(buf))
 			},
 		)

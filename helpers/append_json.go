@@ -2,7 +2,7 @@ package helpers
 
 // AppendJSON writes s into buf with JSON string escaping but without
 // the surrounding quotes. Used by appendArgsQuotedJSON.
-func AppendJSON(buf []byte, word []byte) []byte {
+func AppendJSON(buf, word []byte) []byte {
 	const hex = "0123456789abcdef"
 
 	for ix := range word {
@@ -34,13 +34,13 @@ func AppendJSON(buf []byte, word []byte) []byte {
 	return buf
 }
 
-func AppendJSON_Quoted(buf []byte, text string) []byte {
+func AppendJSON_Quoted(buf []byte, word []byte) []byte {
 	buf = append(buf, '"')
 
 	const hex = "0123456789abcdef"
 
-	for ix := 0; ix < len(text); ix++ {
-		char := text[ix]
+	for ix := range word {
+		char := word[ix]
 
 		switch char {
 		case '\\', '"':

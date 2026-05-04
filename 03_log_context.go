@@ -119,8 +119,10 @@ func (ctx *LogContext) With(key string, value any) *Entry {
 	e, _ := entryPool.Get().(*Entry) //nolint:revive
 
 	e.formatter = ctx
-	e.fields = e.fields[:0] // reset slice
-	e.fields = append(e.fields, makeField(key, value))
+	e.fieldCount = 0
+
+	e.fields[e.fieldCount] = makeField(key, value)
+	e.fieldCount++
 
 	return e
 }
@@ -129,14 +131,58 @@ func (ctx *LogContext) WithString(key, value string) *Entry {
 	e, _ := entryPool.Get().(*Entry) //nolint:revive
 
 	e.formatter = ctx
-	e.fields = e.fields[:0] // reset slice
-	e.fields = append(
-		e.fields,
-		field{
-			key:         key,
-			valueString: value,
-		},
-	)
+	e.fieldCount = 0
+
+	e.fields[e.fieldCount] = field{
+		key:         key,
+		valueString: value,
+	}
+	e.fieldCount++
+
+	return e
+}
+
+func (ctx *LogContext) WithInt(key string, value int64) *Entry {
+	e := entryPool.Get().(*Entry) //nolint:revive
+
+	e.formatter = ctx
+	e.fieldCount = 0
+
+	e.fields[e.fieldCount] = field{
+		key:      key,
+		valueInt: value,
+	}
+	e.fieldCount++
+
+	return e
+}
+
+func (ctx *LogContext) WithFloat(key string, value float64) *Entry {
+	e := entryPool.Get().(*Entry) //nolint:revive
+
+	e.formatter = ctx
+	e.fieldCount = 0
+
+	e.fields[e.fieldCount] = field{
+		key:        key,
+		valueFloat: value,
+	}
+	e.fieldCount++
+
+	return e
+}
+
+func (ctx *LogContext) WithBool(key string, value bool) *Entry {
+	e := entryPool.Get().(*Entry) //nolint:revive
+
+	e.formatter = ctx
+	e.fieldCount = 0
+
+	e.fields[e.fieldCount] = field{
+		key:       key,
+		valueBool: value,
+	}
+	e.fieldCount++
 
 	return e
 }

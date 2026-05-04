@@ -9,7 +9,7 @@ import (
 var entryPool = sync.Pool{
 	New: func() any {
 		return &Entry{
-			fields: make([]field, 0, 8), // small reusable buffer
+			fields: [8]field{}, // small reusable buffer
 		}
 	},
 }
@@ -17,9 +17,10 @@ var entryPool = sync.Pool{
 // Entry is not safe for concurrent use.
 // Each goroutine should obtain its own Entry via Formatter.With.
 type Entry struct {
-	formatter *LogContext
-	fields    []field // per-request, owned by this Entry
-	level     Level
+	formatter  *LogContext
+	fields     [8]field // per-request, owned by this Entry
+	level      Level
+	fieldCount int
 }
 
 // With allocates.
@@ -28,78 +29,84 @@ type Entry struct {
 // The boxing causes a heap allocation when the value does not fit in a pointer word
 // or the compiler cannot prove it escapes to the stack only.
 func (e *Entry) With(key string, value any) *Entry {
-	e.fields = append(
-		e.fields,
-		makeField(key, value),
-	)
+	if e.fieldCount < len(e.fields) {
+		e.fields[e.fieldCount] = makeField(key, value)
+
+		e.fieldCount++
+	}
 
 	return e
 }
 
 // WithString appends a string field without boxing value into any.
 func (e *Entry) WithString(key, value string) *Entry {
-	e.fields = append(
-		e.fields,
-		field{
+	if e.fieldCount < len(e.fields) {
+		e.fields[e.fieldCount] = field{
 			key:         key,
 			kind:        kindString,
 			valueString: value,
-		},
-	)
+		}
+
+		e.fieldCount++
+	}
+
+	return e
+}
+
+func (e *Entry) WithFloat(key string, value float64) *Entry {
+	if e.fieldCount < len(e.fields) {
+		e.fields[e.fieldCount] = field{
+			key:        key,
+			kind:       kindFloat,
+			valueFloat: value,
+		}
+
+		e.fieldCount++
+	}
 
 	return e
 }
 
 // WithInt appends an int field without boxing value into any.
 func (e *Entry) WithInt(key string, value int64) *Entry {
-	e.fields = append(
-		e.fields,
-		field{
+	if e.fieldCount < len(e.fields) {
+		e.fields[e.fieldCount] = field{
 			key:      key,
 			kind:     kindInt,
 			valueInt: value,
-		},
-	)
+		}
+
+		e.fieldCount++
+	}
 
 	return e
 }
 
 // WithBool appends a bool field without boxing value into any.
 func (e *Entry) WithBool(key string, value bool) *Entry {
-	e.fields = append(
-		e.fields,
-		field{
+	if e.fieldCount < len(e.fields) {
+		e.fields[e.fieldCount] = field{
 			key:       key,
 			kind:      kindBool,
 			valueBool: value,
-		},
-	)
+		}
 
-	return e
-}
-
-func (e *Entry) WithFloat(key string, value float64) *Entry {
-	e.fields = append(
-		e.fields,
-		field{
-			key:        key,
-			kind:       kindFloat,
-			valueFloat: value,
-		},
-	)
+		e.fieldCount++
+	}
 
 	return e
 }
 
 func (e *Entry) WithGoroutineID() *Entry {
-	e.fields = append(
-		e.fields,
-		field{
+	if e.fieldCount < len(e.fields) {
+		e.fields[e.fieldCount] = field{
 			key:      "g",
 			kind:     kindInt,
 			valueInt: helpers.GoroutineID(),
-		},
-	)
+		}
+
+		e.fieldCount++
+	}
 
 	return e
 }

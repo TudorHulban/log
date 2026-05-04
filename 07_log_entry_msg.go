@@ -33,14 +33,17 @@ func (e *Entry) Msg(msg string) {
 			buffer = append(buffer, `"ts":`...)
 			buffer = helpers.AppendJSON_Quoted(
 				buffer,
-				string(e.formatter.logger.fnTimestamp(nil)),
+				e.formatter.logger.fnTimestamp(nil),
 			)
 			buffer = append(buffer, ',')
 		}
 
 		// level
 		buffer = append(buffer, `"level":`...)
-		buffer = helpers.AppendJSON_Quoted(buffer, e.level.String())
+		buffer = helpers.AppendJSON_Quoted(
+			buffer,
+			[]byte(e.level.String()),
+		)
 		buffer = append(buffer, ',')
 
 		// root field
@@ -53,7 +56,10 @@ func (e *Entry) Msg(msg string) {
 
 			switch fld.kind {
 			case kindString:
-				buffer = helpers.AppendJSON_Quoted(buffer, fld.valueString)
+				buffer = helpers.AppendJSON_Quoted(
+					buffer,
+					[]byte(fld.valueString),
+				)
 			case kindInt:
 				buffer = strconv.AppendInt(buffer, fld.valueInt, 10)
 			case kindBool:
@@ -75,7 +81,10 @@ func (e *Entry) Msg(msg string) {
 
 			switch fld.kind {
 			case kindString:
-				buffer = helpers.AppendJSON_Quoted(buffer, fld.valueString)
+				buffer = helpers.AppendJSON_Quoted(
+					buffer,
+					[]byte(fld.valueString),
+				)
 			case kindInt:
 				buffer = strconv.AppendInt(buffer, fld.valueInt, 10)
 			case kindBool:
@@ -88,7 +97,7 @@ func (e *Entry) Msg(msg string) {
 		}
 
 		// entry fields
-		for ix := range e.fields {
+		for ix := range e.fieldCount {
 			fld := &e.fields[ix]
 
 			buffer = append(buffer, '"')
@@ -97,7 +106,10 @@ func (e *Entry) Msg(msg string) {
 
 			switch fld.kind {
 			case kindString:
-				buffer = helpers.AppendJSON_Quoted(buffer, fld.valueString)
+				buffer = helpers.AppendJSON_Quoted(
+					buffer,
+					[]byte(fld.valueString),
+				)
 			case kindInt:
 				buffer = strconv.AppendInt(buffer, fld.valueInt, 10)
 			case kindBool:
@@ -110,9 +122,9 @@ func (e *Entry) Msg(msg string) {
 		}
 
 		// message
-		buffer = append(buffer, `"message":`...)
+		buffer = append(buffer, `"msg":"`...)
 		buffer = helpers.AppendJSON(buffer, []byte(msg))
-		buffer = append(buffer, '}', '\n')
+		buffer = append(buffer, '"', '}', '\n')
 
 		copy(region.Buf(), buffer)
 		e.formatter.logger.ingestor.EndWrite(region)
@@ -180,7 +192,7 @@ func (e *Entry) Msg(msg string) {
 	}
 
 	// entry fields
-	for ix := range e.fields {
+	for ix := range e.fieldCount {
 		fld := &e.fields[ix]
 
 		buffer = append(buffer, fld.key...)
@@ -195,12 +207,16 @@ func (e *Entry) Msg(msg string) {
 
 		case kindBool:
 			buffer = strconv.AppendBool(buffer, fld.valueBool)
+
+		case kindFloat:
+			buffer = helpers.AppendFloat(buffer, fld.valueFloat, _PrecisionFloat)
 		}
 
 		buffer = append(buffer, ' ')
 	}
 
-	buffer = helpers.AppendJSON(buffer, []byte(msg)) // TODO: why append json?
+	buffer = append(buffer, "msg="...)
+	buffer = helpers.AppendArgs(buffer, msg) // TODO: why append json?
 	buffer = append(buffer, '\n')
 
 	copy(region.Buf(), buffer)

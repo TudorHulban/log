@@ -61,7 +61,10 @@ func (l *Logger) appendJSONRoot(buffer []byte, cfg *formatterConfig, file string
 
 		switch fld.kind {
 		case kindString:
-			buffer = helpers.AppendJSON_Quoted(buffer, fld.valueString)
+			buffer = helpers.AppendJSON_Quoted(
+				buffer,
+				[]byte(fld.valueString),
+			)
 		case kindInt:
 			buffer = strconv.AppendInt(buffer, fld.valueInt, 10)
 		case kindBool:
@@ -83,7 +86,10 @@ func (l *Logger) appendJSONRoot(buffer []byte, cfg *formatterConfig, file string
 
 		switch fld.kind {
 		case kindString:
-			buffer = helpers.AppendJSON_Quoted(buffer, fld.valueString)
+			buffer = helpers.AppendJSON_Quoted(
+				buffer,
+				[]byte(fld.valueString),
+			)
 		case kindInt:
 			buffer = strconv.AppendInt(buffer, fld.valueInt, 10)
 		case kindBool:

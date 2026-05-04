@@ -37,7 +37,7 @@ func TimestampRFC3339(appendTo []byte) []byte {
 	updateRFC3339TimeCache() // Fast path: update cache (cheap CAS if already fresh)
 
 	// Load cached value (non-nil after update)
-	buf := timeCacheStandard.active.Load()
+	buf := timeCacheRFC3339.active.Load()
 	if buf != nil {
 		return append(appendTo, buf.output[:buf.length]...)
 	}

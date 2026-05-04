@@ -37,6 +37,7 @@ var pow10 = [...]uint64{
 
 func appendUint64(destination []byte, value uint64) []byte {
 	var buf [20]byte // Write into a fixed-size scratch buffer, then copy the tail.
+
 	i := len(buf)
 
 	for value >= 100 {
@@ -67,6 +68,7 @@ func appendUint64(destination []byte, value uint64) []byte {
 
 func appendUintZeroPadded(destination []byte, value uint64, width int) []byte {
 	var buf [20]byte // Write into a fixed-size scratch, then copy tail.
+
 	i := len(buf)
 
 	for value >= 100 {
@@ -141,6 +143,7 @@ func AppendFloat(destination []byte, value float64, precision int) []byte {
 		if fv < 0 {
 			fv = 0
 		}
+
 		fracInt := uint64(fv)
 
 		destination = appendUintZeroPadded(destination, fracInt, precision)

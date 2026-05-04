@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-const nanosPerDay = int64(24 * 60 * 60 * 1e9)
-
 type timeBuf struct {
 	valueMillisecond int64 // millisecond-epoch at which this buf was built
 	valueDay         int64 // Unix-day at which the date prefix was built
@@ -24,6 +22,7 @@ type timeCache struct {
 
 var timeCacheStandard timeCache
 var timeCacheYYYYMonth timeCache
+var timeCacheRFC3339 timeCache
 
 // gateStandard and gateYYYYMonth serialize the one writer per millisecond.
 // When multiple goroutines observe a stale valueMillisecond simultaneously, exactly one
@@ -31,6 +30,7 @@ var timeCacheYYYYMonth timeCache
 var (
 	gateStandard  atomic.Int64
 	gateYYYYMonth atomic.Int64
+	gateRFC3339   atomic.Int64
 )
 
 func updateStandardTimeCache() {
@@ -232,4 +232,95 @@ func updateYYYYMonthTimeCache() {
 	next.length = next.dateLen + len(custom)
 
 	timeCacheYYYYMonth.active.Store(next)
+}
+
+func updateRFC3339TimeCache() {
+	now := time.Now().UTC() // ← Ensure UTC for 'Z' suffix
+	nowMillisecond := now.UnixNano() / 1e6
+
+	current := gateRFC3339.Load()
+	if current == nowMillisecond {
+		return
+	}
+
+	if !gateRFC3339.CompareAndSwap(current, nowMillisecond) {
+		return
+	}
+
+	previous := timeCacheRFC3339.active.Load()
+	next := new(timeBuf)
+	next.valueMillisecond = nowMillisecond
+
+	if previous != nil {
+		*next = *previous
+	}
+
+	// Rebuild date+time prefix only when the millisecond changes
+	// (your existing logic already handles day-change optimization via valueDay)
+	nowDay := now.UnixNano() / nanosPerDay
+	if previous == nil || nowDay != previous.valueDay {
+		next.valueDay = nowDay
+		year, month, day := now.Date()
+		std := next.output[:0]
+
+		// YYYY-MM-DDT
+		std = strconv.AppendInt(std, int64(year), 10)
+
+		std = append(std, '-')
+		if month < 10 {
+			std = append(std, '0')
+		}
+
+		std = strconv.AppendInt(std, int64(month), 10)
+
+		std = append(std, '-')
+		if day < 10 {
+			std = append(std, '0')
+		}
+
+		std = strconv.AppendInt(std, int64(day), 10)
+		std = append(std, 'T')
+		next.dateLen = len(std)
+	}
+
+	hour, minute, sec := now.Clock()
+	milli := now.Nanosecond() / 1e6
+
+	std := next.output[next.dateLen:next.dateLen]
+
+	// HH:MM:SS.mmmZ
+	if hour < 10 {
+		std = append(std, '0')
+	}
+
+	std = strconv.AppendInt(std, int64(hour), 10)
+	std = append(std, ':')
+
+	if minute < 10 {
+		std = append(std, '0')
+	}
+
+	std = strconv.AppendInt(std, int64(minute), 10)
+	std = append(std, ':')
+
+	if sec < 10 {
+		std = append(std, '0')
+	}
+
+	std = strconv.AppendInt(std, int64(sec), 10)
+	std = append(std, '.')
+
+	// Milliseconds: zero-pad to 3 digits
+	if milli < 100 {
+		std = append(std, '0')
+		if milli < 10 {
+			std = append(std, '0')
+		}
+	}
+
+	std = strconv.AppendInt(std, int64(milli), 10)
+	std = append(std, 'Z') // UTC indicator
+
+	next.length = next.dateLen + len(std)
+	timeCacheRFC3339.active.Store(next)
 }

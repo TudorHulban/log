@@ -48,10 +48,10 @@ func TestArenalog_OneField(t *testing.T) {
 // go test -run '^$' -bench '^BenchmarkArenalog_OneField$' -benchmem -memprofile=mem.prof -cpuprofile=cpu.prof
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArenalog_OneField/G1-16 	18708489	        63.30 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G2-16 	 9617562	       123.1 ns/op	      13 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G3-16 	 9792391	       121.7 ns/op	      13 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G4-16 	 9654943	       123.4 ns/op	      13 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G1-16 	18325016	        63.49 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G2-16 	11072150	       108.7 ns/op	       6 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G3-16 	10980145	       108.3 ns/op	       5 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G4-16 	10916209	       110.0 ns/op	       6 B/op	       0 allocs/op
 func BenchmarkArenalog_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}
@@ -89,10 +89,14 @@ func BenchmarkArenalog_OneField(b *testing.B) {
 					WithRoot("service", "auth")
 
 				runtime.GC()
+
 				for i := 0; i < runtime.GOMAXPROCS(0)*4; i++ {
-					e := entryPool.Get().(*Entry)
+					e, _ := entryPool.Get().(*Entry) //nolint:revive
 					entryPool.Put(e)
 				}
+
+				var warmupBuffer []byte
+				timestamp.TimestampRFC3339(warmupBuffer)
 
 				b.ReportAllocs()
 				b.ResetTimer()
@@ -162,7 +166,7 @@ func TestArenalog_MultipleFields(t *testing.T) {
 // go tool pprof -alloc_objects mem.out
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_MultipleFields-16    	 9660744	       125.6 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkContext_NoJSON_MultipleFields-16    	 9760326	       126.5 ns/op	       4 B/op	       0 allocs/op
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -196,6 +200,14 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 
 	runtime.GC()
 
+	for i := 0; i < runtime.GOMAXPROCS(0)*4; i++ {
+		e, _ := entryPool.Get().(*Entry) //nolint:revive
+		entryPool.Put(e)
+	}
+
+	var warmupBuffer []byte
+	timestamp.TimestampRFC3339(warmupBuffer)
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -215,7 +227,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-16    	 7178278	       165.8 ns/op	      14 B/op	       0 allocs/op
+// BenchmarkContext_WithJSON_MultipleFields-16    	 8048110	       151.1 ns/op	       5 B/op	       0 allocs/op
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -250,6 +262,14 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 
 	runtime.GC()
 
+	for i := 0; i < runtime.GOMAXPROCS(0)*4; i++ {
+		e, _ := entryPool.Get().(*Entry) //nolint:revive
+		entryPool.Put(e)
+	}
+
+	var warmupBuffer []byte
+	timestamp.TimestampRFC3339(warmupBuffer)
+
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -269,10 +289,10 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=1-16         	15683703	        77.47 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=2-16         	14636638	       108.6 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=3-16         	14384590	        93.58 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=4-16         	13956750	        85.85 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=1-16         	15812635	        76.11 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=2-16         	17419221	        67.73 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=3-16         	13884411	        85.10 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=4-16         	13652745	        87.12 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 
@@ -311,6 +331,14 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 		SetBool("cache_hit", true)
 
 	runtime.GC()
+
+	for i := 0; i < runtime.GOMAXPROCS(0)*4; i++ {
+		e, _ := entryPool.Get().(*Entry) //nolint:revive
+		entryPool.Put(e)
+	}
+
+	var warmupBuffer []byte
+	timestamp.TimestampRFC3339(warmupBuffer)
 
 	b.SetParallelism(16)
 

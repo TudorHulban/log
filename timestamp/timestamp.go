@@ -34,7 +34,16 @@ func TimestampYYYYMonth(appendTo []byte) []byte {
 }
 
 func TimestampRFC3339(appendTo []byte) []byte {
-	return time.Now().UTC().AppendFormat(appendTo, time.RFC3339)
+	updateRFC3339TimeCache() // Fast path: update cache (cheap CAS if already fresh)
+
+	// Load cached value (non-nil after update)
+	buf := timeCacheStandard.active.Load()
+	if buf != nil {
+		return append(appendTo, buf.output[:buf.length]...)
+	}
+
+	// Fallback: should almost never happen (cache cold start)
+	return time.Now().UTC().AppendFormat(appendTo, rfc3339MilliLayout)
 }
 
 func TimestampRFC3339Nano(appendTo []byte) []byte {

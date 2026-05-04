@@ -56,32 +56,32 @@ func TestAppendFloat(t *testing.T) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkAppendFloat/1_custom_nan-16         	 8092822	       149.7 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_nan-16         	 7834503	       151.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_1._nan-16         	 8278422	       145.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_1._nan-16         	 8229361	       143.4 ns/op	       8 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_pos_inf-16     	 8180378	       145.6 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_pos_inf-16     	 7891600	       151.6 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_2._pos_inf-16     	 8517171	       142.3 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_2._pos_inf-16     	 8217518	       143.7 ns/op	       8 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_neg_inf-16     	 8386286	       144.4 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_neg_inf-16     	 7895463	       150.8 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_3._neg_inf-16     	 8315826	       141.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_3._neg_inf-16     	 8195685	       144.3 ns/op	       8 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_small_int-16   	 8076417	       148.8 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_small_int-16   	 7080556	       169.2 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_4._small_int-16   	 7951039	       149.9 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_4._small_int-16   	 6827728	       177.1 ns/op	       8 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_small_frac-16  	 7612082	       157.4 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_small_frac-16  	 6586550	       180.5 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_5._small_frac-16  	 7545920	       158.1 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_5._small_frac-16  	 6271718	       188.8 ns/op	       8 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_large_int-16   	 7126051	       167.4 ns/op	      16 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_large_int-16   	 6664712	       179.5 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_6._large_int-16   	 7592638	       158.5 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_6._large_int-16   	 6490910	       186.0 ns/op	      16 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_large_frac-16  	 6707352	       178.5 ns/op	      16 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_large_frac-16  	 6325773	       189.5 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_7._large_frac-16  	 7291576	       164.7 ns/op	      16 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_7._large_frac-16  	 6132566	       196.2 ns/op	      16 B/op	       1 allocs/op
 
-// BenchmarkAppendFloat/1_custom_tiny-16        	 6114620	       195.9 ns/op	      24 B/op	       2 allocs/op
-// BenchmarkAppendFloat/2_stdlib_tiny-16        	 5817366	       205.4 ns/op	      24 B/op	       2 allocs/op
+// BenchmarkAppendFloat/1_custom_8._tiny-16        	 6586474	       181.8 ns/op	      24 B/op	       2 allocs/op
+// BenchmarkAppendFloat/2_stdlib_8._tiny-16        	 5570665	       214.9 ns/op	      24 B/op	       2 allocs/op
 
-// BenchmarkAppendFloat/1_custom_negative-16    	 7627508	       156.9 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkAppendFloat/2_stdlib_negative-16    	 6720366	       177.7 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/1_custom_9._negative-16    	 7618142	       156.9 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkAppendFloat/2_stdlib_9._negative-16    	 6682270	       178.5 ns/op	       8 B/op	       1 allocs/op
 
 func BenchmarkAppendFloat(b *testing.B) {
 	tests := []struct {
@@ -89,18 +89,18 @@ func BenchmarkAppendFloat(b *testing.B) {
 		value       float64
 		prec        int
 	}{
-		// 1. Error-like cases
-		{"nan", math.NaN(), 4},
-		{"pos_inf", math.Inf(+1), 4},
-		{"neg_inf", math.Inf(-1), 4},
+		// Error-like cases
+		{"1. nan", math.NaN(), 4},
+		{"2. pos_inf", math.Inf(+1), 4},
+		{"3. neg_inf", math.Inf(-1), 4},
 
-		// 2. Normal cases
-		{"small_int", 42, 0},
-		{"small_frac", 3.14159, 4},
-		{"large_int", 123456789012345.0, 0},
-		{"large_frac", 987654321.123456, 6},
-		{"tiny", 0.00000012345, 10},
-		{"negative", -123.456, 3},
+		// Normal cases
+		{"4. small_int", 42, 0},
+		{"5. small_frac", 3.14159, 4},
+		{"6. large_int", 123456789012345.0, 0},
+		{"7. large_frac", 987654321.123456, 6},
+		{"8. tiny", 0.00000012345, 10},
+		{"9. negative", -123.456, 3},
 	}
 
 	for _, tc := range tests {

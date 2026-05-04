@@ -7,7 +7,7 @@ require (
 	github.com/phuslu/log v1.0.123
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
-	github.com/tudorhulban/bytearena v0.0.14-0.20260427111926-2cadbcfc13de
+	github.com/tudorhulban/bytearena v0.0.15-0.20260503120813-2190e929ee5d
 )
 
 require (

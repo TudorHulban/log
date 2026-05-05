@@ -30,8 +30,8 @@ func TestContext(t *testing.T) {
 
 			WithFatalWriter: writer,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
-			// WithJSON:        true,
-			WithColor: true,
+			WithJSON:        true,
+			WithColor:       true,
 		},
 	)
 	require.NoError(t, errCrLogger)

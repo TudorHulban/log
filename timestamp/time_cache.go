@@ -35,7 +35,9 @@ var (
 
 func updateStandardTimeCache() {
 	now := time.Now()
-	nowMillisecond := now.UnixNano() / 1e6
+	nowNano := now.UnixNano()
+
+	nowMillisecond := nowNano / 1e6
 
 	current := gateStandard.Load()
 	if current == nowMillisecond {
@@ -57,7 +59,7 @@ func updateStandardTimeCache() {
 	}
 
 	// rebuild date prefix only when the day changes.
-	nowDay := now.UnixNano() / nanosPerDay
+	nowDay := nowNano / nanosPerDay
 
 	if previous == nil || nowDay != previous.valueDay {
 		next.valueDay = nowDay
@@ -136,7 +138,9 @@ func updateStandardTimeCache() {
 
 func updateYYYYMonthTimeCache() {
 	now := time.Now()
-	nowMillisecond := now.UnixNano() / 1e6
+	nowNano := now.UnixNano()
+
+	nowMillisecond := nowNano / 1e6
 
 	current := gateYYYYMonth.Load()
 	if current == nowMillisecond {
@@ -158,7 +162,7 @@ func updateYYYYMonthTimeCache() {
 	}
 
 	// rebuild date prefix only when the day changes.
-	nowDay := now.UnixNano() / nanosPerDay
+	nowDay := nowNano / nanosPerDay
 
 	if previous == nil || nowDay != previous.valueDay {
 		next.valueDay = nowDay
@@ -236,7 +240,9 @@ func updateYYYYMonthTimeCache() {
 
 func updateRFC3339TimeCache() {
 	now := time.Now().UTC() // ← Ensure UTC for 'Z' suffix
-	nowMillisecond := now.UnixNano() / 1e6
+	nowNano := now.UnixNano()
+
+	nowMillisecond := nowNano / 1e6
 
 	current := gateRFC3339.Load()
 	if current == nowMillisecond {
@@ -257,7 +263,8 @@ func updateRFC3339TimeCache() {
 
 	// Rebuild date+time prefix only when the millisecond changes
 	// (your existing logic already handles day-change optimization via valueDay)
-	nowDay := now.UnixNano() / nanosPerDay
+	nowDay := nowNano / nanosPerDay
+
 	if previous == nil || nowDay != previous.valueDay {
 		next.valueDay = nowDay
 		year, month, day := now.Date()

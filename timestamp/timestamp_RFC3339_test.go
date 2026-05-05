@@ -72,6 +72,7 @@ func BenchmarkTimestampYYYYMonth(b *testing.B) {
 	}
 }
 
+// BenchmarkTimestampRFC3339-16    	26308006	        45.12 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkTimestampRFC3339(b *testing.B) {
 	var scratch [64]byte
 

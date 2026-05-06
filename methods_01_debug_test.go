@@ -45,7 +45,7 @@ func TestDebug(t *testing.T) {
 
 	// {"ts":"2026-05-06T12:07:36+03:00","level":"INFO","msg":"created logger, level TRACE"}
 
-	// l.Trace("0")
+	l.Trace("0")
 	// l.Tracef("%d", 1)
 	l.Tracew("msg-trace", "key1", 1)
 	// l.TraceFast("%d", 777)

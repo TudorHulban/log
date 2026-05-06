@@ -99,7 +99,7 @@ linters:
         # ============================
         - name: line-length-limit
           severity: error
-          arguments: [190]
+          arguments: [230]
 
         # ============================
         # ACTIVE RULES WITH ARGUMENTS

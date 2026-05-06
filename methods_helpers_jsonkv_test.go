@@ -7,7 +7,7 @@ import (
 )
 
 func TestAppendJSONKV(t *testing.T) {
-	type testCase struct {
+	type testCase struct { //nolint:govet
 		description string
 		level       string
 		file        string

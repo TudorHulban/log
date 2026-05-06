@@ -67,9 +67,8 @@ func AppendKeyValues(dst []byte, kv ...any) []byte {
 	return dst
 }
 
+// Precondition: len(kv) is even.
 func AppendJSONKeyValuesIntoObject(dst []byte, kv ...any) []byte {
-	// Precondition: len(kv) is even.
-
 	for i := 0; i < len(kv); i += 2 {
 		key := kv[i]
 		val := kv[i+1]

@@ -91,10 +91,12 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 	// 7. Parse and Assert Output
 	output := buf.String()
 	linesRaw := strings.Split(output, "\n")
+
 	var linesJSON []string
 
 	for _, line := range linesRaw {
 		trimmed := strings.TrimFunc(line, unicode.IsSpace)
+
 		idx := strings.IndexByte(trimmed, '{')
 		if idx >= 0 {
 			linesJSON = append(linesJSON, trimmed[idx:])
@@ -106,6 +108,7 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 	parseLog := func(line string) map[string]any {
 		var m map[string]any
 		require.NoError(t, json.Unmarshal([]byte(line), &m))
+
 		return m
 	}
 
@@ -224,12 +227,14 @@ func TestArenalog_NoRootFields(t *testing.T) {
 	// 7. Parse and Assert
 	output := buf.String()
 	linesRaw := strings.Split(output, "\n")
+
 	var linesJSON []string
 
 	for _, line := range linesRaw {
 		trimmed := strings.TrimSpace(line)
+
 		if strings.Contains(trimmed, "{") {
-			linesJSON = append(linesJSON, trimmed[strings.Index(trimmed, "{"):])
+			linesJSON = append(linesJSON, trimmed[strings.Index(trimmed, "{"):]) //nolint:gocritic
 		}
 	}
 
@@ -239,6 +244,7 @@ func TestArenalog_NoRootFields(t *testing.T) {
 	parseLog := func(line string) map[string]any {
 		var m map[string]any
 		require.NoError(t, json.Unmarshal([]byte(line), &m))
+
 		return m
 	}
 

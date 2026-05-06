@@ -8,24 +8,27 @@ import (
 )
 
 func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []any) {
-	region, errWrite := l.ingestor.TryWrite(estimatedMessageSize + _DeltaEstimation)
-	if errWrite != nil {
-		return
+	var (
+		file string
+		line int
+	)
+
+	if l.withCaller {
+		_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
+		file = fileCaller
+		line = lineCaller
 	}
 
-	buf := region.Buf()[:0]
-
 	if l.withJSON {
-		var (
-			file string
-			line int
+		region, errWrite := l.ingestor.TryWrite(
+			estimatedMessageSize +
+				l.estimateJSONOverhead(0, file, line, args),
 		)
-
-		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
-			file = fileCaller
-			line = lineCaller
+		if errWrite != nil {
+			return
 		}
+
+		buf := region.Buf()[:0]
 
 		buf = l.appendJSON(
 			buf,
@@ -44,14 +47,21 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 	}
 
 	// Non‑JSON path
+	region, errWrite := l.ingestor.TryWrite(
+		estimatedMessageSize + _DeltaEstimation,
+	)
+	if errWrite != nil {
+		return
+	}
+
+	buf := region.Buf()[:0]
+
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
 	}
 
 	if l.withCaller {
-		_, file, line, _ := runtime.Caller(int(l.callerLevel))
-
 		buf = append(buf, file...)
 		buf = append(buf, ' ')
 		buf = append(buf, 'L', 'i', 'n', 'e')
@@ -70,24 +80,27 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 }
 
 func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32, args []any) {
-	region, errWrite := l.ingestor.TryWrite(estimatedMessageSize + _DeltaEstimation)
-	if errWrite != nil {
-		return
+	var (
+		file string
+		line int
+	)
+
+	if l.withCaller {
+		_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
+		file = fileCaller
+		line = lineCaller
 	}
 
-	buf := region.Buf()[:0]
-
 	if l.withJSON {
-		var (
-			file string
-			line int
+		region, errWrite := l.ingestor.TryWrite(
+			estimatedMessageSize +
+				l.estimateJSONOverhead(0, file, line, args),
 		)
-
-		if l.withCaller {
-			_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
-			file = fileCaller
-			line = lineCaller
+		if errWrite != nil {
+			return
 		}
+
+		buf := region.Buf()[:0]
 
 		buf = l.appendJSON(
 			buf,
@@ -106,6 +119,15 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 	}
 
 	// Non‑JSON path
+	region, errWrite := l.ingestor.TryWrite(
+		estimatedMessageSize + _DeltaEstimation,
+	)
+	if errWrite != nil {
+		return
+	}
+
+	buf := region.Buf()[:0]
+
 	if l.fnTimestamp != nil {
 		buf = l.fnTimestamp(buf)
 		buf = append(buf, ' ')
@@ -174,8 +196,7 @@ func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, k
 
 	// Non‑JSON path
 	region, errWrite := l.ingestor.TryWrite(
-		estimatedMessageSize +
-			l.estimateJSONOverhead(len(msg), file, line, keysAndValues),
+		estimatedMessageSize + _DeltaEstimation,
 	)
 	if errWrite != nil {
 		return
@@ -210,12 +231,12 @@ func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, k
 	l.ingestor.EndWrite(region)
 }
 
-func (l *Logger) estimateJSONOverhead(msgLen int, file string, line int, kv []any) uint32 {
+func (l *Logger) estimateJSONOverhead(msgLen int, file string, line int, args []any) uint32 {
 	var size uint32 = 64 // base JSON overhead
 
 	// timestamp
 	if l.fnTimestamp != nil {
-		size += 32 // worst case timestamp length
+		size = size + 32 // worst case timestamp length
 	}
 
 	// level
@@ -223,50 +244,63 @@ func (l *Logger) estimateJSONOverhead(msgLen int, file string, line int, kv []an
 
 	// caller info
 	if len(file) > 0 && line > 0 {
-		size += uint32(len(file)) + 20 // "caller":"...","line":123,
+		size = size + uint32(len(file)) + 20 // "caller":"...","line":123,
 	}
 
 	// message field: "msg":"<escaped>"
 	// worst case: every char becomes \u00XX (6 bytes)
-	size += uint32(msgLen) * 2
-	size += 10 // field name + quotes + comma
+	size = size + uint32(msgLen)*2
+	size = size + 10 // field name + quotes + comma
 
 	// key/value pairs
-	for i := 0; i < len(kv); i += 2 {
-		key := kv[i]
-		val := kv[i+1]
+	// no assumption about even length
+	for i := 0; i < len(args); i = i + 2 {
+		key := args[i]
 
 		// key
 		switch k := key.(type) {
 		case string:
-			size += uint32(len(k))*2 + 4
+			size = size + uint32(len(k))*2 + 4
 		case []byte:
-			size += uint32(len(k))*2 + 4
+			size = size + uint32(len(k))*2 + 4
 		default:
-			size += 16
+			size = size + 16
 		}
 
 		// value
-		switch v := val.(type) {
-		case string:
-			size += uint32(len(v))*2 + 4
-		case []byte:
-			size += uint32(len(v))*2 + 4
-		case int, int32, int64, uint, uint64:
-			size += 20
-		case float32, float64:
-			size += 32
-		case bool:
-			size += 5
-		case nil:
-			size += 4
-		default:
-			size += 32
+		if i+1 < len(args) {
+			val := args[i+1]
+
+			switch v := val.(type) {
+			case string:
+				size = size + uint32(len(v))*2 + 4
+			case []byte:
+				size = size + uint32(len(v))*2 + 4
+
+			case int, int32, int64, uint, uint64:
+				size = size + 20
+
+			case float32, float64:
+				size = size + 32
+
+			case bool:
+				size = size + 5
+
+			case nil:
+				size = size + 4
+
+			default:
+				size = size + 32
+			}
+		} else {
+			// dangling key without value
+			// worst case: treat as string with unknown length
+			size = size + 32
 		}
 	}
 
 	// newline
-	size++
+	size = size + 1
 
 	return size
 }

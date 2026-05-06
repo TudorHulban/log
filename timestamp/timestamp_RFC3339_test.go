@@ -31,6 +31,7 @@ func TestTimestampRFC3339(t *testing.T) {
 			}
 
 			timestampPart := got[len(prefix):]
+
 			_, errParse := time.Parse(time.RFC3339Nano, string(timestampPart))
 			if errParse != nil {
 				t.Errorf("Appended part is not a valid timestamp: %v", errParse)

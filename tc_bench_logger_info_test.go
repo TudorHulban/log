@@ -177,8 +177,6 @@ func BenchmarkLogger_InfoFast(b *testing.B) {
 						Ingestor:    ingestor,
 						LoggerLevel: LevelDebug,
 
-						EstimatedMessageSizeInfo: MessageMediumSize,
-
 						WithFatalWriter: os.Stdout,
 						WithTimestamp:   tc.timestampFunc,
 						WithJSON:        tc.withJSON,

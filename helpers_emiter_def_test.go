@@ -271,70 +271,66 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 
 		switch lvl {
 		case LevelDebug:
-			switch idx % 4 {
+			switch idx % 3 {
 			case 0:
 				call, method = func() error { logger.Debug(id); return nil }, "Debug"
-			case 2:
+			case 1:
 				call, method = func() error { logger.Debugf("%s", id); return nil }, "Debugf"
-			case 3:
+			case 2:
 				call, method = func() error { logger.Debugw(id); return nil }, "Debugw"
 			}
 
 		case LevelInfo:
-			switch idx % 4 {
+			switch idx % 3 {
 			case 0:
 				call, method = func() error { logger.Info(id); return nil }, "Info"
-
-			case 2:
+			case 1:
 				call, method = func() error { logger.Infof("%s", id); return nil }, "Infof"
-			case 3:
+			case 2:
 				call, method = func() error { logger.Infow(id); return nil }, "Infow"
 			}
 
 		case LevelWarn:
-			switch idx % 4 {
+			switch idx % 3 {
 			case 0:
 				call, method = func() error { logger.Warn(id); return nil }, "Warn"
-
-			case 2:
+			case 1:
 				call, method = func() error { logger.Warnf("%s", id); return nil }, "Warnf"
-			case 3:
+			case 2:
 				call, method = func() error { logger.Warnw(id); return nil }, "Warnw"
 			}
 
 		case LevelError:
-			switch idx % 4 {
+			switch idx % 3 {
 			case 0:
 				call, method = func() error { logger.Error(id); return nil }, "Error"
-
-			case 2:
+			case 1:
 				call, method = func() error { logger.Errorf("%s", id); return nil }, "Errorf"
-			case 3:
+			case 2:
 				call, method = func() error { logger.Errorw(id); return nil }, "Errorw"
 			}
 
 		case LevelPanic: // PRINT variants (11 total)
-			switch idx % 11 {
+			switch idx % 10 {
 			case 0:
 				call, method = func() error { logger.Print(id); return nil }, "Print"
-
-			case 2:
+			case 1:
 				call, method = func() error { logger.Printf("%s", id); return nil }, "Printf"
-			case 3:
+			case 2:
 				call, method = func() error { logger.PrintfFast("%s", id); return nil }, "PrintfFast"
-			case 4:
+			case 3:
 				call, method = func() error { logger.Printw(id); return nil }, "Printw"
-			case 5:
+			case 4:
 				call, method = func() error { logger.PrintwFast(id); return nil }, "PrintwFast"
-			case 6:
+			case 5:
 				call, method = func() error { logger.PrintMessage(id); return nil }, "PrintMessage"
-			case 7:
+			case 6:
 				call, method = func() error { logger.PrintMessageFast(id); return nil }, "PrintMessageFast"
-			case 8:
+			case 7:
 				call, method = func() error { logger.PrintRaw([]byte(id)); return nil }, "PrintRaw"
-			case 9:
+			case 8:
 				call, method = func() error { logger.PrintWithNoTimestamp(id); return nil }, "PrintWithNoTimestamp"
-			case 10:
+			case 9:
 				call, method = func() error { logger.PrintWithNoTimestampFast(id); return nil }, "PrintWithNoTimestampFast"
 			}
 

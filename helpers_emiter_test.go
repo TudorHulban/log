@@ -67,11 +67,12 @@ func TestEmitData(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond) // warm up
 
+	processErrors := emitData(data, l)
 	require.Empty(t,
-		emitData(
-			data,
-			l,
-		),
+		processErrors,
+
+		"number errors: %d",
+		len(processErrors),
 	)
 
 	cancel()

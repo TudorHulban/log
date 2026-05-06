@@ -44,18 +44,6 @@ func (l *Logger) Errorw(msg string, keysAndValues ...any) {
 		l.labelError(),
 		msg,
 		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
-		keysAndValues,
-	)
-}
-
-func (l *Logger) ErrorFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelError {
-		return
-	}
-
-	l.logWithLabel(
-		l.labelError(),
-		l.estimatedMessageSizeError,
-		args,
+		keysAndValues...,
 	)
 }

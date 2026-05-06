@@ -51,15 +51,3 @@ func (l *Logger) Tracew(msg string, keysAndValues ...any) {
 		keysAndValues...,
 	)
 }
-
-func (l *Logger) TraceFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelTrace {
-		return
-	}
-
-	l.logWithLabel(
-		l.labelTrace(),
-		l.estimatedMessageSizeTrace,
-		args,
-	)
-}

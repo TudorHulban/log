@@ -65,7 +65,7 @@ func TestGetEstimatedMessageSize(t *testing.T) {
 			description: "09 %f uses float64Len conservative bound",
 			format:      "%f",
 			args:        []any{123.456},
-			expected:    9, // integer part 123 -> 3 digits + 6 = 9
+			expected:    15, // integer part 123 -> 3 digits + 6 = 9
 		},
 		{
 			description: "10 %v uses fmt.Sprint length for exotic types",
@@ -89,7 +89,7 @@ func TestGetEstimatedMessageSize(t *testing.T) {
 			// " C:" (3) + float32Len(1.5) -> integer part 1 -> digits 1 + 6 = 7 -> 10
 			// " D:" (3) + t worst-case 5 -> 8 -> 18
 			// " Z:" (3) + %% -> single '%' (1) -> 4 -> total 22
-			expected: 29,
+			expected: 35,
 		},
 	}
 

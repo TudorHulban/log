@@ -44,18 +44,6 @@ func (l *Logger) Warnw(msg string, keysAndValues ...any) {
 		l.labelWarn(),
 		msg,
 		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
-		keysAndValues,
-	)
-}
-
-func (l *Logger) WarnFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelWarn {
-		return
-	}
-
-	l.logWithLabel(
-		l.labelWarn(),
-		l.estimatedMessageSizeWarn,
-		args,
+		keysAndValues...,
 	)
 }

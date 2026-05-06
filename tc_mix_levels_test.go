@@ -184,9 +184,15 @@ func TestLevelsMatrix(t *testing.T) {
 				// Verify suppressed entries do not appear
 				for _, msg := range tc.shouldSkip {
 					for _, ln := range lines {
-						require.NotContains(t, ln, `"msg":"`+msg+`"`,
+						require.NotContains(t,
+							ln,
+							`"msg":"`+msg+`"`,
+
 							"msg=%q must be suppressed at threshold=%s, output:\n%s",
-							msg, tc.level.String(), out)
+							msg,
+							tc.level.String(),
+							out,
+						)
 					}
 				}
 			},

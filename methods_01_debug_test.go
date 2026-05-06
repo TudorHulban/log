@@ -3,7 +3,7 @@ package log
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"encoding/json"
 	"io"
 	"os"
 	"runtime"
@@ -16,7 +16,31 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-func TestDebug(t *testing.T) {
+type logEntry struct {
+	Level string          `json:"level"`
+	Msg   string          `json:"msg"`
+	Key1  json.RawMessage `json:"key1,omitempty"`
+}
+
+// produces:
+// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"0"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":43,"msg":"msg-info","key1":1}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","msg":"created logger, level TRACE"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"0"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":47,"msg":"msg-info","key1":1}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":18,"msg":"0"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":47,"msg":"msg-trace","key1":1}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":30,"msg":"1"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"0"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":43,"msg":"msg-info","key1":1}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":18,"msg":"0"}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":47,"msg":"msg-debug","key1":1}
+// {"ts":"2026-05-06T17:04:09+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":30,"msg":"1"}
+
+func TestDirectCallsx(t *testing.T) {
 	var writer bytes.Buffer
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
@@ -34,7 +58,7 @@ func TestDebug(t *testing.T) {
 			WithFatalWriter: &writer,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
-			WithColor:       false, // JSON + color = messy output
+			WithColor:       false,
 			WithJSON:        true,
 		},
 	)
@@ -43,27 +67,30 @@ func TestDebug(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	// {"ts":"2026-05-06T12:07:36+03:00","level":"INFO","msg":"created logger, level TRACE"}
+	const (
+		value    = 1
+		keyValue = 777
+	)
 
 	l.Trace("0")
-	// l.Tracef("%d", 1)
-	l.Tracew("msg-trace", "key1", 1)
-	// l.TraceFast("%d", 777)
+	l.Tracef("%d", value)
+	l.Tracew("msg-trace", "key1", keyValue)
 
-	// {"ts":"2026-05-06T12:07:36+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"0"}
-	// {"ts":"2026-05-06T12:07:36+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
+	l.Debug("0")
+	l.Debugf("%d", value)
+	l.Debugw("msg-debug", "key1", keyValue)
 
-	// l.Debug("0")
-	// l.Debugf("%d", 1)
+	l.Info("0")
+	l.Infof("%d", value)
+	l.Infow("msg-info", "key1", keyValue)
 
-	// {"ts":"2026-05-06T12:01:57+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"0"}
-	// {"ts":"2026-05-06T12:01:57+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
+	l.Warn("0")
+	l.Warnf("%d", value)
+	l.Warnw("msg-info", "key1", keyValue)
 
-	// l.Info("0")
-	// l.Infof("%d", 1)
-
-	// 	{"ts":"2026-05-06T12:04:49+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"0"}
-	// {"ts":"2026-05-06T12:04:49+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
+	l.Error("0")
+	l.Errorf("%d", value)
+	l.Errorw("msg-info", "key1", keyValue)
 
 	cancel()
 	<-chIngestionEnd
@@ -71,35 +98,79 @@ func TestDebug(t *testing.T) {
 	out := writer.String()
 	require.NotEmpty(t, out)
 
-	fmt.Println(out)
+	rawLines := strings.Split(strings.TrimSpace(out), "\n")
 
-	// JSON mode → each log entry is a JSON object on its own line
-	lines := strings.Split(strings.TrimSpace(out), "\n")
-	require.Len(t, lines, 4)
+	var linesJSON []string
 
-	require.Contains(t,
-		lines[1],
-		`"level":"DEBUG"`,
+	for _, line := range rawLines {
+		trimmed := strings.TrimSpace(line)
 
-		lines[1],
-	)
-	require.Contains(t, lines[1], `"msg":"0"`)
+		idx := strings.IndexByte(trimmed, '{')
+		if idx >= 0 {
+			linesJSON = append(linesJSON, trimmed[idx:])
+		}
+	}
 
-	require.Contains(t,
-		lines[2],
-		`"level":"DEBUG"`,
+	require.NotEmpty(t, linesJSON)
 
-		lines[2],
-	)
-	require.Contains(t, lines[2], `"msg":"1"`)
+	type cases struct {
+		plain     bool
+		formatted bool
+		withKV    bool
+	}
 
-	// Timestamp must exist in both
-	require.Contains(t, lines[0], `"ts":`)
-	require.Contains(t, lines[1], `"ts":`)
+	expected := map[string]*cases{
+		"TRACE": {},
+		"DEBUG": {},
+		"INFO":  {},
+		"WARN":  {},
+		"ERROR": {},
+	}
 
-	// Caller info must exist if enabled
-	require.Contains(t, lines[1], `"caller":`)
-	require.Contains(t, lines[2], `"caller":`)
+	for _, line := range linesJSON {
+		var e logEntry
+
+		errUnmarshal := json.Unmarshal([]byte(line), &e)
+		require.NoError(t, errUnmarshal)
+
+		if e.Msg == "created logger, level TRACE" {
+			continue
+		}
+
+		c, ok := expected[e.Level]
+		require.True(t, ok, "unexpected level in line: %s", line)
+
+		switch {
+		case e.Msg == "0":
+			require.False(t, c.plain, "duplicate plain case for level %s", e.Level)
+			c.plain = true
+
+		case e.Msg == "1":
+			require.False(t, c.formatted, "duplicate formatted case for level %s", e.Level)
+			c.formatted = true
+
+		case strings.HasPrefix(e.Msg, "msg-"):
+			require.False(t, c.withKV, "duplicate withKV case for level %s", e.Level)
+			require.NotEmpty(t, e.Key1, "withKV case must have key1 for level %s", e.Level)
+
+			var v int
+
+			errKV := json.Unmarshal(e.Key1, &v)
+			require.NoError(t, errKV)
+			require.Equal(t, keyValue, v, "invalid key1 value for level %s", e.Level)
+
+			c.withKV = true
+
+		default:
+			t.Fatalf("unexpected msg for level %s: %q", e.Level, e.Msg)
+		}
+	}
+
+	for lvl, c := range expected {
+		require.True(t, c.plain, "missing plain case for level %s", lvl)
+		require.True(t, c.formatted, "missing formatted case for level %s", lvl)
+		require.True(t, c.withKV, "missing withKV case for level %s", lvl)
+	}
 }
 
 // Benchmark_Debug-16    	20773839	        58.77 ns/op	       0 B/op	       0 allocs/op
@@ -136,8 +207,8 @@ func Benchmark_Debug(b *testing.B) {
 	)
 }
 
-// Benchmark_Debug_Fast-16    	38939557	        29.85 ns/op	       0 B/op	       0 allocs/op
-func Benchmark_Debug_Fast(b *testing.B) {
+// Benchmark_Debugw-16    	30845853	        35.96 ns/op	       0 B/op	       0 allocs/op
+func Benchmark_Debugw(b *testing.B) {
 	writer := helpers.CountWriterNoBuffer{}
 
 	ingestor, errCrIngestor := bytearena.NewIngestor(
@@ -170,7 +241,7 @@ func Benchmark_Debug_Fast(b *testing.B) {
 	b.RunParallel(
 		func(pb *testing.PB) {
 			for pb.Next() {
-				l.DebugFast("1")
+				l.Debugw("1some message", "some key", "some value")
 			}
 		},
 	)

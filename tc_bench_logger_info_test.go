@@ -194,7 +194,7 @@ func BenchmarkLogger_InfoFast(b *testing.B) {
 				b.ResetTimer()
 
 				for i := 0; b.Loop(); i++ {
-					logger.InfoFast(
+					logger.Infof(
 						"%d",
 						i,
 					)

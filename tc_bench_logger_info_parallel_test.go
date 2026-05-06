@@ -98,7 +98,7 @@ func BenchmarkLogger_Parallel_InfoFast(b *testing.B) {
 						i := 0
 
 						for pb.Next() {
-							logger.InfoFast(
+							logger.Infof(
 								"%d",
 								i,
 							)

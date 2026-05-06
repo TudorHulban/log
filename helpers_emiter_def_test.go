@@ -274,8 +274,6 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Debug(id); return nil }, "Debug"
-			case 1:
-				call, method = func() error { logger.DebugFast(id); return nil }, "DebugFast"
 			case 2:
 				call, method = func() error { logger.Debugf("%s", id); return nil }, "Debugf"
 			case 3:
@@ -286,8 +284,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Info(id); return nil }, "Info"
-			case 1:
-				call, method = func() error { logger.InfoFast(id); return nil }, "InfoFast"
+
 			case 2:
 				call, method = func() error { logger.Infof("%s", id); return nil }, "Infof"
 			case 3:
@@ -298,8 +295,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Warn(id); return nil }, "Warn"
-			case 1:
-				call, method = func() error { logger.WarnFast(id); return nil }, "WarnFast"
+
 			case 2:
 				call, method = func() error { logger.Warnf("%s", id); return nil }, "Warnf"
 			case 3:
@@ -310,8 +306,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			switch idx % 4 {
 			case 0:
 				call, method = func() error { logger.Error(id); return nil }, "Error"
-			case 1:
-				call, method = func() error { logger.ErrorFast(id); return nil }, "ErrorFast"
+
 			case 2:
 				call, method = func() error { logger.Errorf("%s", id); return nil }, "Errorf"
 			case 3:
@@ -322,8 +317,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			switch idx % 11 {
 			case 0:
 				call, method = func() error { logger.Print(id); return nil }, "Print"
-			case 1:
-				call, method = func() error { logger.PrintFast(id); return nil }, "PrintFast"
+
 			case 2:
 				call, method = func() error { logger.Printf("%s", id); return nil }, "Printf"
 			case 3:

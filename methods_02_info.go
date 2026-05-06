@@ -48,18 +48,6 @@ func (l *Logger) Infow(msg string, keysAndValues ...any) {
 		l.labelInfo(),
 		msg,
 		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
-		keysAndValues,
-	)
-}
-
-func (l *Logger) InfoFast(args ...any) {
-	if Level(l.logLevel.Load()) > LevelInfo {
-		return
-	}
-
-	l.logWithLabel(
-		l.labelInfo(),
-		l.estimatedMessageSizeInfo,
-		args,
+		keysAndValues...,
 	)
 }

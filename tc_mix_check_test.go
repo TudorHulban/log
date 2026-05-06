@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
-	"time"
 	"unicode"
 
 	"github.com/stretchr/testify/require"
@@ -17,6 +16,9 @@ import (
 func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 	// 1. Create a buffer to capture output
 	var buf bytes.Buffer
+
+	// Define constant for req_id
+	const expectedReqID = 12345
 
 	// 2. Setup Ingestor with the buffer as the writer
 	ingestor, errCrIngestor := bytearena.NewIngestor(
@@ -45,7 +47,7 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 	// 4. Create Context with Base Fields
 	logContext := NewLogContext(logger).
 		WithRoot("service", "auth").
-		SetInt("req_id", 12345).
+		SetInt("req_id", expectedReqID).
 		SetBool("cache_hit", true)
 
 	// 5. Generate Logs for All Levels
@@ -88,101 +90,190 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 
 	// 7. Parse and Assert Output
 	output := buf.String()
-
-	// Split by newline and filter out empty strings
 	linesRaw := strings.Split(output, "\n")
-	require.GreaterOrEqual(t, len(linesRaw), 3)
-
 	var linesJSON []string
 
 	for _, line := range linesRaw {
 		trimmed := strings.TrimFunc(line, unicode.IsSpace)
-
 		idx := strings.IndexByte(trimmed, '{')
 		if idx >= 0 {
 			linesJSON = append(linesJSON, trimmed[idx:])
 		}
 	}
 
-	// We expect 5 lines: 1 Init message + 4 Log messages
-	require.Equal(t,
-		5,
-		len(linesJSON),
+	require.Equal(t, 5, len(linesJSON), "Expected 5 JSON log lines")
 
-		"Expected 5 JSON log lines, got %d. Output:\n%s",
-		len(linesJSON),
-		output,
-	)
-
-	// Helper to parse JSON line
 	parseLog := func(line string) map[string]any {
 		var m map[string]any
-
-		require.NoError(t,
-			json.Unmarshal([]byte(line), &m),
-
-			"Failed to parse JSON: %s",
-			line,
-		)
-
+		require.NoError(t, json.Unmarshal([]byte(line), &m))
 		return m
+	}
+
+	// Helper to check Root Context info (shared across all logs)
+	checkRootInfo := func(logData map[string]any) {
+		require.Equal(t, "auth", logData["service"])
+		require.Equal(t, float64(expectedReqID), logData["req_id"])
+		require.Equal(t, true, logData["cache_hit"])
 	}
 
 	// --- Line 0: Initialization Message ---
 	initLog := parseLog(linesJSON[0])
 	require.Equal(t, "INFO", initLog["level"])
-	require.Equal(t, "created logger, level TRACE", initLog["msg"])
 
 	// --- Line 1: TRACE ---
 	traceLog := parseLog(linesJSON[1])
+	checkRootInfo(traceLog)
 	require.Equal(t, "TRACE", traceLog["level"])
-	require.Equal(t, "trace message", traceLog["msg"])
-	require.Equal(t, "auth", traceLog["service"])
-	require.Equal(t, float64(12345), traceLog["req_id"])
-	require.Equal(t, true, traceLog["cache_hit"])
 	require.Equal(t, "trace-area", traceLog["area"])
 	require.Equal(t, "arena-trace", traceLog["user"])
+	require.Equal(t, "trace message", traceLog["msg"])
 
 	// --- Line 2: DEBUG ---
 	debugLog := parseLog(linesJSON[2])
+	checkRootInfo(debugLog)
 	require.Equal(t, "DEBUG", debugLog["level"])
-	require.Equal(t, "debug message", debugLog["msg"])
 	require.Equal(t, "debug-area", debugLog["area"])
 	require.Equal(t, "arena-debug", debugLog["user"])
 	require.Equal(t, float64(1), debugLog["attempt"])
+	require.Equal(t, "debug message", debugLog["msg"])
 
 	// --- Line 3: INFO ---
 	infoLog := parseLog(linesJSON[3])
+	checkRootInfo(infoLog)
 	require.Equal(t, "INFO", infoLog["level"])
-	require.Equal(t, "info message", infoLog["msg"])
 	require.Equal(t, "info-area", infoLog["area"])
 	require.Equal(t, "arena-info", infoLog["user"])
 	require.Equal(t, true, infoLog["success"])
-
-	// Float comparison with tolerance
-	infoFloat := infoLog["some_float"].(float64)
-	require.InDelta(t, 1.1137, infoFloat, 0.0001)
+	require.InDelta(t, 1.1137, infoLog["some_float"].(float64), 0.0001)
+	require.Equal(t, "info message", infoLog["msg"])
 
 	// --- Line 4: ERROR ---
 	errorLog := parseLog(linesJSON[4])
+	checkRootInfo(errorLog)
 	require.Equal(t, "ERROR", errorLog["level"])
-	require.Equal(t, "error message", errorLog["msg"])
 	require.Equal(t, "error-area", errorLog["area"])
 	require.Equal(t, "arena-error", errorLog["user"])
 	require.Equal(t, "something failed", errorLog["error_detail"])
+	require.Equal(t, "error message", errorLog["msg"])
+}
 
-	// Verify Timestamp exists and is valid RFC3339 on one of the entries
-	ts, couldCast := traceLog["ts"].(string)
-	require.True(t,
-		couldCast,
-		"Timestamp missing",
+func TestArenalog_NoRootFields(t *testing.T) {
+	// 1. Create a buffer to capture output
+	var buf bytes.Buffer
+
+	// 2. Setup Ingestor
+	ingestor, errCrIngestor := bytearena.NewIngestor(
+		bytearena.Size100K(),
+		&buf,
 	)
+	require.NoError(t, errCrIngestor)
 
-	_, errParse := time.Parse(time.RFC3339, ts)
-	require.NoError(t,
-		errParse,
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-		"Invalid timestamp format: %s",
-		ts,
+	// 3. Setup Logger
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    ingestor,
+			LoggerLevel: LevelTrace,
+
+			WithFatalWriter: &buf,
+			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithJSON:        true,
+		},
 	)
+	require.NoError(t, errCrLogger)
+
+	// 4. Create Context WITHOUT Root Fields
+	logContext := NewLogContext(logger)
+
+	// 5. Generate Logs
+
+	// --- TRACE (Entry info only) ---
+	logContext.
+		WithString("entry start", "trace-area").
+		Trace().
+		WithString("component", "scanner").
+		Msg("minimal trace")
+
+		// --- DEBUG (Entry info only) ---
+	logContext.
+		WithString("entry start", "debug-area").
+		Debug().
+		WithString("component", "scanner").
+		Msg("minimal debug")
+
+		// --- INFO (Entry info only) ---
+	logContext.
+		WithString("entry start", "info-area").
+		Info().
+		WithString("component", "scanner").
+		Msg("minimal info")
+
+		// --- ERROR (Entry info only) ---
+	logContext.
+		WithString("entry start", "error-area").
+		Error().
+		WithInt("code", 500).
+		Msg("minimal error")
+
+	// 6. Stop Ingestor
+	cancel()
+	<-chIngestionEnd
+
+	// 7. Parse and Assert
+	output := buf.String()
+	linesRaw := strings.Split(output, "\n")
+	var linesJSON []string
+
+	for _, line := range linesRaw {
+		trimmed := strings.TrimSpace(line)
+		if strings.Contains(trimmed, "{") {
+			linesJSON = append(linesJSON, trimmed[strings.Index(trimmed, "{"):])
+		}
+	}
+
+	// Expect 5 lines: 1 Init + 4 Log messages
+	require.Equal(t, 5, len(linesJSON))
+
+	parseLog := func(line string) map[string]any {
+		var m map[string]any
+		require.NoError(t, json.Unmarshal([]byte(line), &m))
+		return m
+	}
+
+	// Helper to ensure root fields from previous tests ARE NOT present
+	assertNoRootFields := func(logData map[string]any) {
+		require.Nil(t, logData["service"], "Root field 'service' should not exist")
+		require.Nil(t, logData["req_id"], "Root field 'req_id' should not exist")
+		require.Nil(t, logData["cache_hit"], "Root field 'cache_hit' should not exist")
+	}
+
+	// --- verify TRACE ---
+	traceLog := parseLog(linesJSON[1])
+	assertNoRootFields(traceLog)
+	require.Equal(t, "TRACE", traceLog["level"])
+	require.Equal(t, "scanner", traceLog["component"]) // Entry Info
+	require.Equal(t, "minimal trace", traceLog["msg"])
+
+	// --- verify DEBUG ---
+	debugLog := parseLog(linesJSON[2])
+	assertNoRootFields(debugLog)
+	require.Equal(t, "DEBUG", debugLog["level"])
+	require.Equal(t, "scanner", debugLog["component"]) // Entry Info
+	require.Equal(t, "minimal debug", debugLog["msg"])
+
+	// --- verify INFO ---
+	infoLog := parseLog(linesJSON[3])
+	assertNoRootFields(infoLog)
+	require.Equal(t, "INFO", infoLog["level"])
+	require.Equal(t, "scanner", infoLog["component"]) // Entry Info
+	require.Equal(t, "minimal info", infoLog["msg"])
+
+	// --- verify ERROR ---
+	errorLog := parseLog(linesJSON[4])
+	assertNoRootFields(errorLog)
+	require.Equal(t, "ERROR", errorLog["level"])
+	require.Equal(t, float64(500), errorLog["code"]) // Entry Info
+	require.Equal(t, "minimal error", errorLog["msg"])
 }

@@ -48,7 +48,7 @@ func (l *Logger) Tracew(msg string, keysAndValues ...any) {
 		l.labelTrace(),
 		msg,
 		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
-		keysAndValues,
+		keysAndValues...,
 	)
 }
 

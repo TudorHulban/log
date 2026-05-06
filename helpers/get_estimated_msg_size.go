@@ -163,5 +163,5 @@ func float64Len(v float64) uint32 {
 	result = result + digitsUint64(i)
 
 	// decimal part (assume ".+" even if not always present)
-	return result + 6
+	return result + 12
 }

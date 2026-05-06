@@ -96,7 +96,7 @@ func (l *Logger) Panicw(msg string, keysAndValues ...any) {
 
 	b.WriteString(msg)
 
-	for i := 0; i < len(keysAndValues); i += 2 {
+	for i := 0; i < len(keysAndValues); i = i + 2 {
 		b.WriteByte(' ')
 		fmt.Fprint(&b, keysAndValues[i])
 		b.WriteByte('=')

@@ -29,7 +29,7 @@ func TestDebug(t *testing.T) {
 	l, errCrLogger := NewLogger(
 		&ParamsNewLogger{
 			Ingestor:    ingestor,
-			LoggerLevel: LevelDebug,
+			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &writer,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
@@ -43,8 +43,27 @@ func TestDebug(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	chIngestionEnd := ingestor.StartIngestion(ctx)
 
-	l.Debug("0")
-	l.Debugf("%d", 1)
+	// {"ts":"2026-05-06T12:07:36+03:00","level":"INFO","msg":"created logger, level TRACE"}
+
+	// l.Trace("0")
+	// l.Tracef("%d", 1)
+	l.Tracew("msg-trace", "key1", 1)
+	// l.TraceFast("%d", 777)
+
+	// {"ts":"2026-05-06T12:07:36+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"0"}
+	// {"ts":"2026-05-06T12:07:36+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
+
+	// l.Debug("0")
+	// l.Debugf("%d", 1)
+
+	// {"ts":"2026-05-06T12:01:57+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"0"}
+	// {"ts":"2026-05-06T12:01:57+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
+
+	// l.Info("0")
+	// l.Infof("%d", 1)
+
+	// 	{"ts":"2026-05-06T12:04:49+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"0"}
+	// {"ts":"2026-05-06T12:04:49+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
 
 	cancel()
 	<-chIngestionEnd

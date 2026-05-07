@@ -78,7 +78,7 @@ func BenchmarkLogger_PrintWithNoTimestamp(b *testing.B) {
 	b.ResetTimer()
 
 	for b.Loop() {
-		logger.PrintWithNoTimestampFast("hi", 123, "world")
+		logger.PrintWithNoTimestamp("hi", 123, "world")
 	}
 
 	cancel()
@@ -192,86 +192,6 @@ func BenchmarkLogger_Printf(b *testing.B) {
 
 				for i := 0; b.Loop(); i++ {
 					logger.Printf(
-						`{"level":"info","msg":"user login","user_id":%d}`,
-						i,
-					)
-				}
-
-				cancel()
-				<-chIngestionEnd
-			},
-		)
-	}
-}
-
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_PrintFast/1._standard_timestamp-16         	25063872	        49.11 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/2._yyyy-month_timestamp-16       	24362606	        49.18 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_PrintFast/3._nano_timestamp-16             	22495556	        53.10 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_PrintFast/4._nano_timestamp_-_json-16      	22512678	        53.10 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_PrintFast/5._nil_timestamp-16              	28439660	        40.96 ns/op	       8 B/op	       0 allocs/op
-func BenchmarkLogger_PrintFast(b *testing.B) {
-	tests := []struct {
-		timestampFunc timestamp.Timestamp
-		description   string
-		withJSON      bool
-	}{
-		{
-			description:   "1. standard timestamp",
-			timestampFunc: timestamp.TimestampStandard,
-		},
-		{
-			description:   "2. yyyy-month timestamp",
-			timestampFunc: timestamp.TimestampYYYYMonth,
-		},
-		{
-			description:   "3. nano timestamp",
-			timestampFunc: timestamp.TimestampNano,
-		},
-		{
-			description:   "4. nano timestamp - json",
-			timestampFunc: timestamp.TimestampNano,
-			withJSON:      true,
-		},
-		{
-			description: "5. nil timestamp",
-		},
-	}
-
-	for _, tc := range tests {
-		b.Run(
-			tc.description,
-			func(b *testing.B) {
-				ingestor, errCrIngestor := bytearena.NewIngestor(
-					bytearena.Size100K(),
-					&helpers.NoopWriter{},
-				)
-				require.NoError(b, errCrIngestor)
-				require.NotNil(b, ingestor)
-
-				ctx, cancel := context.WithCancel(context.Background())
-				chIngestionEnd := ingestor.StartIngestion(ctx)
-
-				logger, errCrLogger := NewLogger(
-					&ParamsNewLogger{
-						Ingestor:    ingestor,
-						LoggerLevel: LevelInfo,
-
-						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tc.timestampFunc,
-						WithJSON:        tc.withJSON,
-					},
-				)
-				require.NoError(b, errCrLogger)
-				require.NotNil(b, logger)
-
-				runtime.GC()
-
-				b.ReportAllocs()
-				b.ResetTimer()
-
-				for i := 0; b.Loop(); i++ {
-					logger.PrintFast(
 						`{"level":"info","msg":"user login","user_id":%d}`,
 						i,
 					)

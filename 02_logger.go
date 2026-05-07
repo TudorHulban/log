@@ -83,7 +83,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		result.callerLevel = 1
 	}
 
-	result.PrintfFast(
+	result.Printf(
 		"created logger, level %v",
 		logLevels[params.LoggerLevel],
 	)

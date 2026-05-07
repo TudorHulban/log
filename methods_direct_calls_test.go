@@ -88,6 +88,9 @@ func TestDirectCallsx(t *testing.T) {
 	l.Errorf("%d", value)
 	l.Errorw("msg-info", "key1", keyValue)
 
+	l.PrintMessage("0")
+	l.PrintWithNoTimestamp("0")
+
 	cancel()
 	<-chIngestionEnd
 

@@ -233,7 +233,7 @@ func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
 						i := 0
 
 						for pb.Next() {
-							logger.PrintfFast(
+							logger.Printf(
 								`{"level":"info","msg":"user login","user_id":%d}`,
 								i,
 							)

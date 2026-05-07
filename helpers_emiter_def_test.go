@@ -310,28 +310,20 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 				call, method = func() error { logger.Errorw(id); return nil }, "Errorw"
 			}
 
-		case LevelPanic: // PRINT variants (11 total)
-			switch idx % 10 {
+		case LevelPanic:
+			switch idx % 6 {
 			case 0:
 				call, method = func() error { logger.Print(id); return nil }, "Print"
 			case 1:
 				call, method = func() error { logger.Printf("%s", id); return nil }, "Printf"
 			case 2:
-				call, method = func() error { logger.PrintfFast("%s", id); return nil }, "PrintfFast"
-			case 3:
 				call, method = func() error { logger.Printw(id); return nil }, "Printw"
-			case 4:
-				call, method = func() error { logger.PrintwFast(id); return nil }, "PrintwFast"
-			case 5:
+			case 3:
 				call, method = func() error { logger.PrintMessage(id); return nil }, "PrintMessage"
-			case 6:
-				call, method = func() error { logger.PrintMessageFast(id); return nil }, "PrintMessageFast"
-			case 7:
+			case 4:
 				call, method = func() error { logger.PrintRaw([]byte(id)); return nil }, "PrintRaw"
-			case 8:
+			case 5:
 				call, method = func() error { logger.PrintWithNoTimestamp(id); return nil }, "PrintWithNoTimestamp"
-			case 9:
-				call, method = func() error { logger.PrintWithNoTimestampFast(id); return nil }, "PrintWithNoTimestampFast"
 			}
 
 		// Fallback for undefined levels (TRACE, FATAL, PANIC, etc.)
@@ -340,8 +332,8 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 		}
 
 		// Execute and track errors
-		if err := call(); err != nil {
-			errs = append(errs, fmt.Errorf("%s(%q): %w", method, id, err))
+		if errCall := call(); errCall != nil {
+			errs = append(errs, fmt.Errorf("%s(%q): %w", method, id, errCall))
 			consecFails[method]++
 
 			if consecFails[method] >= 2 {

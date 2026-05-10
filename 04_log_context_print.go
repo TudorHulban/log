@@ -39,8 +39,6 @@ func (ctx *LogContext) Print(args ...any) {
 			)
 		}
 
-		buffer = append(buffer, '\n')
-
 		copy(region.Buf(), buffer)
 		ctx.logger.ingestor.EndWrite(region)
 

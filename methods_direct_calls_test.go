@@ -3,7 +3,6 @@ package log
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,23 +10,31 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// produces:
-// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"0"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":43,"msg":"msg-info","key1":1}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","msg":"created logger, level TRACE"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"0"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":47,"msg":"msg-info","key1":1}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":18,"msg":"0"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":47,"msg":"msg-trace","key1":1}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":30,"msg":"1"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"0"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":43,"msg":"msg-info","key1":1}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":18,"msg":"0"}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":47,"msg":"msg-debug","key1":1}
-// {"ts":"2026-05-06T17:04:09+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":30,"msg":"1"}
+// test produces:
+// {"ts":"2026-05-10T17:13:01+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"333"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":43,"msg":"msg-error","key1":1}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":81,"msg":"msg-print","key1":1}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"created logger, level TRACE"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","msg":"666"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"111"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":47,"msg":"msg-info","key1":1}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":60,"msg":"777"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":18,"msg":"444"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":60,"msg":"777"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":47,"msg":"msg-trace","key1":1}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":30,"msg":"1"}
+// RAW777
+// {"ts":"2026-05-10T17:13:01+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"222"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":43,"msg":"msg-warn","key1":1}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"1"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":18,"msg":"555"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"1"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":47,"msg":"msg-debug","key1":1}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":81,"msg":"msg-print","key1":1}
 
 func TestDirectCalls(t *testing.T) {
 	var writer bytes.Buffer
@@ -58,7 +65,7 @@ func TestDirectCalls(t *testing.T) {
 
 	const (
 		value    = 1
-		keyValue = 1 // Based on your 'produces' comment, the value recorded was 1
+		keyValue = 1
 	)
 
 	l.Trace("111")
@@ -75,64 +82,61 @@ func TestDirectCalls(t *testing.T) {
 
 	l.Warn("444")
 	l.Warnf("%d", value)
-	l.Warnw("msg-info", "key1", keyValue)
+	l.Warnw("msg-warn", "key1", keyValue)
 
 	l.Error("555")
 	l.Errorf("%d", value)
-	l.Errorw("msg-info", "key1", keyValue)
+	l.Errorw("msg-error", "key1", keyValue)
 
-	// Note: PrintMessage usually triggers an INFO level log
-	l.PrintMessage("666")
-	// Note: your newTestEntries skips lines without '{',
-	// ensure PrintWithNoTimestamp still outputs JSON.
-	l.PrintWithNoTimestamp("777")
+	l.Msg("666")
+	l.Print("777")
+	l.Print("777")
+	l.PrintRaw([]byte("RAW777\n")) // This line is skipped by your DSL (no '{')
+	l.Printf("%d", value)
+	l.Printf("%d", value)
+	l.Printw("msg-print", "key1", keyValue)
+	l.Printw("msg-print", "key1", keyValue)
 
 	cancel()
 	<-chIngestionEnd
 
-	fmt.Println(writer.String())
-
-	entries, errParse := newTestEntries(writer.String())
+	entries, errParse := NewTestEntries(writer.String())
 	require.NoError(t, errParse)
 	require.NotEmpty(t, entries)
 
-	// --- Assertions using the DSL ---
+	// --- Assertions based on updated "produces" data ---
 
-	// 1. Verify all (or most) entries have a timestamp (except the one from PrintWithNoTimestamp)
-	// If PrintWithNoTimestamp removes the "ts" key, haveTimestamp() would return false.
-	// Given your provided 'produces' lines all have "ts", we check general existence:
-	require.True(t, entries.haveTimestamp(), "All log entries should have a valid RFC3339 timestamp")
+	// 1. Verify Timestamp
+	require.True(t, entries.haveTimestamp())
 
-	// 2. Count occurrences of log levels
-	require.NoError(t, entries.hasKeyWithValue("level", "TRACE", 3))
-	require.NoError(t, entries.hasKeyWithValue("level", "DEBUG", 3))
-	require.NoError(t, entries.hasKeyWithValue("level", "INFO", 4)) // 3 calls + "created logger" msg
-	require.NoError(t, entries.hasKeyWithValue("level", "WARN", 3))
-	require.NoError(t, entries.hasKeyWithValue("level", "ERROR", 3))
+	// 2. Updated Counts by Level
+	// TRACE now includes: 3 (Trace calls) + 1 (Logger init) + 1 (Msg) + 6 (Print calls) = 11
+	require.NoError(t, entries.HasKeyWithValue("level", "TRACE", 11))
+	require.NoError(t, entries.HasKeyWithValue("level", "DEBUG", 3))
+	require.NoError(t, entries.HasKeyWithValue("level", "INFO", 3))
+	require.NoError(t, entries.HasKeyWithValue("level", "WARN", 3))
+	require.NoError(t, entries.HasKeyWithValue("level", "ERROR", 3))
 
-	// 3. Verify specific messages
-	require.NoError(t, entries.hasKeyWithValue("msg", "0", 5)) // Trace, Debug, Info, Warn, Error
-	require.NoError(t, entries.hasKeyWithValue("msg", "1", 5)) // The formatted '%d' calls
+	// 3. Verify Specific Messages
+	require.NoError(t, entries.HasKeyWithValue("msg", "111", 1))
+	require.NoError(t, entries.HasKeyWithValue("msg", "777", 2))
+	require.NoError(t, entries.HasKeyWithValue("msg", "1", 7)) // 5 from formatted calls + 2 from Printf
+	require.NoError(t, entries.HasKeyWithValue("msg", "msg-print", 2))
 
-	// 4. Verify structured logging key-values
-	// Checking how many times "key1" appeared with value 1
-	require.NoError(t, entries.hasKeyWithValue("key1", keyValue, 5))
+	// 4. Verify Structured Key-Values
+	// key1: 1 appears in Tracew, Debugw, Infow, Warnw, Errorw, and 2x Printw = 7 total
+	require.NoError(t, entries.HasKeyWithValue("key1", keyValue, 7))
 
-	// 5. Verify complex matches (Level + Message + Key)
-	// Verify the specific TRACE structured log
-	require.NoError(t, entries.hasKeysWithValues(1,
+	// 5. Verify Complex Matches
+	// Ensure Printw produced TRACE level logs with the correct message
+	require.NoError(t, entries.HasKeysWithValues(2,
 		"level", "TRACE",
-		"msg", "msg-trace",
+		"msg", "msg-print",
 		"key1", keyValue,
 	))
 
-	// Verify the specific ERROR structured log
-	require.NoError(t, entries.hasKeysWithValues(1,
-		"level", "ERROR",
-		"msg", "msg-info",
-		"key1", keyValue,
-	))
-
-	// 6. Verify caller information exists on most lines
-	require.NoError(t, entries.hasKey("caller", 15))
+	// 6. Verify Caller Presence
+	// Total lines is 23 (24 minus the RAW777 line which newTestEntries skips).
+	// One line (msg: 666) is missing a caller in your "produces" output.
+	require.NoError(t, entries.HasKey("caller", 22))
 }

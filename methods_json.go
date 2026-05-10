@@ -80,6 +80,7 @@ func (l *Logger) appendJSONKV(buffer []byte, level, file string, line int, msg [
 	}
 
 	buffer = append(buffer, '}')
+	buffer = append(buffer, '\n')
 
 	return buffer
 }
@@ -157,11 +158,12 @@ func (l *Logger) appendJSONRoot(buffer []byte, cfg *formatterConfig, file string
 	buffer = append(buffer, `"msg":"`...)
 	buffer = helpers.AppendJSON(buffer, msg)
 	buffer = append(buffer, `"}`...)
+	buffer = append(buffer, '\n')
 
 	return buffer
 }
 
-// Formats
+// TODO: Formats to test.
 // {"ts":"2026-03-18T14:27:09.123Z","level":"info","msg":"user login"}
 // {"ts":"2026-03-18T14:27:09.123Z","level":"info","msg":"user login","user_id":3847291,"ip":"10.44.12.189","device":"mobile","session_id":"sess_abc123xyz"}
 // {"ts":"…","level":"warn","msg":"slow database query","duration_ms":342,"query":"SELECT …","rows":124}

@@ -12,6 +12,13 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
+// test produces
+// {"ts":"2026-05-10T13:08:07+03:00","level":"TRACE","msg":"created logger, level TRACE"}
+// {"ts":"2026-05-10T13:08:07+03:00","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","msg":"xxx1"}
+// {"ts":"2026-05-10T13:08:07+03:00","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","area":"some area","msg":"login ok again"}
+// {"ts":"2026-05-10T13:08:07+03:00","level":"INFO","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","area":"some area","zzzz":4.299999999999,"g":8,"msg":"finished"}
+// {"ts":"2026-05-10T13:08:07+03:00","level":"ERROR","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","area":"some area","xxxxxxxxxxxxx":"2","g":10,"msg":"some error"}
+
 func TestContextPrint(t *testing.T) {
 	var bufLogs, bufFatal bytes.Buffer
 
@@ -63,13 +70,6 @@ func TestContextPrint(t *testing.T) {
 		WithGoroutineID().
 		Msg("finished")
 
-	// produces
-	// {"ts":"2026-05-10T13:08:07+03:00","level":"TRACE","msg":"created logger, level TRACE"}
-	// {"ts":"2026-05-10T13:08:07+03:00","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","msg":"xxx1"}
-	// {"ts":"2026-05-10T13:08:07+03:00","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","area":"some area","msg":"login ok again"}
-	// {"ts":"2026-05-10T13:08:07+03:00","level":"INFO","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","area":"some area","zzzz":4.299999999999,"g":8,"msg":"finished"}
-	// {"ts":"2026-05-10T13:08:07+03:00","level":"ERROR","service":"auth","req_id":12345,"cache_hit":true,"root ends":"here","area":"some area","xxxxxxxxxxxxx":"2","g":10,"msg":"some error"}
-
 	// Allow time for the goroutine and the ingestor tick
 	time.Sleep(100 * time.Millisecond)
 
@@ -81,22 +81,28 @@ func TestContextPrint(t *testing.T) {
 
 	fmt.Println(bufLogs.String())
 
-	entries, errParse := newTestEntries(bufLogs.String())
+	entries, errParse := NewTestEntries(bufLogs.String())
 	require.NoError(t, errParse)
 
-	require.Len(t, entries, 5)
+	require.Len(t,
+		entries,
+		5,
+
+		entries,
+	)
+
 	require.True(t, entries.haveTimestamp())
-	require.NoError(t, entries.hasKey("msg", 5))
-	require.NoError(t, entries.hasKey("req_id", 4))
-	require.NoError(t, entries.hasKey("level", 3))
-	require.NoError(t, entries.hasKeyWithValue("service", "auth", 4))
-	require.NoError(t, entries.hasKeyWithValue("level", "TRACE", 1))
+	require.NoError(t, entries.HasKey("msg", 5))
+	require.NoError(t, entries.HasKey("req_id", 4))
+	require.NoError(t, entries.HasKey("level", 3))
+	require.NoError(t, entries.HasKeyWithValue("service", "auth", 4))
+	require.NoError(t, entries.HasKeyWithValue("level", "TRACE", 1))
 	require.NoError(t,
-		entries.hasKeysWithValues(1,
+		entries.HasKeysWithValues(1,
 			"req_id", 12345,
 			"level", "INFO",
 			"zzzz", 4.299999999999,
 		),
 	)
-	require.NoError(t, entries.hasKeysWithValues(1, "req_id", 12345, "level", "ERROR"))
+	require.NoError(t, entries.HasKeysWithValues(1, "req_id", 12345, "level", "ERROR"))
 }

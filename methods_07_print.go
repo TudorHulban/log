@@ -1,8 +1,6 @@
 package log
 
 import (
-	"fmt"
-
 	"github.com/tudorhulban/log/helpers"
 )
 
@@ -23,94 +21,8 @@ func (l *Logger) labelPrint() string {
 	return logLevels[l.GetLogLevel()]
 }
 
-func (l *Logger) PrintMessage(msg string) {
-	region, errWrite := l.ingestor.TryWrite(uint32(len(msg)))
-	if errWrite != nil {
-		return
-	}
-
-	buf := region.Buf()[:0]
-
-	if l.withJSON {
-		buf = l.appendJSON(
-			buf,
-			l.labelPrint(),
-			"",
-			0,
-			[]byte(msg),
-		)
-
-		copy(region.Buf(), buf)
-		l.ingestor.EndWrite(region)
-
-		return
-	}
-
-	if l.fnTimestamp != nil {
-		buf = l.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
-
-	buf = append(buf, msg...)
-	buf = append(buf, '\n')
-
-	copy(region.Buf(), buf)
-	l.ingestor.EndWrite(region)
-}
-
-func (l *Logger) Print(args ...any) {
-	l.logWithLabel(
-		l.labelPrint(),
-		helpers.GetEstimatedMessageSize("", args),
-		args,
-	)
-}
-
-func (l *Logger) PrintWithNoTimestamp(args ...any) {
-	region, errWrite := l.ingestor.TryWrite(
-		helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation,
-	)
-	if errWrite != nil {
-		return
-	}
-
-	buf := region.Buf()[:0]
-
-	buf = helpers.AppendArgs(buf, args...)
-	buf = append(buf, '\n')
-
-	copy(region.Buf(), buf)
-	l.ingestor.EndWrite(region)
-}
-
-func (l *Logger) Printw(msg string, args ...any) {
-	region, errWrite := l.ingestor.TryWrite(
-		uint32(len(msg)) + helpers.GetEstimatedMessageSize("", args) + _DeltaEstimation,
-	)
-	if errWrite != nil {
-		return
-	}
-
-	buf := region.Buf()[:0]
-
-	if l.fnTimestamp != nil {
-		buf = l.fnTimestamp(buf)
-		buf = append(buf, ' ')
-	}
-
-	buf = append(buf, msg...)
-	buf = append(buf, '\n')
-	buf = helpers.AppendArgs(buf, args)
-	buf = append(buf, '\n')
-
-	copy(region.Buf(), buf)
-	l.ingestor.EndWrite(region)
-}
-
-func (l *Logger) Printf(format string, args ...any) {
-	region, errWrite := l.ingestor.TryWrite(
-		helpers.GetEstimatedMessageSize(format, args) + _DeltaEstimation,
-	)
+func (l *Logger) Msg(msg string) {
+	region, errWrite := l.ingestor.TryWrite(uint32(len(msg) + _DeltaEstimation))
 	if errWrite != nil {
 		return
 	}
@@ -123,24 +35,55 @@ func (l *Logger) Printf(format string, args ...any) {
 			l.labelPrint(),
 			"",
 			0,
-			fmt.Appendf(nil, format, args...),
+			[]byte(msg),
 		)
 
 		copy(region.Buf(), buffer)
 		l.ingestor.EndWrite(region)
-	} else {
-		if l.fnTimestamp != nil {
-			buffer = l.fnTimestamp(buffer)
-			buffer = append(buffer, ' ')
-		}
 
-		buffer = fmt.Appendf(buffer, format, args...)
-		buffer = append(buffer, '\n')
-
-		copy(region.Buf(), buffer)
-
-		l.ingestor.EndWrite(region)
+		return
 	}
+
+	if l.fnTimestamp != nil {
+		buffer = l.fnTimestamp(buffer)
+		buffer = append(buffer, ' ')
+	}
+
+	buffer = append(buffer, msg...)
+	buffer = append(buffer, '\n')
+
+	copy(region.Buf(), buffer)
+	l.ingestor.EndWrite(region)
+}
+
+func (l *Logger) Print(args ...any) {
+	l.logWithLabel(
+		l.labelPrint(),
+		helpers.GetEstimatedMessageSize("", args),
+		args,
+	)
+}
+
+func (l *Logger) Printf(format string, args ...any) {
+	l.logfWithLabel(
+		l.labelPrint(),
+		format,
+		helpers.GetEstimatedMessageSize(format, args),
+		args,
+	)
+}
+
+func (l *Logger) Printw(msg string, keysAndValues ...any) {
+	if (len(keysAndValues) & 1) != 0 {
+		l.Msg("panicw: odd number of key-value arguments")
+	}
+
+	l.logwWithLabel(
+		l.labelPrint(),
+		msg,
+		uint32(len(msg))+helpers.GetEstimatedMessageSize("", keysAndValues),
+		keysAndValues...,
+	)
 }
 
 func (l *Logger) PrintRaw(msg []byte) {

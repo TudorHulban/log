@@ -5,29 +5,49 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 )
 
-type testEntry struct {
+type LogEntry struct {
 	timestamp string
 	keyValues map[string]any
+	raw       string // The original, untouched line
 }
 
-func (e testEntry) hasTimestamp() bool {
-	return len(e.timestamp) != 0
+func (e LogEntry) String() string {
+	return e.raw
 }
 
-func (e testEntry) hasKey(key string) (bool, any) {
+func (e LogEntry) IsRAW() bool {
+	return len(e.raw) != 0 && (len(e.timestamp) == 0 || len(e.keyValues) == 0)
+}
+
+func (e LogEntry) HasTimestamp() bool {
+	return len(e.keyValues) == 0
+}
+
+func (e LogEntry) HasKey(key string) (bool, any) {
 	val, exists := e.keyValues[key]
 
 	return exists, val
 }
 
-type testEntries []testEntry
+type LogEntries []LogEntry
 
-func (e testEntries) haveTimestamp() bool {
+func (e LogEntries) String() string {
+	entries := make([]string, len(e))
+
+	for ix, entry := range e {
+		entries[ix] = entry.String()
+	}
+
+	return strings.Join(entries, "\n")
+}
+
+func (e LogEntries) haveTimestamp() bool {
 	for _, item := range e {
-		if !item.hasTimestamp() {
+		if !item.HasTimestamp() {
 			return false
 		}
 	}
@@ -35,12 +55,12 @@ func (e testEntries) haveTimestamp() bool {
 	return true
 }
 
-// hasKey checks if a key exists a specific number of times across all entries.
-func (e testEntries) hasKey(name string, noTimes uint) error {
+// HasKey checks if a key exists a specific number of times across all entries.
+func (e LogEntries) HasKey(name string, noTimes uint) error {
 	var count uint
 
 	for _, item := range e {
-		if exists, _ := item.hasKey(name); exists {
+		if exists, _ := item.HasKey(name); exists {
 			count++
 		}
 	}
@@ -73,11 +93,11 @@ func valuesMatch(actual, expected any) bool {
 	return actualStr == expectedStr
 }
 
-// hasKeyWithValue checks if a key with a specific value exists a specific number of times.
-func (e testEntries) hasKeyWithValue(name string, value any, noTimes uint) error {
+// HasKeyWithValue checks if a key with a specific value exists a specific number of times.
+func (e LogEntries) HasKeyWithValue(name string, value any, noTimes uint) error {
 	var count uint
 	for _, item := range e {
-		if exists, val := item.hasKey(name); exists {
+		if exists, val := item.HasKey(name); exists {
 			if valuesMatch(val, value) {
 				count++
 			}
@@ -98,12 +118,15 @@ func (e testEntries) hasKeyWithValue(name string, value any, noTimes uint) error
 	return nil
 }
 
-func (e testEntries) hasKeysWithValues(noTimes uint, kv ...any) error {
+func (e LogEntries) HasKeysWithValues(noTimes uint, kv ...any) error {
 	if len(kv)%2 != 0 {
-		return fmt.Errorf("hasKeysWithValues requires an even number of kv arguments")
+		return fmt.Errorf(
+			"hasKeysWithValues requires an even number of kv arguments",
+		)
 	}
 
 	var count uint
+
 	for _, item := range e {
 		matchAll := true
 		for i := 0; i < len(kv); i += 2 {
@@ -115,8 +138,9 @@ func (e testEntries) hasKeysWithValues(noTimes uint, kv ...any) error {
 				)
 			}
 
-			if exists, actual := item.hasKey(key); !exists || !valuesMatch(actual, kv[i+1]) {
+			if exists, actual := item.HasKey(key); !exists || !valuesMatch(actual, kv[i+1]) {
 				matchAll = false
+
 				break
 			}
 		}
@@ -138,50 +162,93 @@ func (e testEntries) hasKeysWithValues(noTimes uint, kv ...any) error {
 	return nil
 }
 
+// FilterBy returns a new subset of entries where the key matches the expected value.
+func (e LogEntries) FilterBy(key string, value any) LogEntries {
+	var filtered LogEntries
+
+	for _, item := range e {
+		if exists, val := item.HasKey(key); exists {
+			if valuesMatch(val, value) {
+				filtered = append(filtered, item)
+			}
+		}
+	}
+
+	return filtered
+}
+
+func (e LogEntries) First() LogEntry {
+	if len(e) == 0 {
+		return LogEntry{}
+	}
+
+	return e[0]
+}
+
+func (e LogEntries) Last() LogEntry {
+	if len(e) == 0 {
+		return LogEntry{}
+	}
+
+	return e[len(e)-1]
+}
+
+// SortByTimestamp reorders the entries based on the ts field.
+// If desc is true, it sorts newest to oldest.
+func (e LogEntries) SortByTimestamp(desc bool) LogEntries {
+	// Create a copy to avoid mutating the original slice during a test
+	sorted := make(LogEntries, len(e))
+	copy(sorted, e)
+
+	sort.SliceStable(
+		sorted,
+		func(i, j int) bool {
+			if desc {
+				return sorted[i].timestamp > sorted[j].timestamp
+			}
+			return sorted[i].timestamp < sorted[j].timestamp
+		},
+	)
+
+	return sorted
+}
+
 var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
 
-func newTestEntries(from string) (testEntries, error) {
+func NewTestEntries(from string) (LogEntries, error) {
 	lines := strings.Split(strings.TrimSpace(from), "\n")
-	entries := make(testEntries, 0, len(lines))
+	entries := make(LogEntries, 0, len(lines))
 
 	for _, line := range lines {
-		cleanLine := strings.TrimSpace(line)
-		if len(cleanLine) == 0 {
+		if len(strings.TrimSpace(line)) == 0 {
 			continue
 		}
 
-		cleanLine = ansiRegex.ReplaceAllString(line, "")
-
-		idx := strings.IndexByte(cleanLine, '{')
-		if idx == -1 {
-			continue
-		}
-
-		cleanLine = cleanLine[idx:]
-
-		// Parse JSON into a temporary map
-		var rawMap map[string]any
-		if errUnmarshal := json.Unmarshal([]byte(cleanLine), &rawMap); errUnmarshal != nil {
-			return nil,
-				fmt.Errorf(
-					"unmarshaling error: %w for line: %s",
-					errUnmarshal,
-					cleanLine,
-				)
-		}
-
-		entry := testEntry{
+		entry := LogEntry{
+			raw:       line, // Store the original line immediately
 			keyValues: make(map[string]any),
 		}
 
-		// Separate the timestamp from the rest of the data
-		for k, v := range rawMap {
-			if k == "ts" {
-				if tsStr, ok := v.(string); ok {
-					entry.timestamp = tsStr
+		// Strip ANSI and find JSON
+		cleanLine := ansiRegex.ReplaceAllString(line, "")
+		idx := strings.IndexByte(cleanLine, '{')
+
+		// If it is not JSON, we still keep it as a 'raw' entry
+		// but it will not have keyValues or a timestamp.
+		if idx != -1 {
+			jsonPart := cleanLine[idx:]
+			var rawMap map[string]any
+
+			if err := json.Unmarshal([]byte(jsonPart), &rawMap); err == nil {
+				for k, v := range rawMap {
+					if k == "ts" {
+						if tsStr, ok := v.(string); ok {
+							entry.timestamp = tsStr
+						}
+					} else {
+						entry.keyValues[k] = v
+					}
 				}
-			} else {
-				entry.keyValues[k] = v
 			}
 		}
 

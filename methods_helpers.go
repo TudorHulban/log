@@ -38,8 +38,6 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 			helpers.AppendArgs(nil, args...),
 		)
 
-		buf = append(buf, '\n')
-
 		copy(region.Buf(), buf)
 		l.ingestor.EndWrite(region)
 
@@ -109,8 +107,6 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 			line,
 			helpers.Appendf(nil, format, args),
 		)
-
-		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
 		l.ingestor.EndWrite(region)
@@ -184,8 +180,6 @@ func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, k
 			[]byte(msg),
 			keysAndValues...,
 		)
-
-		buf = append(buf, '\n')
 
 		copy(region.Buf(), buf)
 

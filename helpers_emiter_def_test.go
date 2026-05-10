@@ -311,7 +311,7 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			}
 
 		case LevelPanic:
-			switch idx % 6 {
+			switch idx % 5 {
 			case 0:
 				call, method = func() error { logger.Print(id); return nil }, "Print"
 			case 1:
@@ -319,11 +319,9 @@ func emitData(data *state, logger *Logger) []error { //nolint:revive
 			case 2:
 				call, method = func() error { logger.Printw(id); return nil }, "Printw"
 			case 3:
-				call, method = func() error { logger.PrintMessage(id); return nil }, "PrintMessage"
+				call, method = func() error { logger.Msg(id); return nil }, "PrintMessage"
 			case 4:
 				call, method = func() error { logger.PrintRaw([]byte(id)); return nil }, "PrintRaw"
-			case 5:
-				call, method = func() error { logger.PrintWithNoTimestamp(id); return nil }, "PrintWithNoTimestamp"
 			}
 
 		// Fallback for undefined levels (TRACE, FATAL, PANIC, etc.)

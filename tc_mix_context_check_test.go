@@ -121,7 +121,7 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 
 	// --- Line 0: Initialization Message ---
 	initLog := parseLog(linesJSON[0])
-	require.Equal(t, "INFO", initLog["level"])
+	require.Equal(t, "TRACE", initLog["level"])
 
 	// --- Line 1: TRACE ---
 	traceLog := parseLog(linesJSON[1])

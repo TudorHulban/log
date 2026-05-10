@@ -11,30 +11,30 @@ import (
 )
 
 // test produces:
-// {"ts":"2026-05-10T17:13:01+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"333"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":43,"msg":"msg-error","key1":1}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":81,"msg":"msg-print","key1":1}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"created logger, level TRACE"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","msg":"666"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"111"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":47,"msg":"msg-info","key1":1}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":60,"msg":"777"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":18,"msg":"444"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":60,"msg":"777"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":47,"msg":"msg-trace","key1":1}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":18,"msg":"333"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":43,"msg":"msg-error","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":81,"msg":"msg-print","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"created logger, level TRACE"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","msg":"666"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":18,"msg":"111"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"INFO","caller":"/mnt/tmpfs.ramdisk/log/methods_02_info.go","line":47,"msg":"msg-info","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":60,"msg":"777"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":18,"msg":"444"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":60,"msg":"777"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_00_trace.go","line":47,"msg":"msg-trace","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":30,"msg":"1"}
 // RAW777
-// {"ts":"2026-05-10T17:13:01+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"222"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":43,"msg":"msg-warn","key1":1}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"1"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":18,"msg":"555"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"1"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":47,"msg":"msg-debug","key1":1}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":30,"msg":"1"}
-// {"ts":"2026-05-10T17:13:01+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":81,"msg":"msg-print","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":18,"msg":"222"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"WARN","caller":"/mnt/tmpfs.ramdisk/log/methods_03_warn.go","line":43,"msg":"msg-warn","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":18,"msg":"555"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":68,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"DEBUG","caller":"/mnt/tmpfs.ramdisk/log/methods_01_debug.go","line":47,"msg":"msg-debug","key1":1}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"ERROR","caller":"/mnt/tmpfs.ramdisk/log/methods_04_error.go","line":30,"msg":"1"}
+// {"ts":"2026-05-10T18:30:22+03:00","level":"TRACE","caller":"/mnt/tmpfs.ramdisk/log/methods_07_print.go","line":81,"msg":"msg-print","key1":1}
 
 func TestDirectCalls(t *testing.T) {
 	var writer bytes.Buffer
@@ -105,11 +105,15 @@ func TestDirectCalls(t *testing.T) {
 	require.NotEmpty(t, entries)
 
 	// --- Assertions based on updated "produces" data ---
+	require.Len(t, entries, 24)
 
-	// 1. Verify Timestamp
-	require.True(t, entries.haveTimestamp())
+	// Verify Timestamp
+	require.EqualValues(t,
+		len(entries.WithTimestamp()),
+		len(entries)-1,
+	)
 
-	// 2. Updated Counts by Level
+	// Updated Counts by Level
 	// TRACE now includes: 3 (Trace calls) + 1 (Logger init) + 1 (Msg) + 6 (Print calls) = 11
 	require.NoError(t, entries.HasKeyWithValue("level", "TRACE", 11))
 	require.NoError(t, entries.HasKeyWithValue("level", "DEBUG", 3))
@@ -117,25 +121,27 @@ func TestDirectCalls(t *testing.T) {
 	require.NoError(t, entries.HasKeyWithValue("level", "WARN", 3))
 	require.NoError(t, entries.HasKeyWithValue("level", "ERROR", 3))
 
-	// 3. Verify Specific Messages
+	// Verify Specific Messages
 	require.NoError(t, entries.HasKeyWithValue("msg", "111", 1))
 	require.NoError(t, entries.HasKeyWithValue("msg", "777", 2))
 	require.NoError(t, entries.HasKeyWithValue("msg", "1", 7)) // 5 from formatted calls + 2 from Printf
 	require.NoError(t, entries.HasKeyWithValue("msg", "msg-print", 2))
 
-	// 4. Verify Structured Key-Values
+	// Verify Structured Key-Values
 	// key1: 1 appears in Tracew, Debugw, Infow, Warnw, Errorw, and 2x Printw = 7 total
 	require.NoError(t, entries.HasKeyWithValue("key1", keyValue, 7))
 
-	// 5. Verify Complex Matches
+	// Verify Complex Matches
 	// Ensure Printw produced TRACE level logs with the correct message
-	require.NoError(t, entries.HasKeysWithValues(2,
-		"level", "TRACE",
-		"msg", "msg-print",
-		"key1", keyValue,
-	))
+	require.NoError(t,
+		entries.HasKeysWithValues(2,
+			"level", "TRACE",
+			"msg", "msg-print",
+			"key1", keyValue,
+		),
+	)
 
-	// 6. Verify Caller Presence
+	// Verify Caller Presence
 	// Total lines is 23 (24 minus the RAW777 line which newTestEntries skips).
 	// One line (msg: 666) is missing a caller in your "produces" output.
 	require.NoError(t, entries.HasKey("caller", 22))

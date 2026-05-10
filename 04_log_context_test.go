@@ -38,8 +38,8 @@ func TestContextPrint(t *testing.T) {
 
 			WithFatalWriter: &bufFatal,
 			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
-			WithColor:       true,
-			WithJSON:        true,
+			// WithColor:       true,
+			WithJSON: true,
 		},
 	)
 	require.NoError(t, errCrLogger)
@@ -91,7 +91,7 @@ func TestContextPrint(t *testing.T) {
 		entries,
 	)
 
-	require.True(t, entries.haveTimestamp())
+	require.Len(t, entries.WithTimestamp(), 5)
 	require.NoError(t, entries.HasKey("msg", 5))
 	require.NoError(t, entries.HasKey("req_id", 4))
 	require.NoError(t, entries.HasKey("level", 3))

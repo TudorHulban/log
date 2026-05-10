@@ -2,6 +2,7 @@ package log
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -24,7 +25,7 @@ func (e LogEntry) IsRAW() bool {
 }
 
 func (e LogEntry) HasTimestamp() bool {
-	return len(e.keyValues) == 0
+	return len(e.keyValues) != 0
 }
 
 func (e LogEntry) HasKey(key string) (bool, any) {
@@ -45,14 +46,28 @@ func (e LogEntries) String() string {
 	return strings.Join(entries, "\n")
 }
 
-func (e LogEntries) haveTimestamp() bool {
+func (e LogEntries) WithTimestamp() LogEntries {
+	var filtered LogEntries
+
 	for _, item := range e {
-		if !item.HasTimestamp() {
-			return false
+		if item.HasTimestamp() {
+			filtered = append(filtered, item)
 		}
 	}
 
-	return true
+	return filtered
+}
+
+func (e LogEntries) WithNoTimestamp() LogEntries {
+	var filtered LogEntries
+
+	for _, item := range e {
+		if !item.HasTimestamp() {
+			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
 }
 
 // HasKey checks if a key exists a specific number of times across all entries.
@@ -96,6 +111,7 @@ func valuesMatch(actual, expected any) bool {
 // HasKeyWithValue checks if a key with a specific value exists a specific number of times.
 func (e LogEntries) HasKeyWithValue(name string, value any, noTimes uint) error {
 	var count uint
+
 	for _, item := range e {
 		if exists, val := item.HasKey(name); exists {
 			if valuesMatch(val, value) {
@@ -120,7 +136,7 @@ func (e LogEntries) HasKeyWithValue(name string, value any, noTimes uint) error 
 
 func (e LogEntries) HasKeysWithValues(noTimes uint, kv ...any) error {
 	if len(kv)%2 != 0 {
-		return fmt.Errorf(
+		return errors.New(
 			"hasKeysWithValues requires an even number of kv arguments",
 		)
 	}
@@ -129,6 +145,7 @@ func (e LogEntries) HasKeysWithValues(noTimes uint, kv ...any) error {
 
 	for _, item := range e {
 		matchAll := true
+
 		for i := 0; i < len(kv); i += 2 {
 			key, ok := kv[i].(string)
 			if !ok {
@@ -206,6 +223,7 @@ func (e LogEntries) SortByTimestamp(desc bool) LogEntries {
 			if desc {
 				return sorted[i].timestamp > sorted[j].timestamp
 			}
+
 			return sorted[i].timestamp < sorted[j].timestamp
 		},
 	)
@@ -213,14 +231,20 @@ func (e LogEntries) SortByTimestamp(desc bool) LogEntries {
 	return sorted
 }
 
-var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+var (
+	ansiRegex         = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+	nonPrintableRegex = regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]`)
+)
 
 func NewTestEntries(from string) (LogEntries, error) {
 	lines := strings.Split(strings.TrimSpace(from), "\n")
 	entries := make(LogEntries, 0, len(lines))
 
 	for _, line := range lines {
-		if len(strings.TrimSpace(line)) == 0 {
+		cleanLine := ansiRegex.ReplaceAllString(line, "")
+		cleanLine = nonPrintableRegex.ReplaceAllString(cleanLine, "")
+
+		if len(strings.TrimSpace(cleanLine)) == 0 {
 			continue
 		}
 
@@ -229,14 +253,13 @@ func NewTestEntries(from string) (LogEntries, error) {
 			keyValues: make(map[string]any),
 		}
 
-		// Strip ANSI and find JSON
-		cleanLine := ansiRegex.ReplaceAllString(line, "")
 		idx := strings.IndexByte(cleanLine, '{')
 
 		// If it is not JSON, we still keep it as a 'raw' entry
 		// but it will not have keyValues or a timestamp.
 		if idx != -1 {
 			jsonPart := cleanLine[idx:]
+
 			var rawMap map[string]any
 
 			if err := json.Unmarshal([]byte(jsonPart), &rawMap); err == nil {

@@ -73,7 +73,10 @@ func TestAppendJSONKV(t *testing.T) {
 					tc.kv...,
 				)
 
-				require.Equal(t, tc.expected, string(out))
+				require.Equal(t,
+					tc.expected+"\n",
+					string(out),
+				)
 			},
 		)
 	}

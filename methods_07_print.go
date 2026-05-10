@@ -115,29 +115,29 @@ func (l *Logger) Printf(format string, args ...any) {
 		return
 	}
 
-	buf := region.Buf()[:0]
+	buffer := region.Buf()[:0]
 
 	if l.withJSON {
-		buf = l.appendJSON(
-			buf,
+		buffer = l.appendJSON(
+			buffer,
 			l.labelPrint(),
 			"",
 			0,
 			fmt.Appendf(nil, format, args...),
 		)
 
-		copy(region.Buf(), buf)
+		copy(region.Buf(), buffer)
 		l.ingestor.EndWrite(region)
 	} else {
 		if l.fnTimestamp != nil {
-			buf = l.fnTimestamp(buf)
-			buf = append(buf, ' ')
+			buffer = l.fnTimestamp(buffer)
+			buffer = append(buffer, ' ')
 		}
 
-		buf = fmt.Appendf(buf, format, args...)
-		buf = append(buf, '\n')
+		buffer = fmt.Appendf(buffer, format, args...)
+		buffer = append(buffer, '\n')
 
-		copy(region.Buf(), buf)
+		copy(region.Buf(), buffer)
 
 		l.ingestor.EndWrite(region)
 	}

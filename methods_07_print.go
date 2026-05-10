@@ -76,7 +76,7 @@ func (l *Logger) PrintWithNoTimestamp(args ...any) {
 
 	buf := region.Buf()[:0]
 
-	buf = helpers.AppendArgs(buf, args)
+	buf = helpers.AppendArgs(buf, args...)
 	buf = append(buf, '\n')
 
 	copy(region.Buf(), buf)

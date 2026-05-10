@@ -162,7 +162,12 @@ func newTestEntries(from string) (testEntries, error) {
 		// Parse JSON into a temporary map
 		var rawMap map[string]any
 		if errUnmarshal := json.Unmarshal([]byte(cleanLine), &rawMap); errUnmarshal != nil {
-			return nil, errUnmarshal
+			return nil,
+				fmt.Errorf(
+					"unmarshaling error: %w for line: %s",
+					errUnmarshal,
+					cleanLine,
+				)
 		}
 
 		entry := testEntry{

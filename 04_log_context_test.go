@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
+	"github.com/tudorhulban/log/query"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -81,31 +82,31 @@ func TestContextPrint(t *testing.T) {
 
 	fmt.Println(bufLogs.String())
 
-	entries, errParse := NewTestEntries(bufLogs.String())
+	logSet, errParse := query.NewLogset(bufLogs.String())
 	require.NoError(t, errParse)
 
 	require.Len(t,
-		entries,
+		logSet,
 		5,
 
-		entries,
+		logSet,
 	)
 
-	require.Len(t, entries.WithTimestamp(), 5)
-	require.NoError(t, entries.HasKey("msg", 5))
-	require.NoError(t, entries.HasKey("req_id", 4))
-	require.NoError(t, entries.HasKey("level", 3))
-	require.NoError(t, entries.HasKeyWithValue("service", "auth", 4))
-	require.NoError(t, entries.HasKeyWithValue("level", "TRACE", 1))
+	require.Len(t, logSet.WithTimestamp(), 5)
+	require.NoError(t, logSet.HasKey("msg", 5))
+	require.NoError(t, logSet.HasKey("req_id", 4))
+	require.NoError(t, logSet.HasKey("level", 3))
+	require.NoError(t, logSet.HasKeyWithValue("service", "auth", 4))
+	require.NoError(t, logSet.HasKeyWithValue("level", "TRACE", 1))
 	require.NoError(t,
-		entries.HasKeysWithValues(1,
+		logSet.HasKeysWithValues(1,
 			"req_id", 12345,
 			"level", "INFO",
 			"zzzz", 4.299999999999,
 		),
 	)
 	require.NoError(t,
-		entries.HasKeysWithValues(1,
+		logSet.HasKeysWithValues(1,
 			"req_id", 12345,
 			"level", "ERROR",
 		),

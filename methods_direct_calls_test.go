@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
+	"github.com/tudorhulban/log/query"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -100,40 +101,40 @@ func TestDirectCalls(t *testing.T) {
 	cancel()
 	<-chIngestionEnd
 
-	entries, errParse := NewTestEntries(writer.String())
+	logSet, errParse := query.NewLogset(writer.String())
 	require.NoError(t, errParse)
-	require.NotEmpty(t, entries)
+	require.NotEmpty(t, logSet)
 
 	// --- Assertions based on updated "produces" data ---
-	require.Len(t, entries, 24)
+	require.Len(t, logSet, 24)
 
 	// Verify Timestamp
 	require.EqualValues(t,
-		len(entries.WithTimestamp()),
-		len(entries)-1,
+		len(logSet.WithTimestamp()),
+		len(logSet)-1,
 	)
 
 	// Counts by Level
-	require.NoError(t, entries.HasKeyWithValue("level", "TRACE", 11))
-	require.NoError(t, entries.HasKeyWithValue("level", "DEBUG", 3))
-	require.NoError(t, entries.HasKeyWithValue("level", "INFO", 3))
-	require.NoError(t, entries.HasKeyWithValue("level", "WARN", 3))
-	require.NoError(t, entries.HasKeyWithValue("level", "ERROR", 3))
+	require.NoError(t, logSet.HasKeyWithValue("level", "TRACE", 11))
+	require.NoError(t, logSet.HasKeyWithValue("level", "DEBUG", 3))
+	require.NoError(t, logSet.HasKeyWithValue("level", "INFO", 3))
+	require.NoError(t, logSet.HasKeyWithValue("level", "WARN", 3))
+	require.NoError(t, logSet.HasKeyWithValue("level", "ERROR", 3))
 
 	// Verify Specific Messages
-	require.NoError(t, entries.HasKeyWithValue("msg", "111", 1))
-	require.NoError(t, entries.HasKeyWithValue("msg", "777", 2))
-	require.NoError(t, entries.HasKeyWithValue("msg", "1", 7)) // 5 from formatted calls + 2 from Printf
-	require.NoError(t, entries.HasKeyWithValue("msg", "msg-print", 2))
+	require.NoError(t, logSet.HasKeyWithValue("msg", "111", 1))
+	require.NoError(t, logSet.HasKeyWithValue("msg", "777", 2))
+	require.NoError(t, logSet.HasKeyWithValue("msg", "1", 7)) // 5 from formatted calls + 2 from Printf
+	require.NoError(t, logSet.HasKeyWithValue("msg", "msg-print", 2))
 
 	// Verify Structured Key-Values
 	// key1: 1 appears in Tracew, Debugw, Infow, Warnw, Errorw, and 2x Printw = 7 total
-	require.NoError(t, entries.HasKeyWithValue("key1", keyValue, 7))
+	require.NoError(t, logSet.HasKeyWithValue("key1", keyValue, 7))
 
 	// Verify Complex Matches
 	// Ensure Printw produced TRACE level logs with the correct message
 	require.NoError(t,
-		entries.HasKeysWithValues(2,
+		logSet.HasKeysWithValues(2,
 			"level", "TRACE",
 			"msg", "msg-print",
 			"key1", keyValue,
@@ -143,5 +144,5 @@ func TestDirectCalls(t *testing.T) {
 	// Verify Caller Presence
 	// Total lines is 23 (24 minus the RAW777 line which newTestEntries skips).
 	// One line (msg: 666) is missing a caller in your "produces" output.
-	require.NoError(t, entries.HasKey("caller", 22))
+	require.NoError(t, logSet.HasKey("caller", 22))
 }

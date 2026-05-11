@@ -3,7 +3,6 @@ package log
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -79,8 +78,6 @@ func TestContextPrint(t *testing.T) {
 
 	// --- Processing Lines ---
 	require.Zero(t, bufFatal.Len())
-
-	fmt.Println(bufLogs.String())
 
 	logSet, errParse := query.NewLogset(bufLogs.String())
 	require.NoError(t, errParse)

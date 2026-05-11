@@ -54,7 +54,7 @@ func BenchmarkLogger_Infof(b *testing.B) {
 			withJSON:      true,
 		},
 		{
-			description:   "7.nano - json, caller",
+			description:   "7.nano - json caller",
 			timestampFunc: timestamp.TimestampNano,
 			withJSON:      true,
 			withCaller:    true,

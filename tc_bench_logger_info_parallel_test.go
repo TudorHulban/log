@@ -13,14 +13,17 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
+// TODO: Info
+// TODO: Infow
+
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_InfoFast/1.nil_timestamp-16         	20668786	        60.14 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/2.standard_timestamp-16    	20675044	        60.50 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/3.yyyy-month_timestamp-16  	20658718	        59.32 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/4.nano_timestamp-16        	19913436	        59.86 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/5.nano_timestamp_-_json-16 	20303058	        59.72 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_InfoFast/6.nano_-_json,_caller-16   	19948575	        60.53 ns/op	       8 B/op	       0 allocs/op
-func BenchmarkLogger_Parallel_InfoFast(b *testing.B) {
+// BenchmarkLogger_Parallel_Infof/1.nil_timestamp-16         	20668786	        60.14 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/2.standard_timestamp-16    	20675044	        60.50 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/3.yyyy-month_timestamp-16  	20658718	        59.32 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/4.nano_timestamp-16        	19913436	        59.86 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/5.nano_timestamp_-_json-16 	20303058	        59.72 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Infof/6.nano_-_json,_caller-16   	19948575	        60.53 ns/op	       8 B/op	       0 allocs/op
+func BenchmarkLogger_Parallel_Infof(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
 	tests := []struct {

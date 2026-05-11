@@ -1,18 +1,8 @@
 package log
 
 import (
-	"sync"
-
 	"github.com/tudorhulban/log/helpers"
 )
-
-var entryPool = sync.Pool{
-	New: func() any {
-		return &Entry{
-			fields: [8]field{}, // small reusable buffer
-		}
-	},
-}
 
 // Entry is not safe for concurrent use.
 // Each goroutine should obtain its own Entry via Formatter.With.

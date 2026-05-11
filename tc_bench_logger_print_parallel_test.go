@@ -158,13 +158,13 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_PrintfFast/1._nil_timestamp-16         	21116536	        59.38 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/2._standard_timestamp-16    	20543920	        59.36 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/3._yyyy-month_timestamp-16  	20435289	        59.44 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/4._nano_timestamp-16        	20611592	        60.00 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_PrintfFast/5._nano_timestamp_-_json-16 	20369793	        60.52 ns/op	       8 B/op	       0 allocs/op
-func BenchmarkLogger_Parallel_PrintfFast(b *testing.B) {
-	runtime.GOMAXPROCS(1)
+// BenchmarkLogger_Parallel_Printw/1._nil_timestamp-16         	21116536	        59.38 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/2._standard_timestamp-16    	20543920	        59.36 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/3._yyyy-month_timestamp-16  	20435289	        59.44 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/4._nano_timestamp-16        	20611592	        60.00 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/5._nano_timestamp_-_json-16 	20369793	        60.52 ns/op	       8 B/op	       0 allocs/op
+func BenchmarkLogger_Parallel_Printw(b *testing.B) {
+	runtime.GOMAXPROCS(1) // TODO: add multiple values
 
 	tests := []struct {
 		timestampFunc timestamp.Timestamp

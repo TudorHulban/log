@@ -20,7 +20,11 @@ func NewLogContext(logger *Logger) *LogContext {
 		logger: logger,
 	}
 
-	f.cfg.Store(&formatterConfig{fields: nil})
+	f.cfg.Store(
+		&formatterConfig{
+			fields: nil,
+		},
+	)
 
 	return &f
 }
@@ -33,12 +37,12 @@ func (ctx *LogContext) WithRoot(key string, value any) *LogContext {
 	copy(newFields, old.fields)
 
 	// replace root
-	newCfg := &formatterConfig{
-		root:   makeFieldPtr(key, value),
-		fields: newFields,
-	}
-
-	ctx.cfg.Store(newCfg)
+	ctx.cfg.Store(
+		&formatterConfig{
+			root:   makeFieldPtr(key, value),
+			fields: newFields,
+		},
+	)
 
 	return ctx
 }
@@ -47,7 +51,6 @@ func (ctx *LogContext) SetString(key, value string) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
-
 	copy(newFields, old.fields)
 
 	newFields[len(old.fields)] = field{
@@ -56,12 +59,12 @@ func (ctx *LogContext) SetString(key, value string) *LogContext {
 		valueString: value,
 	}
 
-	newCfg := &formatterConfig{
-		root:   old.root,  // keep root
-		fields: newFields, // updated ephemeral fields
-	}
-
-	ctx.cfg.Store(newCfg)
+	ctx.cfg.Store(
+		&formatterConfig{
+			root:   old.root,  // keep root
+			fields: newFields, // updated ephemeral fields
+		},
+	)
 
 	return ctx
 }
@@ -70,15 +73,20 @@ func (ctx *LogContext) SetInt(key string, value int64) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
-
 	copy(newFields, old.fields)
+
 	newFields[len(old.fields)] = field{
 		key:      key,
 		kind:     kindInt,
 		valueInt: value,
 	}
 
-	ctx.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
+	ctx.cfg.Store(
+		&formatterConfig{
+			root:   old.root,
+			fields: newFields,
+		},
+	)
 
 	return ctx
 }
@@ -87,15 +95,20 @@ func (ctx *LogContext) SetBool(key string, value bool) *LogContext {
 	old := ctx.cfg.Load()
 
 	newFields := make([]field, len(old.fields)+1)
-
 	copy(newFields, old.fields)
+
 	newFields[len(old.fields)] = field{
 		key:       key,
 		kind:      kindBool,
 		valueBool: value,
 	}
 
-	ctx.cfg.Store(&formatterConfig{root: old.root, fields: newFields})
+	ctx.cfg.Store(
+		&formatterConfig{
+			root:   old.root,
+			fields: newFields,
+		},
+	)
 
 	return ctx
 }
@@ -103,12 +116,12 @@ func (ctx *LogContext) SetBool(key string, value bool) *LogContext {
 func (ctx *LogContext) Clear() {
 	old := ctx.cfg.Load()
 
-	newCfg := &formatterConfig{
-		root:   old.root, // keep root
-		fields: nil,      // clear ephemeral fields
-	}
-
-	ctx.cfg.Store(newCfg)
+	ctx.cfg.Store(
+		&formatterConfig{
+			root:   old.root, // keep root
+			fields: nil,      // clear ephemeral fields
+		},
+	)
 }
 
 func (ctx *LogContext) Reset() {

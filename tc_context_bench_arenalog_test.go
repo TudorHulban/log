@@ -6,12 +6,17 @@ import (
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/bytearena/helpers"
 	"github.com/tudorhulban/log/timestamp"
 )
+
+// test produces
+// {"ts":"2026-05-11T09:33:49.624Z","level":"INFO","msg":"created logger, level INFO"}
+// {"ts":"2026-05-11T09:33:49.624Z","level":"INFO","area":"some area","msg":"benchmark test"}
 
 func TestArenalog_OneField(t *testing.T) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
@@ -117,6 +122,10 @@ func BenchmarkArenalog_OneField(b *testing.B) {
 	}
 }
 
+// test produces
+// {"ts":"2026-05-04T14:29:35Z","level":"INFO","msg":"created logger, level INFO"}
+// {"ts":"2026-05-04T14:29:35Z","level":"INFO","service":"auth","req_id":12345,"cache_hit":true,"area":"some area","user":"tudor","attempt":1,"some float":1.113699999999,"success":true,"message":"benchmark test"}
+
 func TestArenalog_MultipleFields(t *testing.T) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
@@ -154,9 +163,6 @@ func TestArenalog_MultipleFields(t *testing.T) {
 		WithBool("success", true)
 
 	entry.Msg("benchmark test")
-
-	// {"ts":"2026-05-04T14:29:35Z","level":"INFO","msg":"created logger, level INFO"}
-	// {"ts":"2026-05-04T14:29:35Z","level":"INFO","service":"auth","req_id":12345,"cache_hit":true,"area":"some area","user":"tudor","attempt":1,"some float":1.113699999999,"success":true,"message":"benchmark test"}
 
 	cancel()
 	<-chIngestionEnd
@@ -289,10 +295,10 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=1-16         	15812635	        76.11 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=2-16         	17419221	        67.73 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=3-16         	13884411	        85.10 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=4-16         	13652745	        87.12 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=1-16         	16213712	        74.77 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=2-16         	17813103	        64.67 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=3-16         	14062590	        84.90 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=4-16         	13590536	        88.83 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 
@@ -332,6 +338,7 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 
 	runtime.GC()
 
+	// warm up
 	for i := 0; i < runtime.GOMAXPROCS(0)*4; i++ {
 		e, _ := entryPool.Get().(*Entry) //nolint:revive
 		entryPool.Put(e)
@@ -339,6 +346,8 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 
 	var warmupBuffer []byte
 	timestamp.TimestampRFC3339(warmupBuffer)
+
+	time.Sleep(10 * time.Millisecond)
 
 	b.SetParallelism(16)
 

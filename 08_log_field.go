@@ -24,6 +24,7 @@ type field struct {
 	valueBool bool
 }
 
+// makeField is a helper for creating a field from a key value pair.
 func makeField(key string, value any) field {
 	switch v := value.(type) {
 	case string:

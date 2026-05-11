@@ -53,7 +53,7 @@ func (l *Logger) Panicw(msg string, keysAndValues ...any) {
 		b.WriteString(`,"msg":`)
 		b.WriteString(strconv.Quote(msg))
 
-		for i := 0; i < len(keysAndValues); i += 2 {
+		for i := 0; i < len(keysAndValues); i = i + 2 {
 			key := keysAndValues[i]
 			val := keysAndValues[i+1]
 
@@ -77,6 +77,7 @@ func (l *Logger) Panicw(msg string, keysAndValues ...any) {
 				} else {
 					b.WriteString("false")
 				}
+
 			default:
 				b.WriteString(strconv.Quote(fmt.Sprint(v)))
 			}

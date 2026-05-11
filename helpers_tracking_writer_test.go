@@ -15,23 +15,26 @@ func newTrackingWriter(w io.Writer, s *state) *trackingWriter {
 }
 
 func (tw *trackingWriter) Write(p []byte) (int, error) {
-	n, err := tw.w.Write(p)
+	bytesWritten, err := tw.w.Write(p)
 	if err != nil {
-		return n, err
+		return bytesWritten, err
 	}
 
 	data := string(p)
+
 	// Use the SAME mutex as emitData
 	tw.state.muDictionary.Lock()
+
 	for key, msg := range tw.state.dictionary {
 		if !msg.wasReceived && strings.Contains(data, key) {
 			msg.wasReceived = true
 			tw.state.dictionary[key] = msg // reassign to persist struct update
 		}
 	}
+
 	tw.state.muDictionary.Unlock()
 
-	return n, nil
+	return bytesWritten, nil
 }
 
 func (tw *trackingWriter) UnreceivedCount() int {

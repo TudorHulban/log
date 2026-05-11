@@ -216,7 +216,7 @@ func (e *Entry) Msg(msg string) {
 	}
 
 	buffer = append(buffer, "msg="...)
-	buffer = helpers.AppendArgs(buffer, msg) // TODO: why append json?
+	buffer = helpers.AppendArgs(buffer, msg)
 	buffer = append(buffer, '\n')
 
 	copy(region.Buf(), buffer)

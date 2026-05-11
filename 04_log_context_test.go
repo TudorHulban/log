@@ -104,5 +104,10 @@ func TestContextPrint(t *testing.T) {
 			"zzzz", 4.299999999999,
 		),
 	)
-	require.NoError(t, entries.HasKeysWithValues(1, "req_id", 12345, "level", "ERROR"))
+	require.NoError(t,
+		entries.HasKeysWithValues(1,
+			"req_id", 12345,
+			"level", "ERROR",
+		),
+	)
 }

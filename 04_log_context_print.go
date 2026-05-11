@@ -32,10 +32,10 @@ func (ctx *LogContext) Print(args ...any) {
 		if cfg.root != nil {
 			buffer = ctx.logger.appendJSONRoot(
 				buffer,
+				helpers.AppendArgs(nil, args...),
 				cfg,
 				file,
 				line,
-				helpers.AppendArgs(nil, args...),
 			)
 		}
 

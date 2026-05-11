@@ -113,8 +113,7 @@ func TestDirectCalls(t *testing.T) {
 		len(entries)-1,
 	)
 
-	// Updated Counts by Level
-	// TRACE now includes: 3 (Trace calls) + 1 (Logger init) + 1 (Msg) + 6 (Print calls) = 11
+	// Counts by Level
 	require.NoError(t, entries.HasKeyWithValue("level", "TRACE", 11))
 	require.NoError(t, entries.HasKeyWithValue("level", "DEBUG", 3))
 	require.NoError(t, entries.HasKeyWithValue("level", "INFO", 3))

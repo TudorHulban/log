@@ -6,10 +6,7 @@ import (
 	"github.com/tudorhulban/log/helpers"
 )
 
-// appendJSON builds a JSON log entry.
-// `msg` must already be a fully formatted string.
-// Caller info is included only when file != "" and line > 0.
-func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []byte) []byte {
+func (l *Logger) appendJSONKV(buffer []byte, level, file string, line int, msg []byte, kv ...any) []byte {
 	buffer = append(buffer, '{')
 
 	// timestamp
@@ -36,14 +33,18 @@ func (l *Logger) appendJSON(buffer []byte, level, file string, line int, msg []b
 	// message
 	buffer = append(buffer, `"msg":"`...)
 	buffer = helpers.AppendJSON(buffer, msg)
-	buffer = append(buffer, `"}`...)
+	buffer = append(buffer, `",`...)
+
+	// key/value pairs
+	buffer = helpers.AppendJSONKeyValuesIntoObject(buffer, kv...)
+
+	// remove trailing comma if present
+	if buffer[len(buffer)-1] == ',' {
+		buffer = buffer[:len(buffer)-1]
+	}
+
+	buffer = append(buffer, '}')
 	buffer = append(buffer, '\n')
 
 	return buffer
 }
-
-// TODO: Formats to test.
-// {"ts":"2026-03-18T14:27:09.123Z","level":"info","msg":"user login"}
-// {"ts":"2026-03-18T14:27:09.123Z","level":"info","msg":"user login","user_id":3847291,"ip":"10.44.12.189","device":"mobile","session_id":"sess_abc123xyz"}
-// {"ts":"…","level":"warn","msg":"slow database query","duration_ms":342,"query":"SELECT …","rows":124}
-// {"ts":"…","level":"error","msg":"payment failed","error":"card_declined","code":"AUTH_402","attempt":3}

@@ -197,20 +197,24 @@ func (e LogSet) FilterBy(key string, value any) LogSet {
 	return filtered
 }
 
-func (e LogSet) First() LogRecord {
+func (e LogSet) First() LogSet {
 	if len(e) == 0 {
-		return LogRecord{}
+		return LogSet{}
 	}
 
-	return e[0]
+	return []LogRecord{
+		e[0],
+	}
 }
 
-func (e LogSet) Last() LogRecord {
+func (e LogSet) Last() LogSet {
 	if len(e) == 0 {
-		return LogRecord{}
+		return LogSet{}
 	}
 
-	return e[len(e)-1]
+	return []LogRecord{
+		e[len(e)-1],
+	}
 }
 
 // SortByTimestamp reorders the entries based on the ts field.

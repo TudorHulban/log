@@ -151,10 +151,10 @@ non-json-record`
 		"5. FirstAndLast",
 		func(t *testing.T) {
 			// Test First
-			require.Equal(t, "1", logSet.First().timestamp)
+			require.Equal(t, "1", logSet.First()[0].timestamp)
 
 			// Test Last
-			last := logSet.Last()
+			last := logSet.Last()[0]
 			require.True(t,
 				last.IsRAW(),
 				"last record should be the non-json string",

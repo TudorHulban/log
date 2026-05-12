@@ -66,7 +66,7 @@ func BenchmarkLogger_Parallel_Infof(b *testing.B) {
 			func(b *testing.B) {
 				ingestor, errCrIngestor := bytearena.NewIngestor(
 					bytearena.Size100K(),
-					&helpers.NoopWriter{},
+					&helpers.CountWriterNoBuffer{},
 				)
 				require.NoError(b, errCrIngestor)
 				require.NotNil(b, ingestor)

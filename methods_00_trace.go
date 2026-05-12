@@ -41,7 +41,9 @@ func (l *Logger) Tracew(msg string, keysAndValues ...any) {
 	}
 
 	if (len(keysAndValues) & 1) != 0 {
-		l.Msg("panicw: odd number of key-value arguments")
+		keysAndValues = append(keysAndValues, "(MISSING)")
+
+		msg = "LOG_ERR(odd_args): " + msg
 	}
 
 	l.logwWithLabel(

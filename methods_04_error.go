@@ -40,6 +40,12 @@ func (l *Logger) Errorw(msg string, keysAndValues ...any) {
 		return
 	}
 
+	if (len(keysAndValues) & 1) != 0 {
+		keysAndValues = append(keysAndValues, "(MISSING)")
+
+		msg = "LOG_ERR(odd_args): " + msg
+	}
+
 	l.logwWithLabel(
 		l.labelError(),
 		msg,

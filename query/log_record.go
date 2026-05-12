@@ -15,7 +15,7 @@ func (e LogRecord) IsRAW() bool {
 }
 
 func (e LogRecord) HasTimestamp() bool {
-	return len(e.keyValues) != 0
+	return len(e.timestamp) != 0
 }
 
 func (e LogRecord) HasKey(key string) (bool, any) {

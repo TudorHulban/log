@@ -10,7 +10,12 @@ import (
 
 type LogSet []LogRecord
 
+// TODO: review error conditions
 func NewLogset(from string) (LogSet, error) {
+	if len(from) == 0 {
+		return LogSet{}, errors.New("empty input")
+	}
+
 	lines := strings.Split(strings.TrimSpace(from), "\n")
 	entries := make(LogSet, 0, len(lines))
 

@@ -71,6 +71,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		ingestor: params.Ingestor,
 
 		estimatedMessageSizeOverall: params.EstimatedMessageSizeOverall,
+		fatalWriter:                 params.WithFatalWriter,
 	}
 
 	result.SetLogLevel(params.LoggerLevel)

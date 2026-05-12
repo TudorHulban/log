@@ -89,6 +89,29 @@ func (e LogSet) WithNoTimestamp() LogSet {
 	return filtered
 }
 
+// Contains checks if a substring exists in the raw log line a specific number of times across all entries.
+func (e LogSet) Contains(text string, noTimes uint) error {
+	var count uint
+
+	for _, item := range e {
+		// We check the 'raw' field of the LogRecord
+		if strings.Contains(item.raw, text) {
+			count++
+		}
+	}
+
+	if count != noTimes {
+		return fmt.Errorf(
+			"expected text %q to be contained in %d entries, but found it in %d entries",
+			text,
+			noTimes,
+			count,
+		)
+	}
+
+	return nil
+}
+
 // HasKey checks if a key exists a specific number of times across all entries.
 func (e LogSet) HasKey(name string, noTimes uint) error {
 	var count uint

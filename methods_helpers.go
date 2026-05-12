@@ -122,29 +122,29 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 		return
 	}
 
-	buf := region.Buf()[:0]
+	buffer := region.Buf()[:0]
 
 	if l.fnTimestamp != nil {
-		buf = l.fnTimestamp(buf)
-		buf = append(buf, ' ')
+		buffer = l.fnTimestamp(buffer)
+		buffer = append(buffer, ' ')
 	}
 
 	if l.withCaller {
 		_, file, line, _ := runtime.Caller(int(l.callerLevel))
 
-		buf = append(buf, file...)
-		buf = append(buf, ' ')
-		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = strconv.AppendInt(buf, int64(line), 10)
-		buf = append(buf, ' ')
+		buffer = append(buffer, file...)
+		buffer = append(buffer, ' ')
+		buffer = append(buffer, 'L', 'i', 'n', 'e')
+		buffer = strconv.AppendInt(buffer, int64(line), 10)
+		buffer = append(buffer, ' ')
 	}
 
-	buf = append(buf, label...)
-	buf = append(buf, delim...)
-	buf = helpers.Appendf(buf, format, args)
-	buf = append(buf, '\n')
+	buffer = append(buffer, label...)
+	buffer = append(buffer, delim...)
+	buffer = helpers.Appendf(buffer, format, args)
+	buffer = append(buffer, '\n')
 
-	copy(region.Buf(), buf)
+	copy(region.Buf(), buffer)
 
 	l.ingestor.EndWrite(region)
 }

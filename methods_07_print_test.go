@@ -63,3 +63,51 @@ func TestErrorsPrint(t *testing.T) {
 	require.NoError(t, logSet.HasKeyWithValue("key", _Missing, 1))
 	require.NoError(t, logSet.HasKey("level", 3))
 }
+
+// test produces
+// {"level":"INFO","msg":"created logger, level INFO"}
+// {"level":"INFO","msg":"benchmark test"}
+
+func TestLoggerMsg_NoTimestamp(t *testing.T) {
+	var bufLogs, bufFatal bytes.Buffer
+
+	ingestor, errCrIngestor := bytearena.NewIngestor(
+		bytearena.Size100K(),
+		&bufLogs,
+	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	logger, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    ingestor,
+			LoggerLevel: LevelInfo,
+
+			WithCaller:      true,
+			WithFatalWriter: &bufFatal,
+			WithJSON:        false,
+		},
+	)
+	require.NoError(t, errCrLogger)
+
+	logger.Msg("benchmark test")
+
+	cancel()
+	<-chIngestionEnd
+
+	// --- Processing Lines ---
+	require.Zero(t, bufFatal.Len())
+
+	logSet, errParse := query.NewLogset(bufLogs.String())
+	require.NoError(t, errParse)
+
+	require.Len(t,
+		logSet,
+		2,
+
+		logSet,
+	)
+}

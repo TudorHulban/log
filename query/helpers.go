@@ -7,8 +7,16 @@ import (
 )
 
 var (
-	ansiRegex         = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
-	nonPrintableRegex = regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]`)
+	ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+
+	// Matches:
+	// 0x00-0x08 (Control chars: Null, Bell, Backspace, etc.)
+	// 0x0B-0x0C (Vertical tab, Form feed)
+	// 0x0E-0x1F (Remaining C0 controls: Shift Out, Unit Separator, etc.)
+	// 0x7F      (DEL - Delete character)
+	// 0x80-0x9F (C1 Control chars: Padding, Break, Start of string, etc.)
+	// 0xA0-0xFF (Extended ASCII: Non-breaking space, symbols, and Latin letters)
+	nonPrintableRegex = regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]`)
 )
 
 // valuesMatch provides a "fuzzy" equality check for JSON-parsed data

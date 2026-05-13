@@ -16,9 +16,9 @@ import (
 )
 
 // test produces
-// {"ts":"1778599118763016624","level":"FATAL","msg":"system failure"}
+// {"ts":"1778659939086873688","level":"FATAL","msg":"service infra failure"}
 
-func TestLogger_JSON_Fatal(t *testing.T) {
+func TestLogger_JSON_Fatalf(t *testing.T) {
 	// This is the main test that spawns the sub-process
 	if os.Getenv("BE_CRASHING") == "1" {
 		ingestor, _ := bytearena.NewIngestor(
@@ -43,7 +43,7 @@ func TestLogger_JSON_Fatal(t *testing.T) {
 
 		_ = ingestor.StartIngestion(context.Background())
 
-		l.Fatal("system failure")
+		l.Fatalf("service %s failure", "infra")
 	}
 
 	// --- Parent Process Logic (The Actual Test) ---
@@ -53,7 +53,7 @@ func TestLogger_JSON_Fatal(t *testing.T) {
 	cmd := exec.CommandContext(
 		context.Background(),
 		os.Args[0],
-		"-test.run=^TestLogger_JSON_Fatal$",
+		"-test.run=^TestLogger_JSON_Fatalf$",
 	)
 
 	cmd.Env = append(os.Environ(), "BE_CRASHING=1")
@@ -77,13 +77,13 @@ func TestLogger_JSON_Fatal(t *testing.T) {
 		"timestamp should be present",
 	)
 	require.NoError(t, logSet.First().HasKeyWithValue("level", "FATAL", 1))
-	require.NoError(t, logSet.First().HasKeyWithValue("msg", "system failure", 1))
+	require.NoError(t, logSet.First().HasKeyWithValue("msg", "service infra failure", 1))
 }
 
 // test produces
-// 1778662219503435854 [FATAL] system failure
+// 1778661992655861121 [FATAL] service infra failure
 
-func TestLogger_Raw_Fatal(t *testing.T) {
+func TestLogger_Raw_Fatalf(t *testing.T) {
 	// This is the main test that spawns the sub-process
 	if os.Getenv("BE_CRASHING") == "1" {
 		ingestor, _ := bytearena.NewIngestor(
@@ -108,7 +108,7 @@ func TestLogger_Raw_Fatal(t *testing.T) {
 
 		_ = ingestor.StartIngestion(context.Background())
 
-		l.Fatal("system failure")
+		l.Fatalf("service %s failure", "infra")
 	}
 
 	// --- Parent Process Logic (The Actual Test) ---
@@ -118,7 +118,7 @@ func TestLogger_Raw_Fatal(t *testing.T) {
 	cmd := exec.CommandContext(
 		context.Background(),
 		os.Args[0],
-		"-test.run=^TestLogger_Raw_Fatal$",
+		"-test.run=^TestLogger_Raw_Fatalf$",
 	)
 
 	cmd.Env = append(os.Environ(), "BE_CRASHING=1")
@@ -138,5 +138,5 @@ func TestLogger_Raw_Fatal(t *testing.T) {
 	assert.Len(t, logSet, 1)
 
 	require.NoError(t, logSet.First().Contains("[FATAL]", 1))
-	require.NoError(t, logSet.Contains("system failure", 1))
+	require.NoError(t, logSet.First().Contains("service infra failure", 1))
 }

@@ -165,6 +165,31 @@ func (e LogSet) HasKeyWithValue(name string, value any, noTimes uint) error {
 	return nil
 }
 
+// HasKeyWithValueLike matches also numbers of bool.
+func (e LogSet) HasKeyWithValueLike(name, value string, noTimes uint) error {
+	var count uint
+
+	for _, item := range e {
+		if exists, val := item.HasKey(name); exists {
+			if strings.Contains(fmt.Sprint(val), value) {
+				count++
+			}
+		}
+	}
+
+	if count != noTimes {
+		return fmt.Errorf(
+			"expected key %q with value like %q to appear %d times, but found %d",
+			name,
+			value,
+			noTimes,
+			count,
+		)
+	}
+
+	return nil
+}
+
 func (e LogSet) HasKeysWithValues(noTimes uint, kv ...any) error {
 	if len(kv)%2 != 0 {
 		return errors.New(

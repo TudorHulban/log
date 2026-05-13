@@ -12,9 +12,9 @@ import (
 func (l *Logger) Fatal(args ...any) {
 	var msg string
 
-	if l.withJSON {
-		var buffer strings.Builder
+	var buffer strings.Builder
 
+	if l.withJSON {
 		// 1. Start the JSON object
 		buffer.WriteByte('{')
 
@@ -38,18 +38,24 @@ func (l *Logger) Fatal(args ...any) {
 
 		// 4. Close the object
 		buffer.WriteByte('}')
-
-		msg = buffer.String()
 	} else {
 		// Non-JSON / Raw section
 		if l.fnTimestamp != nil {
 			tsBuf := l.fnTimestamp(nil)
-
-			msg = string(tsBuf) + " " + fmt.Sprint(args...)
-		} else {
-			msg = fmt.Sprint(args...)
+			buffer.Write(tsBuf)
+			buffer.WriteByte(' ')
 		}
+
+		// log level
+		buffer.WriteByte('[')
+		buffer.WriteString(logLevels[LevelFatal])
+		buffer.WriteString("] ")
+
+		// message
+		buffer.WriteString(fmt.Sprint(args...))
 	}
+
+	msg = buffer.String()
 
 	// Bypass ingestion: write directly to fatal writer
 	_, _ = l.fatalWriter.Write([]byte(msg))
@@ -60,21 +66,52 @@ func (l *Logger) Fatal(args ...any) {
 func (l *Logger) Fatalf(format string, args ...any) {
 	var msg string
 
+	var buffer strings.Builder
+
 	if l.withJSON {
-		var b strings.Builder
+		// 1. Start the JSON object
+		buffer.WriteByte('{')
 
-		b.WriteString(`{"level":`)
-		b.WriteString(strconv.Quote(logLevels[LevelFatal]))
-		b.WriteString(`,"msg":`)
-		b.WriteString(strconv.Quote(fmt.Sprintf(format, args...)))
-		b.WriteByte('}')
+		// 2. Handle timestamp inside the object
+		if l.fnTimestamp != nil {
+			// Use a small temporary buffer for the timestamp
+			tsBuf := l.fnTimestamp(nil)
 
-		msg = b.String()
+			buffer.WriteString(`"ts":"`)
+			// Assuming fnTimestamp appends the time string to the builder
+			// or returns a string you write to it.
+			buffer.Write(tsBuf)
+			buffer.WriteString(`",`)
+		}
+
+		// 3. Add level and msg
+		buffer.WriteString(`"level":`)
+		buffer.WriteString(strconv.Quote(logLevels[LevelFatal]))
+		buffer.WriteString(`,"msg":`)
+		buffer.WriteString(strconv.Quote(fmt.Sprintf(format, args...)))
+
+		// 4. Close the object
+		buffer.WriteByte('}')
 	} else {
-		msg = fmt.Sprintf(format, args...)
+		// Non-JSON / Raw section
+		if l.fnTimestamp != nil {
+			tsBuf := l.fnTimestamp(nil)
+			buffer.Write(tsBuf)
+			buffer.WriteByte(' ')
+		}
+
+		// log level
+		buffer.WriteByte('[')
+		buffer.WriteString(logLevels[LevelFatal])
+		buffer.WriteString("] ")
+
+		// message
+		buffer.WriteString(fmt.Sprintf(format, args...))
 	}
 
-	// Direct fatal bypass — never ingest
+	msg = buffer.String()
+
+	// Bypass ingestion: write directly to fatal writer
 	_, _ = l.fatalWriter.Write([]byte(msg))
 
 	os.Exit(1)
@@ -89,13 +126,29 @@ func (l *Logger) Fatalw(msg string, keysAndValues ...any) {
 		msg = "LOG_ERR(odd_args): " + msg
 	}
 
-	if l.withJSON {
-		var b strings.Builder
+	var buffer strings.Builder
 
-		b.WriteString(`{"level":`)
-		b.WriteString(strconv.Quote(logLevels[LevelFatal]))
-		b.WriteString(`,"msg":`)
-		b.WriteString(strconv.Quote(msg))
+	if l.withJSON {
+		// 1. Start the JSON object
+		buffer.WriteByte('{')
+
+		// 2. Handle timestamp inside the object
+		if l.fnTimestamp != nil {
+			// Use a small temporary buffer for the timestamp
+			tsBuf := l.fnTimestamp(nil)
+
+			buffer.WriteString(`"ts":"`)
+			// Assuming fnTimestamp appends the time string to the builder
+			// or returns a string you write to it.
+			buffer.Write(tsBuf)
+			buffer.WriteString(`",`)
+		}
+
+		// 3. Add level and msg
+		buffer.WriteString(`"level":`)
+		buffer.WriteString(strconv.Quote(logLevels[LevelFatal]))
+		buffer.WriteString(`,"msg":`)
+		buffer.WriteString(strconv.Quote(msg))
 
 		for i := 0; i < len(keysAndValues); i += 2 {
 			key := keysAndValues[i]
@@ -108,45 +161,54 @@ func (l *Logger) Fatalw(msg string, keysAndValues ...any) {
 				goto write_and_exit
 			}
 
-			b.WriteByte(',')
-			b.WriteString(strconv.Quote(ks))
-			b.WriteByte(':')
+			buffer.WriteByte(',')
+			buffer.WriteString(strconv.Quote(ks))
+			buffer.WriteByte(':')
 
 			switch value := val.(type) {
 			case string:
-				b.WriteString(strconv.Quote(value))
+				buffer.WriteString(strconv.Quote(value))
 			case int:
-				b.WriteString(strconv.Itoa(value))
+				buffer.WriteString(strconv.Itoa(value))
 			case bool:
 				if value {
-					b.WriteString("true")
+					buffer.WriteString("true")
 				} else {
-					b.WriteString("false")
+					buffer.WriteString("false")
 				}
 			default:
-				b.WriteString(strconv.Quote(fmt.Sprint(value)))
+				buffer.WriteString(strconv.Quote(fmt.Sprint(value)))
 			}
 		}
 
-		b.WriteByte('}')
-		out = b.String()
+		// 4. Close the object
+		buffer.WriteByte('}')
 	} else {
 		// Non-JSON fatal path
-		var b strings.Builder
-
-		b.Grow(len(msg) + len(keysAndValues)*8)
-
-		b.WriteString(msg)
-
-		for i := 0; i < len(keysAndValues); i += 2 {
-			b.WriteByte(' ')
-			fmt.Fprint(&b, keysAndValues[i])
-			b.WriteByte('=')
-			fmt.Fprint(&b, keysAndValues[i+1])
+		if l.fnTimestamp != nil {
+			tsBuf := l.fnTimestamp(nil)
+			buffer.Write(tsBuf)
+			buffer.WriteByte(' ')
 		}
 
-		out = b.String()
+		// log level
+		buffer.WriteByte('[')
+		buffer.WriteString(logLevels[LevelFatal])
+		buffer.WriteString("] ")
+
+		buffer.Grow(len(msg) + len(keysAndValues)*8)
+
+		buffer.WriteString(msg)
+
+		for i := 0; i < len(keysAndValues); i = i + 2 {
+			buffer.WriteByte(' ')
+			fmt.Fprint(&buffer, keysAndValues[i])
+			buffer.WriteByte('=')
+			fmt.Fprint(&buffer, keysAndValues[i+1])
+		}
 	}
+
+	out = buffer.String()
 
 write_and_exit:
 	_, _ = l.fatalWriter.Write([]byte(out))

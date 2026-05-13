@@ -18,8 +18,6 @@ import (
 // panic: {"ts":"1778684385879451817","level":"PANIC","msg":"core system panic"} [recovered, repanicked]
 
 func TestLogger_JSON_Panic(t *testing.T) {
-	t.Skip()
-
 	// This is the main test that spawns the sub-process
 	if os.Getenv("BE_PANICKING") == "1" {
 		ingestor, _ := bytearena.NewIngestor(
@@ -95,8 +93,6 @@ func TestLogger_JSON_Panic(t *testing.T) {
 // panic: 1778685218335852537 [PANIC] core system panic [recovered, repanicked]
 
 func TestLogger_Raw_Panic(t *testing.T) {
-	t.Skip()
-
 	// This is the main test that spawns the sub-process
 	if os.Getenv("BE_PANICKING") == "1" {
 		ingestor, _ := bytearena.NewIngestor(

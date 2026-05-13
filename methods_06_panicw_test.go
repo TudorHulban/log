@@ -3,7 +3,6 @@ package log
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -19,8 +18,6 @@ import (
 // panic: {"ts":"1778686873576477432","level":"PANIC","msg":"LOG_ERR(odd_args): core system panic","floor":"(MISSING)"} [recovered, repanicked]
 
 func TestLogger_JSON_Panicw(t *testing.T) {
-	t.Skip()
-
 	// This is the main test that spawns the sub-process
 	if os.Getenv("BE_PANICKING") == "1" {
 		ingestor, _ := bytearena.NewIngestor(
@@ -73,8 +70,6 @@ func TestLogger_JSON_Panicw(t *testing.T) {
 	logSet, errCr := query.NewLogset(buf.String())
 	require.NoError(t, errCr)
 
-	fmt.Println(logSet.Skip(1).First())
-
 	cleanedLine, errClean := query.ExtractLogFromPanic(
 		logSet.Skip(1).First().String(),
 	)
@@ -98,8 +93,6 @@ func TestLogger_JSON_Panicw(t *testing.T) {
 // panic: 1778687110247753845 [PANIC] LOG_ERR(odd_args): core system panic floor=(MISSING) [recovered, repanicked]
 
 func TestLogger_Raw_Panicw(t *testing.T) {
-	t.Skip()
-
 	// This is the main test that spawns the sub-process
 	if os.Getenv("BE_PANICKING") == "1" {
 		ingestor, _ := bytearena.NewIngestor(
@@ -151,8 +144,6 @@ func TestLogger_Raw_Panicw(t *testing.T) {
 	// 2. Parse the output and verify the log entry captured from fatalWriter
 	logSet, errCr := query.NewRawset(buf.String())
 	require.NoError(t, errCr)
-
-	fmt.Println(logSet.Skip(1).First())
 
 	// We look for the first log entry in the set
 	require.NotEmpty(t,

@@ -270,6 +270,30 @@ func (e LogSet) Last() LogSet {
 	}
 }
 
+// At returns a LogSet containing only the record at the specific index.
+// Returns an empty LogSet if the index is out of bounds.
+func (e LogSet) At(index int) LogSet {
+	if index < 0 || index >= len(e) {
+		return LogSet{}
+	}
+
+	return []LogRecord{e[index]}
+}
+
+// Skip returns a new LogSet starting after the first n records.
+// Useful for shifting the "window" before calling First() or At().
+func (e LogSet) Skip(n int) LogSet {
+	if n <= 0 {
+		return e
+	}
+
+	if n >= len(e) {
+		return LogSet{}
+	}
+
+	return e[n:]
+}
+
 // SortByTimestamp reorders the entries based on the ts field.
 // If desc is true, it sorts newest to oldest.
 func (e LogSet) SortByTimestamp(desc bool) LogSet {

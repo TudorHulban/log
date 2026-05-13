@@ -1,9 +1,11 @@
 package query
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -33,4 +35,22 @@ func valuesMatch(actual, expected any) bool {
 	expectedStr := fmt.Sprintf("%v", expected)
 
 	return actualStr == expectedStr
+}
+
+func ExtractLogFromPanic(rawPanicOutput string) (string, error) {
+	// 1. Locate the JSON boundaries
+	start := strings.Index(rawPanicOutput, "{")
+	end := strings.LastIndex(rawPanicOutput, "}")
+
+	// 2. Safety check: ensure both braces exist and are in order
+	if start == -1 || end == -1 || start >= end {
+		return "",
+			errors.New("no valid JSON object found in panic output")
+	}
+
+	// 3. Slice the string to get exactly the JSON payload
+	// We use end+1 because the second index in a slice is exclusive
+	cleanJSON := rawPanicOutput[start : end+1]
+
+	return cleanJSON, nil
 }

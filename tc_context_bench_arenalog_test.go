@@ -349,7 +349,7 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	b.SetParallelism(16)
+	b.SetParallelism(1)
 
 	for _, g := range gomaxprocsValues {
 		inner := g

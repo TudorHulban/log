@@ -17,32 +17,12 @@ func TimestampNano(appendTo []byte) []byte {
 	return strconv.AppendInt(appendTo, time.Now().UnixNano(), 10)
 }
 
-func TimestampStandard(appendTo []byte) []byte {
-	updateStandardTimeCache()
-
-	buf := timeCacheStandard.active.Load()
-
-	return append(appendTo, buf.output[:buf.length]...)
-}
-
-func TimestampYYYYMonth(appendTo []byte) []byte {
-	updateYYYYMonthTimeCache()
-
-	buf := timeCacheYYYYMonth.active.Load()
-
-	return append(appendTo, buf.output[:buf.length]...)
-}
-
 func TimestampRFC3339(appendTo []byte) []byte {
-	updateRFC3339TimeCache() // Fast path: update cache (cheap CAS if already fresh)
-
-	// Load cached value (non-nil after update)
-	buf := timeCacheRFC3339.active.Load()
+	buf := timeCacheRFC3339.active.Load() // atomic pointer load, ~1 ns
 	if buf != nil {
 		return append(appendTo, buf.output[:buf.length]...)
 	}
 
-	// Fallback: should almost never happen (cache cold start)
 	return time.Now().UTC().AppendFormat(appendTo, rfc3339MilliLayout)
 }
 
@@ -54,4 +34,124 @@ func TimestampRFC3339Bucharest(appendTo []byte) []byte {
 	loc, _ := time.LoadLocation("Europe/Bucharest")
 
 	return time.Now().In(loc).AppendFormat(appendTo, time.RFC3339)
+}
+
+func TimestampYYYYMonth(appendTo []byte) []byte {
+	buf := timeCacheYYYYMonth.active.Load()
+	if buf != nil {
+		return append(appendTo, buf.output[:buf.length]...)
+	}
+
+	// cold-start fallback: build manually, same layout as buildYYYYMonthCache
+	now := time.Now()
+	year, month, day := now.Date()
+	hour, minute, sec := now.Clock()
+	milli := now.Nanosecond() / 1e6
+
+	appendTo = strconv.AppendInt(appendTo, int64(year), 10)
+	if month < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(month), 10)
+
+	appendTo = append(appendTo, ' ')
+	if day < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(day), 10)
+
+	appendTo = append(appendTo, ' ')
+	if hour < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(hour), 10)
+
+	appendTo = append(appendTo, ':')
+	if minute < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(minute), 10)
+
+	appendTo = append(appendTo, ':')
+	if sec < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(sec), 10)
+
+	appendTo = append(appendTo, '.')
+	if milli < 100 {
+		appendTo = append(appendTo, '0')
+	}
+
+	if milli < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	return strconv.AppendInt(appendTo, int64(milli), 10)
+}
+
+func TimestampStandard(appendTo []byte) []byte {
+	buf := timeCacheStandard.active.Load()
+	if buf != nil {
+		return append(appendTo, buf.output[:buf.length]...)
+	}
+
+	// cold-start fallback: YYYY/MM/DD HH:MM:SS.mmm
+	now := time.Now()
+	year, month, day := now.Date()
+	hour, minute, sec := now.Clock()
+	milli := now.Nanosecond() / 1e6
+
+	appendTo = strconv.AppendInt(appendTo, int64(year), 10)
+
+	appendTo = append(appendTo, '/')
+	if month < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(month), 10)
+
+	appendTo = append(appendTo, '/')
+	if day < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(day), 10)
+
+	appendTo = append(appendTo, ' ')
+	if hour < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(hour), 10)
+
+	appendTo = append(appendTo, ':')
+	if minute < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(minute), 10)
+
+	appendTo = append(appendTo, ':')
+	if sec < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	appendTo = strconv.AppendInt(appendTo, int64(sec), 10)
+
+	appendTo = append(appendTo, '.')
+	if milli < 100 {
+		appendTo = append(appendTo, '0')
+	}
+
+	if milli < 10 {
+		appendTo = append(appendTo, '0')
+	}
+
+	return strconv.AppendInt(appendTo, int64(milli), 10)
 }

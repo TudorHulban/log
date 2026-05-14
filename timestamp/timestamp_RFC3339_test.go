@@ -7,6 +7,8 @@ import (
 )
 
 func TestTimestampRFC3339(t *testing.T) {
+	go Start(t.Context())
+
 	t.Run(
 		"1. Test basic appending to an empty slice",
 		func(t *testing.T) {
@@ -15,7 +17,10 @@ func TestTimestampRFC3339(t *testing.T) {
 			// Validate format by attempting to parse it back
 			_, errParse := time.Parse(time.RFC3339Nano, string(got))
 			if errParse != nil {
-				t.Errorf("Result is not a valid RFC3339 timestamp: %v", errParse)
+				t.Errorf(
+					"Result is not a valid RFC3339 timestamp: %v",
+					errParse,
+				)
 			}
 		},
 	)
@@ -61,8 +66,10 @@ func TestTimestampRFC3339(t *testing.T) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkTimestamp-16    	27195747	        43.94 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkTimestampYYYYMonth-16    	309270427	         3.902 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkTimestampYYYYMonth(b *testing.B) {
+	go Start(b.Context())
+
 	var scratch [64]byte
 
 	b.ReportAllocs()
@@ -73,8 +80,10 @@ func BenchmarkTimestampYYYYMonth(b *testing.B) {
 	}
 }
 
-// BenchmarkTimestampRFC3339-16    	26308006	        45.12 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkTimestampRFC3339-16    	309137002	         3.882 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkTimestampRFC3339(b *testing.B) {
+	go Start(b.Context())
+
 	var scratch [64]byte
 
 	b.ReportAllocs()
@@ -82,5 +91,15 @@ func BenchmarkTimestampRFC3339(b *testing.B) {
 
 	for b.Loop() {
 		TimestampRFC3339(scratch[:0])
+	}
+}
+
+// BenchmarkTimenow-16    	  492967	      2422 ns/op	       0 B/op	       0 allocs/op
+func BenchmarkTimenow(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for b.Loop() {
+		time.Now().UnixNano()
 	}
 }

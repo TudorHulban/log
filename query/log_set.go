@@ -128,8 +128,8 @@ func (e LogSet) ContainsEach(noTimes uint, words ...string) error {
 
 	// We'll map the compiled regex to the original word for error reporting
 	type wordMatcher struct {
-		original string
 		re       *regexp.Regexp
+		original string
 		count    uint
 	}
 

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"errors"
 	"io"
 	"sync/atomic"
@@ -83,6 +84,8 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 	if result.callerLevel == 0 {
 		result.callerLevel = 1
 	}
+
+	go timestamp.Start(context.Background())
 
 	result.Printf(
 		"created logger, level %v",

@@ -7,6 +7,8 @@ import (
 )
 
 func TestTimestampYYYYMonth(t *testing.T) {
+	go Start(t.Context())
+
 	// The format produced is: YYYYMM DD HH:MM:SS.mmm
 	// Example: 202405 21 15:04:05.123
 	const layout = "200601 02 15:04:05.000"

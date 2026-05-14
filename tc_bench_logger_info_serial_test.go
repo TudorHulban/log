@@ -14,13 +14,14 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Infof/1.nil_timestamp-16         	24787635	        49.41 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Infof/2.standard_timestamp-16    	18566630	        65.94 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/3.yyyy-month_timestamp-16  	18228122	        66.08 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/4.nano_timestamp-16        	16159620	        74.89 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Infof/5.json_-_rfc3339-16        	13196606	        91.23 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/6.nano_timestamp_-_json-16 	13767166	        88.79 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/7.nano_-_json,_caller-16   	 4566430	       268.3 ns/op	     102 B/op	       2 allocs/op
+// BenchmarkLogger_Infof/1.nil_timestamp-16         	23420386	        53.70 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/2.standard_timestamp-16    	22038463	        54.88 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/3.yyyy-month_timestamp-16  	22626078	        54.07 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/4.nano_timestamp-16        	 1621762	       739.2 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/5.json_-_rfc3339-16        	17267485	        70.38 ns/op	      10 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/6.nano_timestamp_-_json-16 	 1813675	       657.5 ns/op	      10 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/7.nano_-_json_caller-16    	  562224	      1925 ns/op	     264 B/op	       3 allocs/op
+
 func BenchmarkLogger_Infof(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -111,13 +112,14 @@ func BenchmarkLogger_Infof(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_InfoFast/1.nil_timestamp-16         	28443475	        41.81 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_InfoFast/2.standard_timestamp-16    	25182224	        46.44 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/3.yyyy-month_timestamp-16  	25570363	        46.68 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/4.nano_timestamp-16        	24437850	        48.42 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_InfoFast/5.json_-_rfc3339-16        	19821165	        56.32 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/6.nano_timestamp_-_json-16 	21348616	        54.92 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/7.nano_-_json,_caller-16   	14252337	        83.78 ns/op	      33 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/1.nil_timestamp-16         	24311269	        50.75 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/2.standard_timestamp-16    	22581175	        53.27 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/3.yyyy-month_timestamp-16  	22399359	        53.05 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/4.nano_timestamp-16        	 1636036	       731.6 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/5.json_-_rfc3339-16        	17275332	        70.38 ns/op	      10 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/6.nano_timestamp_-_json-16 	 1811938	       663.8 ns/op	      11 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/7.nano_-_json,_caller-16   	  505116	      2274 ns/op	     265 B/op	       3 allocs/op
+
 func BenchmarkLogger_InfoFast(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp

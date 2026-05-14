@@ -24,310 +24,240 @@ var timeCacheStandard timeCache
 var timeCacheYYYYMonth timeCache
 var timeCacheRFC3339 timeCache
 
-// gateStandard and gateYYYYMonth serialize the one writer per millisecond.
-// When multiple goroutines observe a stale valueMillisecond simultaneously, exactly one
-// wins the CAS and does the update. The rest load the freshly stored pointer.
-var (
-	gateStandard  atomic.Int64
-	gateYYYYMonth atomic.Int64
-	gateRFC3339   atomic.Int64
-)
-
-func updateStandardTimeCache() {
-	now := time.Now()
+func buildRFC3339Cache(now time.Time) {
 	nowNano := now.UnixNano()
+	nowMs := nowNano / 1e6
 
-	nowMillisecond := nowNano / 1e6
-
-	current := gateStandard.Load()
-	if current == nowMillisecond {
-		return // still fresh, skip entirely
+	prev := timeCacheRFC3339.active.Load()
+	if prev != nil && prev.valueMillisecond == nowMs {
+		return // already current
 	}
-
-	// update timestamp every millisecond. TTL = 1 millisecond.
-	if !gateStandard.CompareAndSwap(current, nowMillisecond) {
-		return
-	}
-
-	previous := timeCacheStandard.active.Load()
 
 	next := new(timeBuf)
-	next.valueMillisecond = nowMillisecond
-
-	if previous != nil {
-		*next = *previous
-	}
-
-	// rebuild date prefix only when the day changes.
+	next.valueMillisecond = nowMs
 	nowDay := nowNano / nanosPerDay
 
-	if previous == nil || nowDay != previous.valueDay {
+	if prev != nil {
+		*next = *prev
+	}
+
+	if prev == nil || nowDay != prev.valueDay {
 		next.valueDay = nowDay
-
 		year, month, day := now.Date()
+		b := next.output[:0]
+		b = strconv.AppendInt(b, int64(year), 10)
 
-		std := next.output[:0]
-
-		// YYYY
-		std = strconv.AppendInt(std, int64(year), 10)
-		std = append(std, '/')
-
-		// MM
+		b = append(b, '-')
 		if month < 10 {
-			std = append(std, '0')
+			b = append(b, '0')
 		}
 
-		std = strconv.AppendInt(std, int64(month), 10)
-		std = append(std, '/')
+		b = strconv.AppendInt(b, int64(month), 10)
 
-		// DD
+		b = append(b, '-')
 		if day < 10 {
-			std = append(std, '0')
+			b = append(b, '0')
 		}
 
-		std = strconv.AppendInt(std, int64(day), 10)
-		std = append(std, ' ')
-
-		next.dateLen = len(std)
+		b = strconv.AppendInt(b, int64(day), 10)
+		b = append(b, 'T')
+		next.dateLen = len(b)
 	}
 
 	hour, minute, sec := now.Clock()
 	milli := now.Nanosecond() / 1e6
+	b := next.output[next.dateLen:next.dateLen]
 
-	std := next.output[next.dateLen:next.dateLen]
-
-	// HH
 	if hour < 10 {
-		std = append(std, '0')
+		b = append(b, '0')
 	}
 
-	std = strconv.AppendInt(std, int64(hour), 10)
-	std = append(std, ':')
+	b = strconv.AppendInt(b, int64(hour), 10)
 
-	// MM
+	b = append(b, ':')
 	if minute < 10 {
-		std = append(std, '0')
+		b = append(b, '0')
 	}
 
-	std = strconv.AppendInt(std, int64(minute), 10)
-	std = append(std, ':')
+	b = strconv.AppendInt(b, int64(minute), 10)
 
-	// SS
+	b = append(b, ':')
 	if sec < 10 {
-		std = append(std, '0')
+		b = append(b, '0')
 	}
 
-	std = strconv.AppendInt(std, int64(sec), 10)
-	std = append(std, '.')
+	b = strconv.AppendInt(b, int64(sec), 10)
 
-	// mmm
+	b = append(b, '.')
 	if milli < 100 {
-		std = append(std, '0')
+		b = append(b, '0')
 	}
 
 	if milli < 10 {
-		std = append(std, '0')
+		b = append(b, '0')
 	}
 
-	std = strconv.AppendInt(std, int64(milli), 10)
+	b = strconv.AppendInt(b, int64(milli), 10)
+	b = append(b, 'Z')
 
-	next.length = next.dateLen + len(std)
+	next.length = next.dateLen + len(b)
+	timeCacheRFC3339.active.Store(next)
+}
 
+func buildStandardCache(now time.Time) {
+	nowNano := now.UnixNano()
+	nowMs := nowNano / 1e6
+
+	prev := timeCacheStandard.active.Load()
+	if prev != nil && prev.valueMillisecond == nowMs {
+		return
+	}
+
+	next := new(timeBuf)
+	next.valueMillisecond = nowMs
+	nowDay := nowNano / nanosPerDay
+
+	if prev != nil {
+		*next = *prev
+	}
+
+	if prev == nil || nowDay != prev.valueDay {
+		next.valueDay = nowDay
+		year, month, day := now.Date()
+		b := next.output[:0]
+		b = strconv.AppendInt(b, int64(year), 10)
+
+		b = append(b, '/')
+		if month < 10 {
+			b = append(b, '0')
+		}
+
+		b = strconv.AppendInt(b, int64(month), 10)
+
+		b = append(b, '/')
+		if day < 10 {
+			b = append(b, '0')
+		}
+
+		b = strconv.AppendInt(b, int64(day), 10)
+		b = append(b, ' ')
+
+		next.dateLen = len(b)
+	}
+
+	hour, minute, sec := now.Clock()
+	milli := now.Nanosecond() / 1e6
+	b := next.output[next.dateLen:next.dateLen]
+
+	if hour < 10 {
+		b = append(b, '0')
+	}
+
+	b = strconv.AppendInt(b, int64(hour), 10)
+
+	b = append(b, ':')
+	if minute < 10 {
+		b = append(b, '0')
+	}
+
+	b = strconv.AppendInt(b, int64(minute), 10)
+
+	b = append(b, ':')
+	if sec < 10 {
+		b = append(b, '0')
+	}
+
+	b = strconv.AppendInt(b, int64(sec), 10)
+
+	b = append(b, '.')
+	if milli < 100 {
+		b = append(b, '0')
+	}
+
+	if milli < 10 {
+		b = append(b, '0')
+	}
+
+	b = strconv.AppendInt(b, int64(milli), 10)
+
+	next.length = next.dateLen + len(b)
 	timeCacheStandard.active.Store(next)
 }
 
-func updateYYYYMonthTimeCache() {
-	now := time.Now()
+func buildYYYYMonthCache(now time.Time) {
 	nowNano := now.UnixNano()
+	nowMs := nowNano / 1e6
 
-	nowMillisecond := nowNano / 1e6
-
-	current := gateYYYYMonth.Load()
-	if current == nowMillisecond {
-		return // still fresh, skip entirely
-	}
-
-	// update timestamp every millisecond. TTL = 1 millisecond.
-	if !gateYYYYMonth.CompareAndSwap(current, nowMillisecond) {
+	prev := timeCacheYYYYMonth.active.Load()
+	if prev != nil && prev.valueMillisecond == nowMs {
 		return
 	}
 
-	previous := timeCacheYYYYMonth.active.Load()
-
 	next := new(timeBuf)
-	next.valueMillisecond = nowMillisecond
-
-	if previous != nil {
-		*next = *previous
-	}
-
-	// rebuild date prefix only when the day changes.
+	next.valueMillisecond = nowMs
 	nowDay := nowNano / nanosPerDay
 
-	if previous == nil || nowDay != previous.valueDay {
+	if prev != nil {
+		*next = *prev
+	}
+
+	if prev == nil || nowDay != prev.valueDay {
 		next.valueDay = nowDay
-
 		year, month, day := now.Date()
+		b := next.output[:0]
 
-		custom := next.output[:0]
-
-		// YYYY
-		custom = strconv.AppendInt(custom, int64(year), 10)
-
-		// MM
+		b = strconv.AppendInt(b, int64(year), 10)
 		if month < 10 {
-			custom = append(custom, '0')
+			b = append(b, '0')
 		}
 
-		custom = strconv.AppendInt(custom, int64(month), 10)
-		custom = append(custom, ' ')
+		b = strconv.AppendInt(b, int64(month), 10)
 
-		// DD
+		b = append(b, ' ')
 		if day < 10 {
-			custom = append(custom, '0')
+			b = append(b, '0')
 		}
 
-		custom = strconv.AppendInt(custom, int64(day), 10)
-		custom = append(custom, ' ')
-
-		next.dateLen = len(custom)
+		b = strconv.AppendInt(b, int64(day), 10)
+		b = append(b, ' ')
+		next.dateLen = len(b)
 	}
 
 	hour, minute, sec := now.Clock()
 	milli := now.Nanosecond() / 1e6
+	b := next.output[next.dateLen:next.dateLen]
 
-	custom := next.output[next.dateLen:next.dateLen]
-
-	// HH
 	if hour < 10 {
-		custom = append(custom, '0')
+		b = append(b, '0')
 	}
 
-	custom = strconv.AppendInt(custom, int64(hour), 10)
-	custom = append(custom, ':')
+	b = strconv.AppendInt(b, int64(hour), 10)
 
-	// MM
+	b = append(b, ':')
 	if minute < 10 {
-		custom = append(custom, '0')
+		b = append(b, '0')
 	}
 
-	custom = strconv.AppendInt(custom, int64(minute), 10)
-	custom = append(custom, ':')
+	b = strconv.AppendInt(b, int64(minute), 10)
 
-	// SS
+	b = append(b, ':')
 	if sec < 10 {
-		custom = append(custom, '0')
+		b = append(b, '0')
 	}
 
-	custom = strconv.AppendInt(custom, int64(sec), 10)
-	custom = append(custom, '.')
+	b = strconv.AppendInt(b, int64(sec), 10)
 
-	// mmm
+	b = append(b, '.')
 	if milli < 100 {
-		custom = append(custom, '0')
+		b = append(b, '0')
 	}
 
 	if milli < 10 {
-		custom = append(custom, '0')
+		b = append(b, '0')
 	}
 
-	custom = strconv.AppendInt(custom, int64(milli), 10)
+	b = strconv.AppendInt(b, int64(milli), 10)
 
-	next.length = next.dateLen + len(custom)
-
+	next.length = next.dateLen + len(b)
 	timeCacheYYYYMonth.active.Store(next)
-}
-
-func updateRFC3339TimeCache() {
-	now := time.Now().UTC() // ← Ensure UTC for 'Z' suffix
-	nowNano := now.UnixNano()
-
-	nowMillisecond := nowNano / 1e6
-
-	current := gateRFC3339.Load()
-	if current == nowMillisecond {
-		return
-	}
-
-	if !gateRFC3339.CompareAndSwap(current, nowMillisecond) {
-		return
-	}
-
-	previous := timeCacheRFC3339.active.Load()
-	next := new(timeBuf)
-	next.valueMillisecond = nowMillisecond
-
-	if previous != nil {
-		*next = *previous
-	}
-
-	// Rebuild date+time prefix only when the millisecond changes
-	// (your existing logic already handles day-change optimization via valueDay)
-	nowDay := nowNano / nanosPerDay
-
-	if previous == nil || nowDay != previous.valueDay {
-		next.valueDay = nowDay
-		year, month, day := now.Date()
-		std := next.output[:0]
-
-		// YYYY-MM-DDT
-		std = strconv.AppendInt(std, int64(year), 10)
-
-		std = append(std, '-')
-		if month < 10 {
-			std = append(std, '0')
-		}
-
-		std = strconv.AppendInt(std, int64(month), 10)
-
-		std = append(std, '-')
-		if day < 10 {
-			std = append(std, '0')
-		}
-
-		std = strconv.AppendInt(std, int64(day), 10)
-		std = append(std, 'T')
-		next.dateLen = len(std)
-	}
-
-	hour, minute, sec := now.Clock()
-	milli := now.Nanosecond() / 1e6
-
-	std := next.output[next.dateLen:next.dateLen]
-
-	// HH:MM:SS.mmmZ
-	if hour < 10 {
-		std = append(std, '0')
-	}
-
-	std = strconv.AppendInt(std, int64(hour), 10)
-	std = append(std, ':')
-
-	if minute < 10 {
-		std = append(std, '0')
-	}
-
-	std = strconv.AppendInt(std, int64(minute), 10)
-	std = append(std, ':')
-
-	if sec < 10 {
-		std = append(std, '0')
-	}
-
-	std = strconv.AppendInt(std, int64(sec), 10)
-	std = append(std, '.')
-
-	// Milliseconds: zero-pad to 3 digits
-	if milli < 100 {
-		std = append(std, '0')
-		if milli < 10 {
-			std = append(std, '0')
-		}
-	}
-
-	std = strconv.AppendInt(std, int64(milli), 10)
-	std = append(std, 'Z') // UTC indicator
-
-	next.length = next.dateLen + len(std)
-	timeCacheRFC3339.active.Store(next)
 }

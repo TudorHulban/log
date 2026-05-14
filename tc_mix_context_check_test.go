@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -335,8 +334,6 @@ func TestMissing_Raw_Mix(t *testing.T) {
 
 	out := writer.String()
 	require.NotEmpty(t, out)
-
-	fmt.Println(out)
 
 	logSet, errCr := query.NewLogset(out)
 	require.NoError(t, errCr)

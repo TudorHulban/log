@@ -196,7 +196,7 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 
 	for b.Loop() {
 		logger.PrintRaw(
-			[]byte("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"), // 32 bytes
+			[]byte(_Payload),
 		)
 	}
 

@@ -13,8 +13,6 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// TODO: Infow
-
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
 // BenchmarkLogger_Parallel_Info/1.nil_timestamp-16         	21219388	        58.37 ns/op	       0 B/op	       0 allocs/op
 // BenchmarkLogger_Parallel_Info/2.standard_timestamp-16    	20901224	        58.61 ns/op	       0 B/op	       0 allocs/op

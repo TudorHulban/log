@@ -151,6 +151,6 @@ func TestLogger_Raw_Panic(t *testing.T) {
 		"Should have captured at least one log line",
 	)
 
-	require.NoError(t, logSet.First().Contains("PANIC", 1))
-	require.NoError(t, logSet.First().Contains("core system panic", 1))
+	require.NoError(t, logSet.First().Contains(1, "PANIC"))
+	require.NoError(t, logSet.First().Contains(1, "core system panic"))
 }

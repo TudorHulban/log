@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"unicode"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
+	"github.com/tudorhulban/log/query"
 	"github.com/tudorhulban/log/timestamp"
 )
 
@@ -282,4 +285,64 @@ func TestArenalog_NoRootFields(t *testing.T) {
 	require.Equal(t, "ERROR", errorLog["level"])
 	require.Equal(t, float64(500), errorLog["code"]) // Entry Info
 	require.Equal(t, "minimal error", errorLog["msg"])
+}
+
+// test produces
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_07_print.go Line68 TRACE: created logger, level TRACE
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_00_trace.go Line18 TRACE: some text
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_01_debug.go Line18 DEBUG: some text
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_02_info.go Line18 INFO: some text
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_03_warn.go Line18 WARN: some text
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_04_error.go Line18 ERROR: some text
+// 2026-05-14T13:21:18+03:00 /mnt/tmpfs.ramdisk/log/methods_07_print.go Line60 TRACE: some text
+
+func TestMissing_Raw_Mix(t *testing.T) {
+	var writer bytes.Buffer
+
+	ingestor, errCrIngestor := bytearena.NewIngestor(
+		bytearena.Size100K(),
+		&writer,
+	)
+	require.NoError(t, errCrIngestor)
+	require.NotNil(t, ingestor)
+
+	l, errCrLogger := NewLogger(
+		&ParamsNewLogger{
+			Ingestor:    ingestor,
+			LoggerLevel: LevelTrace,
+
+			WithFatalWriter: os.Stdout,
+			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
+			WithCaller:      true,
+			WithColor:       false,
+			WithJSON:        false,
+		},
+	)
+	require.NoError(t, errCrLogger)
+
+	l.Trace("some text")
+	l.Debug("some text")
+	l.Info("some text")
+	l.Warn("some text")
+	l.Error("some text")
+	l.Print("some text")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	chIngestionEnd := ingestor.StartIngestion(ctx)
+
+	cancel()
+	<-chIngestionEnd
+
+	out := writer.String()
+	require.NotEmpty(t, out)
+
+	fmt.Println(out)
+
+	logSet, errCr := query.NewLogset(out)
+	require.NoError(t, errCr)
+
+	require.NoError(t, logSet.ContainsLike(7, "Line"))
+	require.NoError(t, logSet.Contains(6, "some text"))
+	require.NoError(t, logSet.Contains(3, "TRACE"))
+	require.NoError(t, logSet.ContainsEach(1, "DEBUG", "INFO", "WARN", "ERROR"))
 }

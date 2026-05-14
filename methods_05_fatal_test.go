@@ -137,6 +137,6 @@ func TestLogger_Raw_Fatal(t *testing.T) {
 	require.NoError(t, errCr)
 	assert.Len(t, logSet, 1)
 
-	require.NoError(t, logSet.First().Contains("[FATAL]", 1))
-	require.NoError(t, logSet.Contains("system failure", 1))
+	require.NoError(t, logSet.First().Contains(1, "[FATAL]"))
+	require.NoError(t, logSet.Contains(1, "system failure"))
 }

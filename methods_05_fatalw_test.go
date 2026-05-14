@@ -137,8 +137,8 @@ func TestLogger_Raw_Fatalw(t *testing.T) {
 	require.NoError(t, errCr)
 	assert.Len(t, logSet, 1)
 
-	require.NoError(t, logSet.First().Contains("[FATAL]", 1))
-	require.NoError(t, logSet.First().Contains("odd_args", 1))
+	require.NoError(t, logSet.First().Contains(1, "[FATAL]"))
+	require.NoError(t, logSet.First().Contains(1, "odd_args"))
 }
 
 // test produces
@@ -198,6 +198,6 @@ func TestLogger_Raw_Fatalw_Even(t *testing.T) {
 	require.NoError(t, errCr)
 	assert.Len(t, logSet, 1)
 
-	require.NoError(t, logSet.First().Contains("[FATAL]", 1))
-	require.NoError(t, logSet.First().Contains("service=infra", 1))
+	require.NoError(t, logSet.First().Contains(1, "[FATAL]"))
+	require.NoError(t, logSet.First().Contains(1, "service=infra"))
 }

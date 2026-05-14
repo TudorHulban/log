@@ -37,21 +37,34 @@ func (l *Logger) slowPathCaller(pc uintptr, idx uintptr) (string, int) {
 	return file, line
 }
 
-// file, line = l.getCallerData()
-
+// getCallerData retrieves the file name and line number for a specific stack depth.
+// It uses a lock-free cache to avoid the high overhead of runtime.FuncForPC and
+// runtime.FileLine on every log call.
+//
+// Parameters:
+//   - skip: The number of stack frames to skip, where 0 is the immediate caller of getCallerData.
+//
+// Implementation Details:
+//   - It adds an internal offset of 2 to 'skip' to account for runtime.Callers and getCallerData itself.
+//   - It subtracts 1 from the PC to convert the return address into the call site address,
+//     ensuring the line number matches the actual invocation.
+//   - The cache uses a simple hash-mapped array with atomic pointers; if a collision occurs,
+//     the "last writer wins," which maintains thread safety without locking.
 func (l *Logger) getCallerData(skip int) (file string, line int) {
 	// 1. Get the PC at the specified skip level.
 	// We use a small stack buffer.
 	var pcs [1]uintptr
 
-	// runtime.Callers(skip, ...) starts at the skip level.
-	// If l.callerLevel is set correctly (e.g., 3 or 4),
-	// it retrieves the PC of your user's code.
-	n := runtime.Callers(skip, pcs[:])
+	// Increment skip by 2:
+	// +1 to get out of runtime.Callers
+	// +1 to get out of getCallerData
+	n := runtime.Callers(skip+2, pcs[:])
 	if n == 0 {
 		return "", 0
 	}
-	pc := pcs[0]
+
+	// Use pc-1 to ensure we are inside the call site's range
+	pc := pcs[0] - 1
 
 	// 2. Hash the PC
 	idx := (pc >> 4) & cacheMask

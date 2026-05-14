@@ -14,12 +14,12 @@ import (
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_Info/1.nil_timestamp-16         	21219388	        58.37 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Info/2.standard_timestamp-16    	20901224	        58.61 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Info/3.yyyy-month_timestamp-16  	20817206	        58.57 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Info/4.nano_timestamp-16        	20793866	        58.50 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Info/5.nano_timestamp_-_json-16 	20825125	        58.69 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Info/6.nano_-_json,_caller-16   	10581820	       108.2 ns/op	     248 B/op	       2 allocs/op
+// BenchmarkLogger_Parallel_Info/1.nil_timestamp-16         	21114748	        59.00 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Info/2.standard_timestamp-16    	20245314	        59.36 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Info/3.yyyy-month_timestamp-16  	19998660	        59.42 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Info/4.nano_timestamp-16        	20076030	        59.31 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Info/5.nano_timestamp_-_json-16 	20193655	        59.49 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Info/6.nano_-_json,_caller-16   	18852224	        63.66 ns/op	       0 B/op	       0 allocs/op
 
 func BenchmarkLogger_Parallel_Info(b *testing.B) {
 	runtime.GOMAXPROCS(1)
@@ -110,12 +110,12 @@ func BenchmarkLogger_Parallel_Info(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_Infof/1.nil_timestamp-16         	21049404	        59.19 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Infof/2.standard_timestamp-16    	20375635	        60.84 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Infof/3.yyyy-month_timestamp-16  	20215396	        60.64 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Infof/4.nano_timestamp-16        	20296920	        59.71 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Infof/5.nano_timestamp_-_json-16 	20112969	        59.68 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Infof/6.nano_-_json,_caller-16   	 9600229	       122.5 ns/op	     256 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Infof/1.nil_timestamp-16         	20651301	        60.43 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/2.standard_timestamp-16    	19452838	        62.51 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/3.yyyy-month_timestamp-16  	18907471	        61.86 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/4.nano_timestamp-16        	19386944	        62.66 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/5.nano_timestamp_-_json-16 	19244624	        61.49 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Infof/6.nano_-_json,_caller-16   	18153415	        67.98 ns/op	       7 B/op	       0 allocs/op
 
 func BenchmarkLogger_Parallel_Infof(b *testing.B) {
 	runtime.GOMAXPROCS(1)
@@ -213,12 +213,12 @@ func BenchmarkLogger_Parallel_Infof(b *testing.B) {
 }
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Parallel_Infow/1.nil_timestamp-16         	19439230	        62.13 ns/op	      32 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Infow/2.standard_timestamp-16    	19434534	        62.66 ns/op	      32 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Infow/3.yyyy-month_timestamp-16  	19168959	        62.48 ns/op	      32 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Infow/4.nano_timestamp-16        	19246233	        62.74 ns/op	      32 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Infow/5.nano_timestamp_-_json-16 	18490947	        63.57 ns/op	      32 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Infow/6.nano_-_json,_caller-16   	 8349188	       137.0 ns/op	     280 B/op	       3 allocs/op
+// BenchmarkLogger_Parallel_Infow/1.nil_timestamp-16         	19160923	        63.98 ns/op	      32 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Infow/2.standard_timestamp-16    	15703446	        67.51 ns/op	      32 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Infow/3.yyyy-month_timestamp-16  	16751235	        75.11 ns/op	      32 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Infow/4.nano_timestamp-16        	16930497	        76.23 ns/op	      32 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Infow/5.nano_timestamp_-_json-16 	17022232	        73.78 ns/op	      32 B/op	       1 allocs/op
+// BenchmarkLogger_Parallel_Infow/6.nano_-_json,_caller-16   	15994668	        76.77 ns/op	      32 B/op	       1 allocs/op
 
 func BenchmarkLogger_Parallel_Infow(b *testing.B) {
 	runtime.GOMAXPROCS(1)

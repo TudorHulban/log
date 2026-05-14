@@ -9,20 +9,21 @@ import (
 
 func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []any) {
 	var (
-		file string
-		line int
+		callingFromFile string
+		callingFromLine int
 	)
 
 	if l.withCaller {
+		// fileCaller, lineCaller := l.getCallerData(int(l.callerLevel))
 		_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
-		file = fileCaller
-		line = lineCaller
+		callingFromFile = fileCaller
+		callingFromLine = lineCaller
 	}
 
 	if l.withJSON {
 		region, errWrite := l.ingestor.TryWrite(
 			estimatedMessageSize +
-				l.estimateJSONOverhead(0, file, line, args),
+				l.estimateJSONOverhead(0, callingFromFile, callingFromLine, args),
 		)
 		if errWrite != nil {
 			return
@@ -33,8 +34,8 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 		buf = l.appendJSON(
 			buf,
 			label,
-			file,
-			line,
+			callingFromFile,
+			callingFromLine,
 			helpers.AppendArgs(nil, args...),
 		)
 
@@ -60,10 +61,10 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 	}
 
 	if l.withCaller {
-		buf = append(buf, file...)
+		buf = append(buf, callingFromFile...)
 		buf = append(buf, ' ')
 		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = strconv.AppendInt(buf, int64(line), 10)
+		buf = strconv.AppendInt(buf, int64(callingFromLine), 10)
 		buf = append(buf, ' ')
 	}
 
@@ -79,20 +80,21 @@ func (l *Logger) logWithLabel(label string, estimatedMessageSize uint32, args []
 
 func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32, args []any) {
 	var (
-		file string
-		line int
+		callingFromFile string
+		callingFromLine int
 	)
 
 	if l.withCaller {
+		// fileCaller, lineCaller := l.getCallerData(int(l.callerLevel))
 		_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
-		file = fileCaller
-		line = lineCaller
+		callingFromFile = fileCaller
+		callingFromLine = lineCaller
 	}
 
 	if l.withJSON {
 		region, errWrite := l.ingestor.TryWrite(
 			estimatedMessageSize +
-				l.estimateJSONOverhead(0, file, line, args),
+				l.estimateJSONOverhead(0, callingFromFile, callingFromLine, args),
 		)
 		if errWrite != nil {
 			return
@@ -103,8 +105,8 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 		buf = l.appendJSON(
 			buf,
 			label,
-			file,
-			line,
+			callingFromFile,
+			callingFromLine,
 			helpers.Appendf(nil, format, args),
 		)
 
@@ -151,20 +153,21 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 
 func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, keysAndValues ...any) {
 	var (
-		file string
-		line int
+		callingFromFile string
+		callingFromLine int
 	)
 
 	if l.withCaller {
+		// fileCaller, lineCaller := l.getCallerData(int(l.callerLevel))
 		_, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
-		file = fileCaller
-		line = lineCaller
+		callingFromFile = fileCaller
+		callingFromLine = lineCaller
 	}
 
 	if l.withJSON {
 		region, errWrite := l.ingestor.TryWrite(
 			estimatedMessageSize +
-				l.estimateJSONOverhead(len(msg), file, line, keysAndValues),
+				l.estimateJSONOverhead(len(msg), callingFromFile, callingFromLine, keysAndValues),
 		)
 		if errWrite != nil {
 			return
@@ -175,8 +178,8 @@ func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, k
 		buf = l.appendJSONKV(
 			buf,
 			label,
-			file,
-			line,
+			callingFromFile,
+			callingFromLine,
 			[]byte(msg),
 			keysAndValues...,
 		)
@@ -207,10 +210,10 @@ func (l *Logger) logwWithLabel(label, msg string, estimatedMessageSize uint32, k
 	buf = append(buf, ' ')
 
 	if l.withCaller {
-		buf = append(buf, file...)
+		buf = append(buf, callingFromFile...)
 		buf = append(buf, ' ')
 		buf = append(buf, 'L', 'i', 'n', 'e')
-		buf = strconv.AppendInt(buf, int64(line), 10)
+		buf = strconv.AppendInt(buf, int64(callingFromLine), 10)
 		buf = append(buf, ' ')
 	}
 

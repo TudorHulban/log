@@ -52,11 +52,12 @@ func TestArenalog_OneField(t *testing.T) {
 
 // go test -run '^$' -bench '^BenchmarkArenalog_OneField$' -benchmem -memprofile=mem.prof -cpuprofile=cpu.prof
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArenalog_OneField/G1-16 	18325016	        63.49 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G2-16 	11072150	       108.7 ns/op	       6 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G3-16 	10980145	       108.3 ns/op	       5 B/op	       0 allocs/op
-// BenchmarkArenalog_OneField/G4-16 	10916209	       110.0 ns/op	       6 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkArenalog_OneField/G1-12 	18744702	        64.20 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G2-12 	11996622	       100.5 ns/op	       6 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G3-12 	11811764	       100.9 ns/op	       6 B/op	       0 allocs/op
+// BenchmarkArenalog_OneField/G4-12 	11488641	       101.7 ns/op	       6 B/op	       0 allocs/op
+
 func BenchmarkArenalog_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}
@@ -171,8 +172,9 @@ func TestArenalog_MultipleFields(t *testing.T) {
 // go test -run '^$' -bench '^BenchmarkContext_NoJSON_MultipleFields$' -benchmem -memprofile=mem.prof -cpuprofile=cpu.prof
 // go tool pprof -alloc_objects mem.out
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_NoJSON_MultipleFields-16    	 9760326	       126.5 ns/op	       4 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkContext_NoJSON_MultipleFields-12    	11057649	       110.6 ns/op	       4 B/op	       0 allocs/op
+
 func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -232,8 +234,9 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	}
 }
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkContext_WithJSON_MultipleFields-16    	 8048110	       151.1 ns/op	       5 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkContext_WithJSON_MultipleFields-12    	 8336259	       146.6 ns/op	       6 B/op	       0 allocs/op
+
 func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -294,11 +297,12 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	}
 }
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=1-16         	16213712	        74.77 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=2-16         	17813103	        64.67 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=3-16         	14062590	        84.90 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=4-16         	13590536	        88.83 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=1-12         	16060803	        75.94 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=2-12         	19532457	        61.69 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=3-12         	14725862	        81.01 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkArenalog_MultipleFields_Parallel/gomaxprocs=4-12         	14204284	        82.44 ns/op	       0 B/op	       0 allocs/op
+
 func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 

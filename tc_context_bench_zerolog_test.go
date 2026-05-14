@@ -23,9 +23,12 @@ func TestZerolog_OneField(t *testing.T) {
 		Msg("benchmark test")
 }
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkZerolog_OneField/G1-16 	 7227042	       166.4 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkZerolog_OneField/G2-16 	 7211571	       165.2 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkZerolog_OneField/G1-12 	 7749836	       154.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_OneField/G2-12 	 7865106	       153.2 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_OneField/G3-12 	 7710064	       157.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkZerolog_OneField/G4-12 	 7761795	       154.6 ns/op	       0 B/op	       0 allocs/op
+
 func BenchmarkZerolog_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 	writer := helpers.CountWriterNoBuffer{}

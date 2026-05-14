@@ -7,8 +7,8 @@ import (
 )
 
 type callerCacheEntry struct {
-	pc   uintptr
 	file string
+	pc   uintptr
 	line int
 }
 
@@ -17,11 +17,12 @@ const cacheMask = cacheSize - 1
 
 var callerTable [cacheSize]unsafe.Pointer
 
-func (l *Logger) slowPathCaller(pc uintptr, idx uintptr) (string, int) {
+func (*Logger) slowPathCaller(pc uintptr, idx uintptr) (string, int) {
 	fn := runtime.FuncForPC(pc)
 	if fn == nil {
 		return "", 0
 	}
+
 	file, line := fn.FileLine(pc)
 
 	// Create new entry

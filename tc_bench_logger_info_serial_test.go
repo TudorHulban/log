@@ -13,14 +13,14 @@ import (
 	"github.com/tudorhulban/log/timestamp"
 )
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Infof/1.nil_timestamp-16         	23420386	        53.70 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/2.standard_timestamp-16    	22038463	        54.88 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/3.yyyy-month_timestamp-16  	22626078	        54.07 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/4.nano_timestamp-16        	 1621762	       739.2 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/5.json_-_rfc3339-16        	17267485	        70.38 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/6.nano_timestamp_-_json-16 	 1813675	       657.5 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_Infof/7.nano_-_json_caller-16    	  562224	      1925 ns/op	     264 B/op	       3 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkLogger_Infof/1.nil_timestamp-12         	24220348	        50.29 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/2.standard_timestamp-12    	23435428	        51.70 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/3.yyyy-month_timestamp-12  	23365196	        51.58 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/4.nano_timestamp-12        	15806343	        74.48 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/5.json_-_rfc3339-12        	16623351	        73.25 ns/op	      10 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/6.nano_timestamp_-_json-12 	12663598	        93.26 ns/op	      11 B/op	       1 allocs/op
+// BenchmarkLogger_Infof/7.nano_-_json_caller-12    	 4257105	       283.7 ns/op	      13 B/op	       1 allocs/op
 
 func BenchmarkLogger_Infof(b *testing.B) {
 	tests := []struct {
@@ -111,14 +111,14 @@ func BenchmarkLogger_Infof(b *testing.B) {
 	}
 }
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_InfoFast/1.nil_timestamp-16         	24311269	        50.75 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/2.standard_timestamp-16    	22581175	        53.27 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/3.yyyy-month_timestamp-16  	22399359	        53.05 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/4.nano_timestamp-16        	 1636036	       731.6 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/5.json_-_rfc3339-16        	17275332	        70.38 ns/op	      10 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/6.nano_timestamp_-_json-16 	 1811938	       663.8 ns/op	      11 B/op	       1 allocs/op
-// BenchmarkLogger_InfoFast/7.nano_-_json,_caller-16   	  505116	      2274 ns/op	     265 B/op	       3 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkLogger_InfoFast/1.nil_timestamp-12         	24612154	        50.32 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/2.standard_timestamp-12    	22802058	        51.95 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/3.yyyy-month_timestamp-12  	22875586	        52.04 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/4.nano_timestamp-12        	16112794	        74.60 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/5.json_-_rfc3339-12        	16694774	        73.44 ns/op	      11 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/6.nano_timestamp_-_json-12 	12238436	        94.69 ns/op	      11 B/op	       1 allocs/op
+// BenchmarkLogger_InfoFast/7.nano_-_json,_caller-12   	 4207267	       282.9 ns/op	      13 B/op	       1 allocs/op
 
 func BenchmarkLogger_InfoFast(b *testing.B) {
 	tests := []struct {

@@ -50,12 +50,15 @@ func BenchmarkLogger_Print(b *testing.B) {
 	<-chIngestionEnd
 }
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkLogger_Printf/1.nil_timestamp-16         	12309045	        98.36 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Printf/2.standard_timestamp-16    	10687345	       114.8 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Printf/3.yyyy-month_timestamp-16  	10265925	       115.8 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Printf/4.nano_timestamp-16        	 9505390	       125.7 ns/op	       8 B/op	       0 allocs/op
-// BenchmarkLogger_Printf/5.nano_timestamp_-_json-16 	 7095447	       174.3 ns/op	      32 B/op	       1 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkLogger_Printf/1.nil_timestamp-12         	12420274	        97.38 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/2.standard_timestamp-12    	11779819	        99.97 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/3.yyyy-month_timestamp-12  	11581088	       101.3 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/4.nano_timestamp-12        	 9334892	       127.4 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/5.nano_timestamp_-_json-12 	 5947657	       200.1 ns/op	      54 B/op	       2 allocs/op
+
+// TODO: alloc
+
 func BenchmarkLogger_Printf(b *testing.B) {
 	tests := []struct {
 		timestampFunc timestamp.Timestamp
@@ -132,7 +135,9 @@ func BenchmarkLogger_Printf(b *testing.B) {
 	}
 }
 
-// BenchmarkLogger_Printw-16    	 8913391	       134.8 ns/op	      47 B/op	       1 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkLogger_Printw-12    	24473226	        49.10 ns/op	       1 B/op	       0 allocs/op
+
 func BenchmarkLogger_Printw(b *testing.B) {
 	var writer helpers.NoopWriter
 

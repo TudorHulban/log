@@ -30,9 +30,11 @@ func TestPhuslu_OneField(t *testing.T) {
 
 // go test -run '^$' -bench '^BenchmarkPhuslu_OneField$' -benchmem
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkPhuslu_OneField/G1-16 	 8996448	       134.4 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkPhuslu_OneField/G2-16 	 9046921	       132.7 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkPhuslu_OneField/G1-12 	 8532501	       140.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_OneField/G2-12 	 8480228	       139.4 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_OneField/G3-12 	 8606548	       140.0 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_OneField/G4-12 	 8446911	       141.2 ns/op	       0 B/op	       0 allocs/op
 
 func BenchmarkPhuslu_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
@@ -66,11 +68,12 @@ func BenchmarkPhuslu_OneField(b *testing.B) {
 	}
 }
 
-// cpu: AMD Ryzen 7 5800H with Radeon Graphics
-// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=1-16         	 8888434	       131.1 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=2-16         	16020363	        74.65 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=3-16         	23736805	        50.80 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=4-16         	23618685	        50.08 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=1-12         	 8586711	       139.1 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=2-12         	15442574	        76.53 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=3-12         	23493219	        51.19 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkPhuslu_Parallel_OneField/gomaxprocs=4-12         	29966448	        39.28 ns/op	       0 B/op	       0 allocs/op
+
 func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
 	gomaxprocsValues := []int{1, 2, 3, 4}
 
@@ -115,7 +118,9 @@ func BenchmarkPhuslu_Parallel_OneField(b *testing.B) {
 	)
 }
 
-// BenchmarkPhuslu_WithFields-16    	 4626322	       259.0 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 5 5600U with Radeon Graphics
+// BenchmarkPhuslu_WithFields-12    	 4801941	       250.9 ns/op	       0 B/op	       0 allocs/op
+
 func BenchmarkPhuslu_WithFields(b *testing.B) {
 	var writer helpers.NoopWriter
 

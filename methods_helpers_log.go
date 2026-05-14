@@ -86,7 +86,6 @@ func (l *Logger) logfWithLabel(label, format string, estimatedMessageSize uint32
 
 	if l.withCaller {
 		fileCaller, lineCaller := l.getCallerData(int(l.callerLevel))
-		// _, fileCaller, lineCaller, _ := runtime.Caller(int(l.callerLevel))
 		callingFromFile = fileCaller
 		callingFromLine = lineCaller
 	}

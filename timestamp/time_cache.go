@@ -38,7 +38,11 @@ func buildRFC3339Cache(now time.Time) {
 
 	next := new(timeBuf)
 	next.valueMillisecond = nowMs
-	nowDay := nowNano / nanosPerDay
+
+	// Get the correct day representation using the local date,
+	// flexible and not tied to UTC math.
+	year, month, day := now.Date()
+	nowDay := int64(year)*10000 + int64(month)*100 + int64(day) // Unique daily integer YYYYMMDD
 
 	if prev != nil {
 		*next = *prev
@@ -46,64 +50,93 @@ func buildRFC3339Cache(now time.Time) {
 
 	if prev == nil || nowDay != prev.valueDay {
 		next.valueDay = nowDay
-		year, month, day := now.Date()
-		b := next.output[:0]
-		b = strconv.AppendInt(b, int64(year), 10)
+		buffer := next.output[:0]
+		buffer = strconv.AppendInt(buffer, int64(year), 10)
 
-		b = append(b, '-')
+		buffer = append(buffer, '-')
 		if month < 10 {
-			b = append(b, '0')
+			buffer = append(buffer, '0')
 		}
 
-		b = strconv.AppendInt(b, int64(month), 10)
+		buffer = strconv.AppendInt(buffer, int64(month), 10)
 
-		b = append(b, '-')
+		buffer = append(buffer, '-')
 		if day < 10 {
-			b = append(b, '0')
+			buffer = append(buffer, '0')
 		}
 
-		b = strconv.AppendInt(b, int64(day), 10)
-		b = append(b, 'T')
-		next.dateLen = len(b)
+		buffer = strconv.AppendInt(buffer, int64(day), 10)
+		buffer = append(buffer, 'T')
+
+		next.dateLen = len(buffer)
 	}
 
 	hour, minute, sec := now.Clock()
 	milli := now.Nanosecond() / 1e6
-	b := next.output[next.dateLen:next.dateLen]
+	buffer := next.output[next.dateLen:next.dateLen]
 
 	if hour < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(hour), 10)
+	buffer = strconv.AppendInt(buffer, int64(hour), 10)
 
-	b = append(b, ':')
+	buffer = append(buffer, ':')
 	if minute < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(minute), 10)
+	buffer = strconv.AppendInt(buffer, int64(minute), 10)
 
-	b = append(b, ':')
+	buffer = append(buffer, ':')
 	if sec < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(sec), 10)
+	buffer = strconv.AppendInt(buffer, int64(sec), 10)
 
-	b = append(b, '.')
+	buffer = append(buffer, '.')
 	if milli < 100 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
 	if milli < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(milli), 10)
-	b = append(b, 'Z')
+	buffer = strconv.AppendInt(buffer, int64(milli), 10)
 
-	next.length = next.dateLen + len(b)
+	// Dynamically calculate and append the passed offset.
+	_, offsetSecs := now.Zone()
+	if offsetSecs == 0 {
+		buffer = append(buffer, 'Z')
+	} else {
+		if offsetSecs > 0 {
+			buffer = append(buffer, '+')
+		} else {
+			buffer = append(buffer, '-')
+			offsetSecs = -offsetSecs
+		}
+
+		offsetMins := offsetSecs / 60
+		offsetHours := offsetMins / 60
+		offsetMins = offsetMins % 60
+
+		if offsetHours < 10 {
+			buffer = append(buffer, '0')
+		}
+
+		buffer = strconv.AppendInt(buffer, int64(offsetHours), 10)
+
+		buffer = append(buffer, ':')
+		if offsetMins < 10 {
+			buffer = append(buffer, '0')
+		}
+
+		buffer = strconv.AppendInt(buffer, int64(offsetMins), 10)
+	}
+
+	next.length = next.dateLen + len(buffer)
 	timeCacheRFC3339.active.Store(next)
 }
 
@@ -127,63 +160,63 @@ func buildStandardCache(now time.Time) {
 	if prev == nil || nowDay != prev.valueDay {
 		next.valueDay = nowDay
 		year, month, day := now.Date()
-		b := next.output[:0]
-		b = strconv.AppendInt(b, int64(year), 10)
+		buffer := next.output[:0]
+		buffer = strconv.AppendInt(buffer, int64(year), 10)
 
-		b = append(b, '/')
+		buffer = append(buffer, '/')
 		if month < 10 {
-			b = append(b, '0')
+			buffer = append(buffer, '0')
 		}
 
-		b = strconv.AppendInt(b, int64(month), 10)
+		buffer = strconv.AppendInt(buffer, int64(month), 10)
 
-		b = append(b, '/')
+		buffer = append(buffer, '/')
 		if day < 10 {
-			b = append(b, '0')
+			buffer = append(buffer, '0')
 		}
 
-		b = strconv.AppendInt(b, int64(day), 10)
-		b = append(b, ' ')
+		buffer = strconv.AppendInt(buffer, int64(day), 10)
+		buffer = append(buffer, ' ')
 
-		next.dateLen = len(b)
+		next.dateLen = len(buffer)
 	}
 
 	hour, minute, sec := now.Clock()
 	milli := now.Nanosecond() / 1e6
-	b := next.output[next.dateLen:next.dateLen]
+	buffer := next.output[next.dateLen:next.dateLen]
 
 	if hour < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(hour), 10)
+	buffer = strconv.AppendInt(buffer, int64(hour), 10)
 
-	b = append(b, ':')
+	buffer = append(buffer, ':')
 	if minute < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(minute), 10)
+	buffer = strconv.AppendInt(buffer, int64(minute), 10)
 
-	b = append(b, ':')
+	buffer = append(buffer, ':')
 	if sec < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(sec), 10)
+	buffer = strconv.AppendInt(buffer, int64(sec), 10)
 
-	b = append(b, '.')
+	buffer = append(buffer, '.')
 	if milli < 100 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
 	if milli < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(milli), 10)
+	buffer = strconv.AppendInt(buffer, int64(milli), 10)
 
-	next.length = next.dateLen + len(b)
+	next.length = next.dateLen + len(buffer)
 	timeCacheStandard.active.Store(next)
 }
 
@@ -207,60 +240,60 @@ func buildYYYYMonthCache(now time.Time) {
 	if prev == nil || nowDay != prev.valueDay {
 		next.valueDay = nowDay
 		year, month, day := now.Date()
-		b := next.output[:0]
+		buffer := next.output[:0]
 
-		b = strconv.AppendInt(b, int64(year), 10)
+		buffer = strconv.AppendInt(buffer, int64(year), 10)
 		if month < 10 {
-			b = append(b, '0')
+			buffer = append(buffer, '0')
 		}
 
-		b = strconv.AppendInt(b, int64(month), 10)
+		buffer = strconv.AppendInt(buffer, int64(month), 10)
 
-		b = append(b, ' ')
+		buffer = append(buffer, ' ')
 		if day < 10 {
-			b = append(b, '0')
+			buffer = append(buffer, '0')
 		}
 
-		b = strconv.AppendInt(b, int64(day), 10)
-		b = append(b, ' ')
-		next.dateLen = len(b)
+		buffer = strconv.AppendInt(buffer, int64(day), 10)
+		buffer = append(buffer, ' ')
+		next.dateLen = len(buffer)
 	}
 
 	hour, minute, sec := now.Clock()
 	milli := now.Nanosecond() / 1e6
-	b := next.output[next.dateLen:next.dateLen]
+	buffer := next.output[next.dateLen:next.dateLen]
 
 	if hour < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(hour), 10)
+	buffer = strconv.AppendInt(buffer, int64(hour), 10)
 
-	b = append(b, ':')
+	buffer = append(buffer, ':')
 	if minute < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(minute), 10)
+	buffer = strconv.AppendInt(buffer, int64(minute), 10)
 
-	b = append(b, ':')
+	buffer = append(buffer, ':')
 	if sec < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(sec), 10)
+	buffer = strconv.AppendInt(buffer, int64(sec), 10)
 
-	b = append(b, '.')
+	buffer = append(buffer, '.')
 	if milli < 100 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
 	if milli < 10 {
-		b = append(b, '0')
+		buffer = append(buffer, '0')
 	}
 
-	b = strconv.AppendInt(b, int64(milli), 10)
+	buffer = strconv.AppendInt(buffer, int64(milli), 10)
 
-	next.length = next.dateLen + len(b)
+	next.length = next.dateLen + len(buffer)
 	timeCacheYYYYMonth.active.Store(next)
 }

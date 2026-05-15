@@ -54,10 +54,12 @@ func TestTimestampRFC3339Bucharest(t *testing.T) {
 	t.Run(
 		"3. Consistency check (values should be close to time.Now)",
 		func(t *testing.T) {
-			now := time.Now().UTC()
 			got := TimestampRFC3339Bucharest(nil)
 
 			parsed, _ := time.Parse(time.RFC3339Nano, string(got))
+
+			loc, _ := time.LoadLocation("Europe/Bucharest")
+			now := time.Now().In(loc)
 
 			// Check if the timestamp is within a reasonable drift (e.g., 1 second)
 			// because the cache update might be slightly behind time.Now()
@@ -67,7 +69,46 @@ func TestTimestampRFC3339Bucharest(t *testing.T) {
 			}
 
 			if diff > time.Second {
-				t.Errorf("Timestamp drift too high: %v", diff)
+				t.Errorf(
+					"Timestamp drift too high: %v (now is %q vs %q)",
+					diff,
+					now,
+					parsed,
+				)
+			}
+		},
+	)
+}
+
+func TestTimestampRFC3339CustomLocation(t *testing.T) {
+	chReady := StartRFC3339CustomLocationCache(t.Context(), "Asia/Kolkata")
+
+	<-chReady
+
+	t.Run(
+		"1. Consistency check (values should be close to time.Now)",
+		func(t *testing.T) {
+			got := TimestampRFC3339CustomLocation(nil)
+
+			parsed, _ := time.Parse(time.RFC3339Nano, string(got))
+
+			loc, _ := time.LoadLocation("Asia/Kolkata")
+			now := time.Now().In(loc)
+
+			// Check if the timestamp is within a reasonable drift (e.g., 1 second)
+			// because the cache update might be slightly behind time.Now()
+			diff := parsed.Sub(now)
+			if diff < 0 {
+				diff = -diff
+			}
+
+			if diff > time.Second {
+				t.Errorf(
+					"Timestamp drift too high: %v (now is %q vs %q)",
+					diff,
+					now,
+					parsed,
+				)
 			}
 		},
 	)

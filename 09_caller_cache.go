@@ -51,7 +51,7 @@ func (*Logger) slowPathCaller(pc uintptr, idx uintptr) (string, int) {
 //     ensuring the line number matches the actual invocation.
 //   - The cache uses a simple hash-mapped array with atomic pointers; if a collision occurs,
 //     the "last writer wins," which maintains thread safety without locking.
-func (l *Logger) getCallerData(skip int) (file string, line int) {
+func (l *Logger) getCallerData(skip int) (string, int) {
 	// 1. Get the PC at the specified skip level.
 	// We use a small stack buffer.
 	var pcs [1]uintptr
@@ -74,7 +74,8 @@ func (l *Logger) getCallerData(skip int) (file string, line int) {
 	if ptr != nil {
 		entry := (*callerCacheEntry)(ptr)
 		if entry.pc == pc {
-			return entry.file, entry.line
+			return entry.file,
+				entry.line
 		}
 	}
 

@@ -35,6 +35,11 @@ test:
 test-local: 
 	@go test -failfast -count=1 ./... -json -cover -race | tparse -smallscreen
 
+coverage:
+	@go test -v -coverprofile=cover.out ./...
+	@go tool cover -func=cover.out
+	@go tool cover -html=cover.out
+
 # for when golangci lint does not work
 # 	@fieldalignment ./...
 # 	@gocritic check ./...

@@ -1,19 +1,14 @@
 package log
 
-const delim = ": "
+const _DeltaEstimation = 128
+const _PrecisionFloat = 12
 
 const (
-	LevelNONE  = 0
-	LevelINFO  = 1
-	LevelWARN  = 2
-	LevelDEBUG = 3
-	LevelERROR = 4
+	MessageSmallSize  uint32 = 256
+	MessageMediumSize uint32 = 512
+	MessageJSONSize   uint32 = 768
+	MessageLargeSize  uint32 = 2048
+	MessageExtraLarge uint32 = 4096
 )
 
-var logLevels = [5]string{
-	"NONE",
-	"INFO",
-	"WARN",
-	"DEBUG",
-	"ERROR",
-}
+const delim = ": "

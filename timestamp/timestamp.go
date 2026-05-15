@@ -17,6 +17,10 @@ func TimestampNano(appendTo []byte) []byte {
 	return strconv.AppendInt(appendTo, time.Now().UnixNano(), 10)
 }
 
+func TimestampRFC3339Nano(appendTo []byte) []byte {
+	return time.Now().UTC().AppendFormat(appendTo, time.RFC3339Nano)
+}
+
 func TimestampRFC3339(appendTo []byte) []byte {
 	buf := timeCacheRFC3339.active.Load() // atomic pointer load, ~1 ns
 	if buf != nil {
@@ -26,14 +30,25 @@ func TimestampRFC3339(appendTo []byte) []byte {
 	return time.Now().UTC().AppendFormat(appendTo, rfc3339MilliLayout)
 }
 
-func TimestampRFC3339Nano(appendTo []byte) []byte {
-	return time.Now().UTC().AppendFormat(appendTo, time.RFC3339Nano)
-}
-
 func TimestampRFC3339Bucharest(appendTo []byte) []byte {
+	buf := timeCacheRFC3339.active.Load() // atomic pointer load, ~1 ns
+	if buf != nil {
+		return append(appendTo, buf.output[:buf.length]...)
+	}
+
 	loc, _ := time.LoadLocation("Europe/Bucharest")
 
 	return time.Now().In(loc).AppendFormat(appendTo, time.RFC3339)
+}
+
+func TimestampRFC3339CustomLocation(appendTo []byte) []byte {
+	buf := timeCacheRFC3339.active.Load() // atomic pointer load, ~1 ns
+	if buf != nil {
+		return append(appendTo, buf.output[:buf.length]...)
+	}
+
+	// fallback if cache not ready, allow time for the cache to start.
+	return time.Now().UTC().AppendFormat(appendTo, rfc3339MilliLayout)
 }
 
 func TimestampYYYYMonth(appendTo []byte) []byte {

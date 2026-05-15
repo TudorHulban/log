@@ -5,19 +5,6 @@ import (
 	"time"
 )
 
-// use as:
-// func main() {
-// 	ctx, cancel := context.WithCancel(context.Background())
-// 	defer cancel()
-
-// 	go timestamp.Start(ctx)
-
-// 	// ...
-// }
-
-// in tests
-// go Start(t.Context())
-
 // Start begins background cache updates and blocks until ctx is cancelled.
 // Call once from main, typically as: go timestamp.Start(ctx)
 func Start(ctx context.Context) {
@@ -35,6 +22,7 @@ func Start(ctx context.Context) {
 		select {
 		case t := <-ticker.C:
 			utc := t.UTC()
+
 			buildRFC3339Cache(utc)
 			buildStandardCache(t)
 			buildYYYYMonthCache(t)
@@ -43,4 +31,100 @@ func Start(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func StartRFC3339Cache(ctx context.Context) <-chan struct{} {
+	chReady := make(chan struct{})
+
+	go func() {
+		now := time.Now() // Pre-warm so readers never see a nil pointer.
+
+		buildRFC3339Cache(now.UTC())
+
+		// Signal readiness to the caller
+		close(chReady)
+
+		ticker := time.NewTicker(500 * time.Microsecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case t := <-ticker.C:
+				buildRFC3339Cache(
+					t.UTC(),
+				)
+
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	return chReady
+}
+
+func StartRFC3339BucharestCache(ctx context.Context) <-chan struct{} {
+	chReady := make(chan struct{})
+
+	go func() {
+		loc, errLoad := time.LoadLocation("Europe/Bucharest")
+		if errLoad != nil {
+			loc = time.UTC // Fallback safety
+		}
+
+		buildRFC3339Cache(time.Now().In(loc))
+
+		// Signal readiness to the caller
+		close(chReady)
+
+		ticker := time.NewTicker(500 * time.Microsecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case t := <-ticker.C:
+				buildRFC3339Cache(
+					t.In(loc),
+				)
+
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	return chReady
+}
+
+func StartRFC3339CustomLocationCache(ctx context.Context, location string) <-chan struct{} {
+	chReady := make(chan struct{})
+
+	go func() {
+		loc, errLoad := time.LoadLocation(location)
+		if errLoad != nil {
+			loc = time.UTC // Fallback safety
+		}
+
+		buildRFC3339Cache(time.Now().In(loc))
+
+		// Signal readiness to the caller
+		close(chReady)
+
+		ticker := time.NewTicker(500 * time.Microsecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case t := <-ticker.C:
+				buildRFC3339Cache(
+					t.In(loc),
+				)
+
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	return chReady
 }

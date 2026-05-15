@@ -20,9 +20,12 @@ type timeCache struct {
 	active atomic.Pointer[timeBuf]
 }
 
-var timeCacheStandard timeCache
-var timeCacheYYYYMonth timeCache
-var timeCacheRFC3339 timeCache
+var (
+	timeCacheStandard  timeCache
+	timeCacheYYYYMonth timeCache
+
+	timeCacheRFC3339 timeCache
+)
 
 func buildRFC3339Cache(now time.Time) {
 	nowNano := now.UnixNano()

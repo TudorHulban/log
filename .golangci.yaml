@@ -16,6 +16,7 @@ linters:
     - depguard
     - dupl
     - dupword
+    - dogsled
     - embeddedstructfieldcheck
     - err113
     - errcheck

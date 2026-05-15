@@ -8,15 +8,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTimestampRFC3339(t *testing.T) {
-	chReady := StartRFC3339Cache(t.Context())
+func TestTimestampRFC3339Bucharest(t *testing.T) {
+	chReady := StartRFC3339BucharestCache(t.Context())
 
 	<-chReady
 
 	t.Run(
 		"1. Test basic appending to an empty slice",
 		func(t *testing.T) {
-			got := TimestampRFC3339(nil)
+			got := TimestampRFC3339Bucharest(nil)
 
 			// Validate format by attempting to parse it back
 			_, errParse := time.Parse(time.RFC3339Nano, string(got))
@@ -33,7 +33,7 @@ func TestTimestampRFC3339(t *testing.T) {
 		"2. Test appending to an existing slice (functional integrity)",
 		func(t *testing.T) {
 			prefix := []byte("log_prefix: ")
-			got := TimestampRFC3339(prefix)
+			got := TimestampRFC3339Bucharest(prefix)
 
 			if !bytes.HasPrefix(got, prefix) {
 				t.Fatalf("Expected prefix not found. Got: %s", string(got))
@@ -55,7 +55,7 @@ func TestTimestampRFC3339(t *testing.T) {
 		"3. Consistency check (values should be close to time.Now)",
 		func(t *testing.T) {
 			now := time.Now().UTC()
-			got := TimestampRFC3339(nil)
+			got := TimestampRFC3339Bucharest(nil)
 
 			parsed, _ := time.Parse(time.RFC3339Nano, string(got))
 

@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/query"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // test produces
@@ -37,11 +36,12 @@ func TestKVMissing_JSON_Mix(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
 			WithColor:       false,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 
@@ -91,11 +91,12 @@ func TestKVMissing_Raw_Mix(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
 			WithColor:       false,
 			WithJSON:        false,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 

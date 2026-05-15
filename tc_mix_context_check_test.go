@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/query"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
@@ -40,7 +39,6 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &buf,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
@@ -183,7 +181,6 @@ func TestArenalog_NoRootFields(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &buf,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
@@ -311,11 +308,12 @@ func TestMissing_Raw_Mix(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
 			WithColor:       false,
 			WithJSON:        false,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 

@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 func TestCreateEmitData(t *testing.T) {
@@ -56,9 +55,10 @@ func TestEmitData(t *testing.T) {
 			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: safeWriter,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 

@@ -61,7 +61,7 @@ func TestCallerLevel(t *testing.T) {
 	l := Logger{}
 
 	// Helper function to wrap the call
-	wrapper := func(depth int) (string, int) {
+	wrapper := func(depth int) (string, int) { //nolint:gocritic
 		// depth 0 inside here = this anonymous function
 		// depth 1 inside here = TestCallerLevel
 		return l.getCallerData(depth)

@@ -11,7 +11,6 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 func main() {
@@ -36,7 +35,6 @@ func main() {
 			LoggerLevel: log.LevelTrace,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
 			WithColor:       true,
 			WithJSON:        true,

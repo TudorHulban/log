@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/query"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // test produces:
@@ -53,11 +52,12 @@ func TestDirectCalls(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &writer,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithCaller:      true,
 			WithColor:       false,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 

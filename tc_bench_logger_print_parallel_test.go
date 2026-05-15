@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/bytearena/helpers"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // cpu: AMD Ryzen 5 5600U with Radeon Graphics
@@ -38,6 +37,8 @@ func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 
 			WithFatalWriter: os.Stdout,
 		},
+
+		WithTimestampStandardLocal(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
@@ -66,40 +67,34 @@ func BenchmarkLogger_Parallel_PrintRaw(b *testing.B) {
 
 // go test -run '^$' -bench '^BenchmarkLogger_Parallel_Printf$' -benchmem -race
 
-// cpu: AMD Ryzen 5 5600U with Radeon Graphics
-// BenchmarkLogger_Parallel_Printf/1.nil_timestamp-12         	20619877	        59.20 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printf/2.standard_timestamp-12    	20188375	        59.13 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printf/3.yyyy-month_timestamp-12  	20417576	        59.18 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printf/4.nano_timestamp-12        	20330949	        59.27 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printf/5.nano_timestamp_-_json-12 	20169340	        59.76 ns/op	       8 B/op	       1 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkLogger_Parallel_Printf/1.standard_timestamp-16         	21054336	        59.81 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/2.yyyy-month_timestamp-16       	19240754	        59.71 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/3.nano_timestamp-16             	20278218	        60.05 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printf/4.nano_timestamp_-_json-16      	20240864	        60.27 ns/op	       8 B/op	       1 allocs/op
 
 func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 	runtime.GOMAXPROCS(1)
 
 	tests := []struct {
-		timestampFunc timestamp.Timestamp
-		description   string
-		withJSON      bool
+		timestampOption Option
+		description     string
+		withJSON        bool
 	}{
 		{
-			description: "1.nil timestamp",
+			description:     "1.standard timestamp",
+			timestampOption: WithTimestampStandardLocal(b.Context()),
 		},
 		{
-			description:   "2.standard timestamp",
-			timestampFunc: timestamp.TimestampStandard,
+			description:     "2.yyyy-month timestamp",
+			timestampOption: WithTimestampYYYYMonthLocal(b.Context()),
 		},
 		{
-			description:   "3.yyyy-month timestamp",
-			timestampFunc: timestamp.TimestampYYYYMonth,
+			description: "3.nano timestamp",
 		},
 		{
-			description:   "4.nano timestamp",
-			timestampFunc: timestamp.TimestampNano,
-		},
-		{
-			description:   "5.nano timestamp - json",
-			timestampFunc: timestamp.TimestampNano,
-			withJSON:      true,
+			description: "4.nano timestamp - json",
+			withJSON:    true,
 		},
 	}
 
@@ -125,9 +120,10 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tc.timestampFunc,
 						WithJSON:        tc.withJSON,
 					},
+
+					tc.timestampOption,
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
@@ -160,49 +156,42 @@ func BenchmarkLogger_Parallel_Printf(b *testing.B) {
 	}
 }
 
-// cpu: AMD Ryzen 5 5600U with Radeon Graphics
-// BenchmarkLogger_Parallel_Printw/1._nil_timestamp-12         	20561943	        59.40 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printw/2._standard_timestamp-12    	20253273	        58.38 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printw/3._yyyy-month_timestamp-12  	20634520	        58.31 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printw/4._nano_timestamp-12        	20525589	        58.75 ns/op	       7 B/op	       0 allocs/op
-// BenchmarkLogger_Parallel_Printw/5._nano_timestamp_-_json-12 	20244883	        59.15 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Parallel_Printw/6._nano_-_json,_caller-12   	17569348	        68.56 ns/op	       8 B/op	       1 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkLogger_Parallel_Printw/1._standard_timestamp-16         	21100912	        59.47 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/2._yyyy-month_timestamp-16       	20666488	        60.01 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/3._nano_timestamp-16             	20684240	        59.53 ns/op	       7 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/4._nano_timestamp_-_json-16      	20210739	        60.24 ns/op	       8 B/op	       0 allocs/op
+// BenchmarkLogger_Parallel_Printw/5._nano_-_json,_caller-16        	18659180	        65.32 ns/op	       8 B/op	       0 allocs/op
 
 func BenchmarkLogger_Parallel_Printw(b *testing.B) {
 	runtime.GOMAXPROCS(1) // TODO: add multiple values
 
 	tests := []struct {
-		timestampFunc timestamp.Timestamp
-		description   string
+		timestampOption Option
+		description     string
 
 		withJSON   bool
 		withCaller bool
 	}{
 		{
-			description: "1. nil timestamp",
+			description:     "1. standard timestamp",
+			timestampOption: WithTimestampStandardLocal(b.Context()),
 		},
 		{
-			description:   "2. standard timestamp",
-			timestampFunc: timestamp.TimestampStandard,
+			description:     "2. yyyy-month timestamp",
+			timestampOption: WithTimestampYYYYMonthLocal(b.Context()),
 		},
 		{
-			description:   "3. yyyy-month timestamp",
-			timestampFunc: timestamp.TimestampYYYYMonth,
+			description: "3. nano timestamp",
 		},
 		{
-			description:   "4. nano timestamp",
-			timestampFunc: timestamp.TimestampNano,
+			description: "4. nano timestamp - json",
+			withJSON:    true,
 		},
 		{
-			description:   "5. nano timestamp - json",
-			timestampFunc: timestamp.TimestampNano,
-			withJSON:      true,
-		},
-		{
-			description:   "6. nano - json, caller",
-			timestampFunc: timestamp.TimestampNano,
-			withJSON:      true,
-			withCaller:    true,
+			description: "5. nano - json, caller",
+			withJSON:    true,
+			withCaller:  true,
 		},
 	}
 
@@ -228,10 +217,11 @@ func BenchmarkLogger_Parallel_Printw(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tc.timestampFunc,
 						WithJSON:        tc.withJSON,
 						WithCaller:      tc.withCaller,
 					},
+
+					tc.timestampOption,
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)

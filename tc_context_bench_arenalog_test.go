@@ -35,9 +35,10 @@ func TestArenalog_OneField(t *testing.T) {
 			LoggerLevel: LevelInfo,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 
@@ -85,9 +86,10 @@ func BenchmarkArenalog_OneField(b *testing.B) {
 						LoggerLevel: LevelDebug,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339UTC,
 						WithJSON:        true,
 					},
+
+					WithTimestampRFC3339UTC(b.Context()),
 				)
 				require.NoError(b, errCrLogger)
 
@@ -144,9 +146,10 @@ func TestArenalog_MultipleFields(t *testing.T) {
 			LoggerLevel: LevelInfo,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			// WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 
@@ -196,8 +199,9 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 		},
+
+		WithTimestampRFC3339UTC(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 
@@ -258,9 +262,10 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 
@@ -329,9 +334,10 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 			Ingestor:        ingestor,
 			LoggerLevel:     LevelDebug,
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 

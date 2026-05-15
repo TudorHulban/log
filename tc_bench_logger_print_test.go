@@ -9,12 +9,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/bytearena/helpers"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // go test -run '^$' -bench '^BenchmarkLogger_Print$' -benchmem
 
-// BenchmarkLogger_Print-16    	32919981	        36.53 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkLogger_Print-16    	32252947	        37.98 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkLogger_Print(b *testing.B) {
 	ingestor, errCrIngestor := bytearena.NewIngestor(
 		bytearena.Size100K(),
@@ -33,6 +33,8 @@ func BenchmarkLogger_Print(b *testing.B) {
 
 			WithFatalWriter: os.Stdout,
 		},
+
+		WithTimestampStandardLocal(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
@@ -50,41 +52,33 @@ func BenchmarkLogger_Print(b *testing.B) {
 	<-chIngestionEnd
 }
 
-// cpu: AMD Ryzen 5 5600U with Radeon Graphics
-// BenchmarkLogger_Printf/1.nil_timestamp-12         	12420274	        97.38 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Printf/2.standard_timestamp-12    	11779819	        99.97 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Printf/3.yyyy-month_timestamp-12  	11581088	       101.3 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Printf/4.nano_timestamp-12        	 9334892	       127.4 ns/op	       8 B/op	       1 allocs/op
-// BenchmarkLogger_Printf/5.nano_timestamp_-_json-12 	 5947657	       200.1 ns/op	      54 B/op	       2 allocs/op
-
-// TODO: alloc
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkLogger_Printf/1.standard_timestamp-16         	12163123	        98.82 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/2.yyyy-month_timestamp-16       	11890149	        99.23 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/3.nano_timestamp-16             	 9798445	       123.3 ns/op	       8 B/op	       1 allocs/op
+// BenchmarkLogger_Printf/4.nano_timestamp_-_json-16      	 6019629	       201.3 ns/op	      54 B/op	       2 allocs/op
 
 func BenchmarkLogger_Printf(b *testing.B) {
 	tests := []struct {
-		timestampFunc timestamp.Timestamp
-		description   string
-		withJSON      bool
-		withCaller    bool
+		timestampOption Option
+		description     string
+		withJSON        bool
+		withCaller      bool
 	}{
 		{
-			description: "1.nil timestamp",
+			description:     "1.standard timestamp",
+			timestampOption: WithTimestampRFC3339UTC(b.Context()),
 		},
 		{
-			description:   "2.standard timestamp",
-			timestampFunc: timestamp.TimestampStandard,
+			description:     "2.yyyy-month timestamp",
+			timestampOption: WithTimestampYYYYMonthLocal(b.Context()),
 		},
 		{
-			description:   "3.yyyy-month timestamp",
-			timestampFunc: timestamp.TimestampYYYYMonth,
+			description: "3.nano timestamp",
 		},
 		{
-			description:   "4.nano timestamp",
-			timestampFunc: timestamp.TimestampNano,
-		},
-		{
-			description:   "5.nano timestamp - json",
-			timestampFunc: timestamp.TimestampNano,
-			withJSON:      true,
+			description: "4.nano timestamp - json",
+			withJSON:    true,
 		},
 	}
 
@@ -108,10 +102,12 @@ func BenchmarkLogger_Printf(b *testing.B) {
 						LoggerLevel: LevelInfo,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   tc.timestampFunc,
-						WithJSON:        tc.withJSON,
-						WithCaller:      tc.withCaller,
+
+						WithJSON:   tc.withJSON,
+						WithCaller: tc.withCaller,
 					},
+
+					tc.timestampOption,
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, logger)
@@ -135,8 +131,8 @@ func BenchmarkLogger_Printf(b *testing.B) {
 	}
 }
 
-// cpu: AMD Ryzen 5 5600U with Radeon Graphics
-// BenchmarkLogger_Printw-12    	24473226	        49.10 ns/op	       1 B/op	       0 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkLogger_Printw-16    	23154374	        51.98 ns/op	       0 B/op	       0 allocs/op
 
 func BenchmarkLogger_Printw(b *testing.B) {
 	var writer helpers.NoopWriter
@@ -155,6 +151,8 @@ func BenchmarkLogger_Printw(b *testing.B) {
 
 			WithFatalWriter: os.Stdout,
 		},
+
+		WithTimestampStandardLocal(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)
@@ -172,7 +170,9 @@ func BenchmarkLogger_Printw(b *testing.B) {
 	<-chIngestionEnd
 }
 
-// BenchmarkLogger_PrintRaw-16    	69086016	        17.51 ns/op	       0 B/op	       0 allocs/op
+// cpu: AMD Ryzen 7 5800H with Radeon Graphics
+// BenchmarkLogger_PrintRaw-16    	68537496	        17.74 ns/op	       0 B/op	       0 allocs/op
+
 func BenchmarkLogger_PrintRaw(b *testing.B) {
 	var writer helpers.NoopWriter
 
@@ -190,6 +190,8 @@ func BenchmarkLogger_PrintRaw(b *testing.B) {
 
 			WithFatalWriter: os.Stdout,
 		},
+
+		WithTimestampStandardLocal(b.Context()),
 	)
 	require.NoError(b, errCrLogger)
 	require.NotNil(b, logger)

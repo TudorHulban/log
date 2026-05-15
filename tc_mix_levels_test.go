@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // PRINT is not a severity level. It is always emitted regardless of the
@@ -128,7 +127,6 @@ func TestLevelsMatrix(t *testing.T) {
 						LoggerLevel: tc.level,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 						WithCaller:      true,
 						WithColor:       false,
 						WithJSON:        true,
@@ -301,7 +299,6 @@ func TestLevelsfMatrix(t *testing.T) {
 						LoggerLevel: tc.level,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 						WithCaller:      true,
 						WithColor:       false,
 						WithJSON:        true,
@@ -474,7 +471,6 @@ func TestLevelswMatrix(t *testing.T) {
 						LoggerLevel: tc.level,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 						WithCaller:      true,
 						WithColor:       false,
 						WithJSON:        true,

@@ -36,7 +36,6 @@ type Logger struct { //nolint:govet
 
 type ParamsNewLogger struct {
 	Ingestor        *bytearena.Ingestor
-	WithTimestamp   timestamp.Timestamp
 	WithFatalWriter io.Writer
 
 	EstimatedMessageSizeOverall uint32
@@ -88,6 +87,10 @@ func NewLogger(params *ParamsNewLogger, options ...Option) (*Logger, error) {
 	}
 
 	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
 		option(&result)
 	}
 

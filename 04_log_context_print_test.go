@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/query"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // test produces
@@ -37,11 +36,11 @@ func TestContext_JSON_Print(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &bufFatal,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
-			// WithColor:       true,
-			WithJSON:   true,
-			WithCaller: true,
+			WithJSON:        true,
+			WithCaller:      true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 
@@ -137,11 +136,11 @@ func TestContext_Raw_Print(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &bufFatal,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
-			// WithColor:       true,
-			WithJSON:   false,
-			WithCaller: true,
+			WithJSON:        false,
+			WithCaller:      true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 

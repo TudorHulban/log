@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/query"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // test produces
@@ -32,9 +31,10 @@ func TestErrorsPrint(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &buf,
-			WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 			WithJSON:        true,
 		},
+
+		WithTimestampRFC3339UTC(t.Context()),
 	)
 	require.NoError(t, errCrLogger)
 	require.NotNil(t, l)

@@ -11,7 +11,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
@@ -43,9 +42,10 @@ func Benchmark_Debug(b *testing.B) {
 						LoggerLevel: LevelDebug,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 						WithJSON:        true,
 					},
+
+					WithTimestampRFC3339UTC(b.Context()),
 				)
 				require.NoError(b, errCrLogger)
 				require.NotNil(b, l)
@@ -105,9 +105,10 @@ func Benchmark_Debugf(b *testing.B) {
 						LoggerLevel: LevelDebug,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 						WithJSON:        true,
 					},
+
+					WithTimestampRFC3339UTC(b.Context()),
 				)
 				require.NoError(b, errCrLogger)
 
@@ -166,9 +167,10 @@ func Benchmark_Debugw(b *testing.B) {
 						LoggerLevel: LevelDebug,
 
 						WithFatalWriter: io.Discard,
-						WithTimestamp:   timestamp.TimestampRFC3339Bucharest,
 						WithJSON:        true,
 					},
+
+					WithTimestampRFC3339UTC(b.Context()),
 				)
 				require.NoError(b, errCrLogger)
 

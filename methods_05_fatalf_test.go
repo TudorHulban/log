@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tudorhulban/bytearena"
 	"github.com/tudorhulban/log/query"
-	"github.com/tudorhulban/log/timestamp"
 )
 
 // test produces
@@ -32,7 +31,6 @@ func TestLogger_JSON_Fatalf(t *testing.T) {
 				Ingestor:    ingestor,
 				LoggerLevel: LevelTrace,
 
-				WithTimestamp:   timestamp.TimestampNano,
 				WithFatalWriter: os.Stdout,
 				WithJSON:        true,
 			},
@@ -97,7 +95,6 @@ func TestLogger_Raw_Fatalf(t *testing.T) {
 				Ingestor:    ingestor,
 				LoggerLevel: LevelTrace,
 
-				WithTimestamp:   timestamp.TimestampNano,
 				WithFatalWriter: os.Stdout,
 				WithJSON:        false,
 			},

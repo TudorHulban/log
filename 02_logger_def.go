@@ -1,7 +1,6 @@
 package log
 
 import (
-	"context"
 	"errors"
 	"io"
 	"sync/atomic"
@@ -50,7 +49,10 @@ type ParamsNewLogger struct {
 	WithJSON   bool
 }
 
-func NewLogger(params *ParamsNewLogger) (*Logger, error) {
+// NewLogger comes by default with nano logging.
+//
+// Use an option for the desired timestamp pattern.
+func NewLogger(params *ParamsNewLogger, options ...Option) (*Logger, error) {
 	if params.Ingestor == nil {
 		return nil,
 			errors.New("nil ingestor")
@@ -65,7 +67,7 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		withCaller:  params.WithCaller,
 		callerLevel: params.CallerLevel,
 
-		fnTimestamp: params.WithTimestamp,
+		fnTimestamp: timestamp.TimestampNano,
 		withColor:   params.WithColor,
 		withJSON:    params.WithJSON,
 
@@ -85,7 +87,9 @@ func NewLogger(params *ParamsNewLogger) (*Logger, error) {
 		result.callerLevel = 1
 	}
 
-	go timestamp.Start(context.Background())
+	for _, option := range options {
+		option(&result)
+	}
 
 	result.Printf(
 		"created logger, level %v",

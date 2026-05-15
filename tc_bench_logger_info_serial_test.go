@@ -46,7 +46,7 @@ func BenchmarkLogger_Infof(b *testing.B) {
 		},
 		{
 			description:   "5.json - rfc3339",
-			timestampFunc: timestamp.TimestampRFC3339,
+			timestampFunc: timestamp.TimestampRFC3339UTC,
 			withJSON:      true,
 		},
 		{
@@ -144,7 +144,7 @@ func BenchmarkLogger_InfoFast(b *testing.B) {
 		},
 		{
 			description:   "5.json - rfc3339",
-			timestampFunc: timestamp.TimestampRFC3339,
+			timestampFunc: timestamp.TimestampRFC3339UTC,
 			withJSON:      true,
 		},
 		{

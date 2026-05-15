@@ -8,7 +8,9 @@ import (
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
 // BenchmarkTimestampYYYYMonth-16    	309270427	         3.902 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkTimestampYYYYMonth(b *testing.B) {
-	Start(b.Context())
+	chReady := StartYYYYMonthCache(b.Context())
+
+	<-chReady
 
 	var scratch [64]byte
 
@@ -22,7 +24,7 @@ func BenchmarkTimestampYYYYMonth(b *testing.B) {
 
 // BenchmarkTimestampRFC3339-16    	309137002	         3.882 ns/op	       0 B/op	       0 allocs/op
 func BenchmarkTimestampRFC3339(b *testing.B) {
-	chReady := StartRFC3339Cache(b.Context())
+	chReady := StartRFC3339UTCCache(b.Context())
 
 	<-chReady
 
@@ -32,7 +34,7 @@ func BenchmarkTimestampRFC3339(b *testing.B) {
 	b.ResetTimer()
 
 	for b.Loop() {
-		TimestampRFC3339(scratch[:0])
+		TimestampRFC3339UTC(scratch[:0])
 	}
 }
 
@@ -54,7 +56,6 @@ func BenchmarkTimestampRFC3339Bucharest(b *testing.B) {
 
 // cpu: AMD Ryzen 7 5800H with Radeon Graphics
 // BenchmarkTimenow-16    	28263483	        41.83 ns/op	       0 B/op	       0 allocs/op
-
 func BenchmarkTimenow(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()

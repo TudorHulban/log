@@ -21,7 +21,7 @@ func TimestampRFC3339Nano(appendTo []byte) []byte {
 	return time.Now().UTC().AppendFormat(appendTo, time.RFC3339Nano)
 }
 
-func TimestampRFC3339(appendTo []byte) []byte {
+func TimestampRFC3339UTC(appendTo []byte) []byte {
 	buf := timeCacheRFC3339.active.Load() // atomic pointer load, ~1 ns
 	if buf != nil {
 		return append(appendTo, buf.output[:buf.length]...)

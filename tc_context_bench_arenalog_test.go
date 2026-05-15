@@ -35,7 +35,7 @@ func TestArenalog_OneField(t *testing.T) {
 			LoggerLevel: LevelInfo,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
@@ -85,7 +85,7 @@ func BenchmarkArenalog_OneField(b *testing.B) {
 						LoggerLevel: LevelDebug,
 
 						WithFatalWriter: os.Stdout,
-						WithTimestamp:   timestamp.TimestampRFC3339,
+						WithTimestamp:   timestamp.TimestampRFC3339UTC,
 						WithJSON:        true,
 					},
 				)
@@ -102,7 +102,7 @@ func BenchmarkArenalog_OneField(b *testing.B) {
 				}
 
 				var warmupBuffer []byte
-				timestamp.TimestampRFC3339(warmupBuffer)
+				timestamp.TimestampRFC3339UTC(warmupBuffer)
 
 				b.ReportAllocs()
 				b.ResetTimer()
@@ -144,7 +144,7 @@ func TestArenalog_MultipleFields(t *testing.T) {
 			LoggerLevel: LevelInfo,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			// WithJSON:        true,
 		},
 	)
@@ -196,7 +196,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 		},
 	)
 	require.NoError(b, errCrLogger)
@@ -214,7 +214,7 @@ func BenchmarkContext_NoJSON_MultipleFields(b *testing.B) {
 	}
 
 	var warmupBuffer []byte
-	timestamp.TimestampRFC3339(warmupBuffer)
+	timestamp.TimestampRFC3339UTC(warmupBuffer)
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -258,7 +258,7 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 			LoggerLevel: LevelDebug,
 
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
@@ -277,7 +277,7 @@ func BenchmarkContext_WithJSON_MultipleFields(b *testing.B) {
 	}
 
 	var warmupBuffer []byte
-	timestamp.TimestampRFC3339(warmupBuffer)
+	timestamp.TimestampRFC3339UTC(warmupBuffer)
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -329,7 +329,7 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 			Ingestor:        ingestor,
 			LoggerLevel:     LevelDebug,
 			WithFatalWriter: os.Stdout,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
@@ -349,7 +349,7 @@ func BenchmarkArenalog_MultipleFields_Parallel(b *testing.B) {
 	}
 
 	var warmupBuffer []byte
-	timestamp.TimestampRFC3339(warmupBuffer)
+	timestamp.TimestampRFC3339UTC(warmupBuffer)
 
 	time.Sleep(10 * time.Millisecond)
 

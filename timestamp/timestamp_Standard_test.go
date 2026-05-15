@@ -9,7 +9,9 @@ import (
 func TestTimestampStandard(t *testing.T) {
 	const layout = "2006/01/02 15:04:05.000"
 
-	go Start(t.Context())
+	chReady := StartStandardCache(t.Context())
+
+	<-chReady
 
 	t.Run(
 		"1. Test basic appending and format validation",

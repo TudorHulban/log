@@ -7,7 +7,9 @@ import (
 )
 
 func TestTimestampYYYYMonth(t *testing.T) {
-	go Start(t.Context())
+	chReady := StartYYYYMonthCache(t.Context())
+
+	<-chReady
 
 	// The format produced is: YYYYMM DD HH:MM:SS.mmm
 	// Example: 202405 21 15:04:05.123

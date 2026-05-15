@@ -40,7 +40,7 @@ func TestArenalog_MultipleFields_AllLevels(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &buf,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
@@ -183,7 +183,7 @@ func TestArenalog_NoRootFields(t *testing.T) {
 			LoggerLevel: LevelTrace,
 
 			WithFatalWriter: &buf,
-			WithTimestamp:   timestamp.TimestampRFC3339,
+			WithTimestamp:   timestamp.TimestampRFC3339UTC,
 			WithJSON:        true,
 		},
 	)
